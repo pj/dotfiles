@@ -1,0 +1,61 @@
+on:
+  push:
+    branches: 
+      - main
+  
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  releases-matrix:
+    name: Release bootstrap
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: wangyoucao577/go-release-action@v1
+        id: build_assets
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          pre_command: export CGO_ENABLED=0
+          asset_name: bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
+          goversion: "1.22"
+          project_path: "./bootstrap"
+          compress_assets: "OFF"
+          upload: "OFF"
+
+      - name: Create pasteable versions
+        run: |
+          FILENAME="bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
+          NAME="${{ steps.build_assets.outputs.release_asset_dir }}/$FILENAME"
+          cat "$NAME" | base64 > "$FILENAME-b64"
+          cat ./bootstrap/pasteable_pre.sh "$FILENAME-b64" ./bootstrap/pasteable_post.sh > "$FILENAME-pasteable.sh"
+          chmod u+x ./$FILENAME-pasteable.sh
+
+      # - uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     automatic_release_tag: "${{github.run_number}}"
+      #     prerelease: false
+      #     title: "Bootstrap build ${{github.run_number}}"
+      #     files: |
+      #       "${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap*"
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "${{github.run_number}}"
+          name: "Bootstrap build ${{github.run_number}}"
+          prerelease: false
+          make_latest: true
+          fail_on_unmatched_files: true
+          files: |
+            ${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
+            bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}-pasteable.sh
+
+      - name: Run bootstrap test
+        run: docker build --progress plain --target test-alpine-pasteable --target test-alpine -f ./bootstrap/Dockerfile.ci ./bootstrap

@@ -1,0 +1,65 @@
+configs:
+  pane:
+    operations:
+      - type: git
+      - type: vim
+      - type: venv
+      - type: exit_code
+      - type: working_directory
+      - type: tmux_active_pane
+      - type: tmux_current_pane
+      - type: host_details
+    template: >
+      {{- define "color" -}}#[fg={{ . }},bg=black]{{- end -}}
+      {{- $sep := "#[fg=color238,bg=black]" }}
+      {{- $rsep := "#[fg=color238,bg=black]" }}
+
+      #[align=left]{{ if .tmux_active_pane }}{{ template "color" "color234" }}{{else}}{{ template "color" "color235" }}{{end}}
+      {{- if eq .vim "0" }}{{ template "color" "color112" }}   {{ else }}{{ template "color" "red" }}   {{ end }}
+      {{- if and .git .git.Branch }}{{ $sep }}{{ template "color" "color12" }}  {{ .git.Branch }}{{ if .git.Status }}{{ template "color" "color160" }} {{ end }} {{ end }}
+      {{- if .venv }}{{ $sep }} {{ .venv }} {{ end }}
+      {{- if ne .exit_code "0" }}{{ $sep }}{{ template "color" "color160" }}  {{ .exit_code }} {{ else }}{{ $sep }}{{ template "color" "color112" }}  0 {{ end }}
+      {{- if .tmux_active_pane }}#[fg=black,bg=color234]{{else}}#[fg=black,bg=color235]{{end}}#[align=right,bg=black,fg=black]
+      {{- if .tmux_active_pane }}#[fg=black,bg=color234]{{else}}#[fg=black,bg=color235]{{end}}
+      {{- template "color" "yellow" }}{{ if .host_details.IsSSH }} 󰣀 {{else}}  {{end}}{{ .host_details.Hostname }}
+      {{ $rsep }}{{- template "color" "color112" }}  {{ .working_directory }}
+      {{- if .tmux_active_pane }}#[fg=color234,bg=black] {{else}}#[fg=color235,bg=black] {{end}}
+  prompt:
+    operations:
+      - type: working_directory
+      - type: host_details
+      - type: in_tmux
+      - type: git
+      - type: vim
+      - type: venv
+      - type: exit_code
+    template: >
+      {{- $sep := "%F{238}" }}
+      {{- if not .in_tmux }}
+      {{- if eq .vim "0" }}%F{112}  {{ else }}%F{red}  {{ end }}
+      {{- if ne .exit_code "0" }}{{ $sep }}%F{160}  {{ else }}{{ $sep }}%F{112}  {{ end }}
+      {{- if and .git .git.Branch }}{{ $sep }}{{ if .git.Status }}%F{160}{{ else }}%F{12}{{ end }} {{ .git.Branch }} {{ end }}
+      {{- $sep }}
+      {{- else}}
+      {{- " "}}{{- $sep }}
+      {{- end }}
+      %F{250}
+  rprompt:
+    operations:
+      - type: working_directory
+      - type: host_details
+      - type: in_tmux
+      - type: git
+      - type: vim
+      - type: venv
+      - type: exit_code
+    template: >
+      {{- $rsep := "%F{238}" }}
+      {{- if not .in_tmux }}
+      {{ $rsep }}%F{green} {{ .working_directory }}
+      {{- end }}
+
+postCommands:
+ #  tmux refresh-client is kind of sensitive to when it's run, so delay a little so tmux can catch up.
+  - "sleep 0.1; tmux refresh-client -S"
+

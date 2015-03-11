@@ -1,0 +1,27 @@
+FROM alpine AS test-alpine
+WORKDIR /root
+
+ARG TARGETARCH
+RUN apk update && apk add curl file
+RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-${TARGETARCH} -o bootstrap
+RUN chmod u+x bootstrap
+RUN ls -al
+RUN file ./bootstrap
+RUN head -n 10 ./bootstrap
+RUN ./bootstrap
+
+COPY test_bootstrap.sh test_bootstrap.sh
+RUN ./test_bootstrap.sh
+
+FROM alpine AS test-alpine-pasteable
+WORKDIR /root
+
+ARG TARGETARCH
+RUN apk update && apk add curl
+RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-${TARGETARCH}-pasteable.sh
+RUN chmod u+x bootstrap-pasteable.sh
+
+RUN ./bootstrap-pasteable.sh
+
+COPY test_bootstrap.sh test_bootstrap.sh
+RUN ./test_bootstrap.sh

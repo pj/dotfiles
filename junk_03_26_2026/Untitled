@@ -1,0 +1,7 @@
+{
+  "provider": {
+    "amazon-bedrock": {}
+  },
+  "model": "amazon-bedrock/anthropic.claude-sonnet-4-5-20250514-v1:0",
+  "small_model": "amazon-bedrock/anthropic.claude-haiku-4-5-20251001-v1:0"
+}

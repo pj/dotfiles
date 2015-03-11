@@ -1,0 +1,63 @@
+# Machine-specific configuration (work machines, extra packages, etc.)
+# Copy this file to local.nix and customize. local.nix is gitignored.
+#
+#   cp local.nix.example local.nix
+#
+# Then add your hostname(s) and any customSystemSettings, customPathAdditions,
+# customPackages, and customFiles per machine. Only commit the example file.
+
+{ nixpkgs ? null }:
+
+let
+  # Load a local flake by path if it exists, returning null otherwise.
+  # Useful for including locally-developed packages without hard-failing on
+  # machines where the source isn't checked out.
+  tryFlake = path:
+    if builtins.pathExists path
+    then builtins.getFlake ("path:" + path)
+    else null;
+
+in
+{
+  # Hostname -> { username, platform, gitUserName, gitUserEmail,
+  #               customSystemSettings?, customPathAdditions?,
+  #               customPackages?, customFiles? }
+  systems = {
+    # Example: Modal Commander (Electron menu-bar app as a local flake).
+    # Uncomment and adapt for your machine.
+    #
+    # "Your-MacBook" =
+    #   let
+    #     modalCommanderFlake = tryFlake "/Users/you/Programming/modal-commander";
+    #     modalCommanderPkg =
+    #       if modalCommanderFlake != null then
+    #         [ modalCommanderFlake.packages.aarch64-darwin.default ]
+    #       else
+    #         [ ];
+    #     modalCommanderFiles =
+    #       if modalCommanderFlake != null then
+    #         [
+    #           {
+    #             source = "${modalCommanderFlake.packages.aarch64-darwin.default}/Applications/ModalCommander.app";
+    #             target = "Applications/ModalCommander.app";
+    #           }
+    #           {
+    #             source = ./modal_commander_config.json;
+    #             target = "Library/Application Support/Modal Commander/config.json";
+    #           }
+    #         ]
+    #       else
+    #         [ ];
+    #   in
+    #   {
+    #     username = "you";
+    #     platform = "aarch64-darwin";
+    #     gitUserName = "Your Name";
+    #     gitUserEmail = "you@example.com";
+    #     customSystemSettings = { };
+    #     customPathAdditions = [ ];
+    #     customPackages = modalCommanderPkg;
+    #     customFiles = modalCommanderFiles;
+    #   };
+  };
+}

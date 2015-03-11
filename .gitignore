@@ -1,0 +1,19 @@
+*.swp
+*.un~
+bundle/
+vim-ycm-*/
+.netrwhist
+sessions/
+vimtest
+.ropeproject/
+tags
+autoload/
+plugged/
+direnv/
+.vscode
+.direnv
+
+.DS_Store
+
+# Machine-specific Nix config (work packages, homebrew, etc.) — copy from nix-darwin/local.nix.example
+nix-darwin/local.nix
