@@ -61,9 +61,18 @@ Plugin 'autoclose'
 Plugin 'xolox/vim-easytags'
 Plugin 'majutsushi/tagbar'
 
-Plugin 'Shougo/neocomplete.vim'
-Plugin 'Shougo/neosnippet.vim'
-Bundle 'Shougo/neosnippet-snippets'
+" Plugin 'Shougo/neocomplete.vim'
+" Plugin 'Shougo/neosnippets.vim'
+Plugin 'godlygeek/tabular'
+
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'ivanov/vim-ipython'
+
+Plugin 'jmcantrell/vim-virtualenv'
+
+Plugin 'klen/python-mode'
+
+" Plugin 'Valloric/YouCompleteMe'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -74,6 +83,7 @@ colorscheme molokai
 
 " Line numbers
 :set number
+:set relativenumber
 
 " Whitespace chars
 :set list
@@ -126,11 +136,20 @@ let g:ctrlp_custom_ignore = {
 
 " Tags stuff
 " toggle Tagbar display
-" :let g:easytags_cmd = 'C:/pj/ctags58/ctags'
+:let g:easytags_cmd = 'C:/pj/ctags58/ctags'
 map <F4> :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
 
 " set guifont=Monaco:h12
 " set guifont=Source\ Code\ Pro:h12
-source $HOME\_vimrc.local
+
+:set incsearch
+
+:if !empty(glob("~/_vimrc.local"))
+:   source $HOME\_vimrc.local
+:endif
+
+:if !empty(glob("~/.vimrc.local"))
+:   source $HOME\.vimrc.local
+:endif
