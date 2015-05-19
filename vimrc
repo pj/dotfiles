@@ -55,9 +55,11 @@ Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'ivanov/vim-ipython'
 Plugin 'jmcantrell/vim-virtualenv'
 Plugin 'klen/python-mode'
+Plugin 'amoffat/snake'
 
 " Javascript/Node
 Plugin 'kchmck/vim-coffee-script'
+Plugin 'marijnh/tern_for_vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -78,7 +80,8 @@ colorscheme molokai
 
 " Char rulers
 :set textwidth=80
-:set colorcolumn=+2
+" :set colorcolumn=+2
+execute "set colorcolumn=" . join(range(81,335), ',')
 
 highlight ColorColumn guibg=Gray14
 
@@ -119,6 +122,8 @@ let g:ctrlp_custom_ignore = {
 
 nmap ,n :NERDTreeToggle<CR>
 
+nmap ,s :Ack 
+
 " Tags stuff
 " toggle Tagbar display
 map <F4> :TagbarToggle<CR>
@@ -127,7 +132,7 @@ let g:tagbar_autofocus = 1
 
 :set incsearch
 
-nmap <C-s> :source %
+nmap <C-s> :w<CR>:source %<CR>
 
 " silver searcher config
 if executable('ag')

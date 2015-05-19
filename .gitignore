@@ -2,3 +2,6 @@
 *.un~
 bundle/
 vim-ycm-*/
+.netrwhist
+sessions/
+vimtest
