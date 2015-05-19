@@ -24,48 +24,32 @@ call vundle#begin()
 " let Vundle manage Vundle, required
 Plugin 'gmarik/Vundle.vim'
 
+" System plugins
 Plugin 'xolox/vim-misc'
-
+Plugin 'xolox/vim-session'
+Plugin 'flazz/vim-colorschemes'
 Plugin 'tpope/vim-fugitive'
-
 Plugin 'airblade/vim-gitgutter'
-
-" Plugin 'Lokaltog/powerline'
 Plugin 'bling/vim-airline'
 
-" Plugin 'AfterColors' " Allows color scheme modifications.
-
-Bundle 'ntpeters/vim-better-whitespace'
-
-Plugin 'flazz/vim-colorschemes'
-
-Plugin 'kien/ctrlp.vim'
-
-Plugin 'tpope/vim-surround'  " Surround things.
-
-Plugin 'scrooloose/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'aperezdc/vim-template'
-
-Plugin 'xolox/vim-session'
-
-" Track the engine.
-" Plugin 'SirVer/ultisnips'
-
-" Snippets are separated from the engine. Add this if you want them:
-Plugin 'honza/vim-snippets'
-
-Plugin 'autoclose'
-
-  " exuberant ctags fu
+" File plugins
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'scrooloose/syntastic'
+Plugin 'Lokaltog/vim-easymotion'
 Plugin 'xolox/vim-easytags'
 Plugin 'majutsushi/tagbar'
-
-" Plugin 'Shougo/neocomplete.vim'
-" Plugin 'Shougo/neosnippets.vim'
+Bundle 'ntpeters/vim-better-whitespace'
+Plugin 'tpope/vim-surround'  " Surround things.
+Plugin 'aperezdc/vim-template'
+Plugin 'honza/vim-snippets'
+Plugin 'autoclose'
 Plugin 'godlygeek/tabular'
 
-Plugin 'Lokaltog/vim-easymotion'
+" Project plugins
+Plugin 'mileszs/ack.vim'
+Plugin 'kien/ctrlp.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 
 " Python
 Plugin 'ivanov/vim-ipython'
@@ -74,12 +58,6 @@ Plugin 'klen/python-mode'
 
 " Javascript/Node
 Plugin 'kchmck/vim-coffee-script'
-
-Plugin 'Valloric/YouCompleteMe'
-
-Plugin 'mileszs/ack.vim'
-
-Plugin 'scrooloose/syntastic'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -126,12 +104,7 @@ let g:session_autosave = 'yes'
 " If you want :UltiSnipsEdit to split your window.
 "let g:UltiSnipsEditSplit="vertical"
 
-" Whitespace
-":ToggleStripWhitespaceOnSave
-
-" CtrlP setup
-" From matt's vimrc
-" let g:ctrlp_map = ',f'
+" CtrlP
 nmap ,f :CtrlP<CR>
 nmap ,b :CtrlPBuffer<CR>
 nmap ,t :CtrlPBufTag<CR>
@@ -152,16 +125,13 @@ map <F4> :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
 
-" set guifont=Monaco:h12
-" set guifont=Source\ Code\ Pro:h12
-
 :set incsearch
 
 nmap <C-s> :source %
 
 " silver searcher config
 if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
+  let g:ackprg = 'ag'
 endif
 
 :if !empty(glob("~/_vimrc.local"))
