@@ -66,13 +66,20 @@ Plugin 'majutsushi/tagbar'
 Plugin 'godlygeek/tabular'
 
 Plugin 'Lokaltog/vim-easymotion'
+
+" Python
 Plugin 'ivanov/vim-ipython'
-
 Plugin 'jmcantrell/vim-virtualenv'
-
 Plugin 'klen/python-mode'
 
-" Plugin 'Valloric/YouCompleteMe'
+" Javascript/Node
+Plugin 'kchmck/vim-coffee-script'
+
+Plugin 'Valloric/YouCompleteMe'
+
+Plugin 'mileszs/ack.vim'
+
+Plugin 'scrooloose/syntastic'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -89,8 +96,11 @@ colorscheme molokai
 :set list
 " :set listchars=tab:ÎõÎé
 
+:set expandtab
+
 " Char rulers
-set colorcolumn=80
+:set textwidth=80
+:set colorcolumn=+2
 
 highlight ColorColumn guibg=Gray14
 
@@ -130,12 +140,11 @@ nmap ,l :CtrlPLine<CR>
 nmap ,m :CtrlPMRUFiles<CR>
 let g:ctrlp_working_path_mode = 0
 let g:ctrlp_custom_ignore = {
-\ 'dir':  '\v[\/](\.git|\.hg|\.svn)$',
+\ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor)$',
 \ 'file': '\.pyc$\|\.pyo$|\.class$|\.min\..*\.js',
 \}
 
-" Easy way to open Nerdtree
-nmap ,n :NERDTree<CR>
+nmap ,n :NERDTreeToggle<CR>
 
 " Tags stuff
 " toggle Tagbar display
@@ -148,10 +157,17 @@ let g:tagbar_autofocus = 1
 
 :set incsearch
 
+nmap <C-s> :source %
+
+" silver searcher config
+if executable('ag')
+  let g:ackprg = 'ag --vimgrep'
+endif
+
 :if !empty(glob("~/_vimrc.local"))
 :   source $HOME\_vimrc.local
 :endif
 
 :if !empty(glob("~/.vimrc.local"))
-:   source $HOME\.vimrc.local
+:   source $HOME/.vimrc.local
 :endif
