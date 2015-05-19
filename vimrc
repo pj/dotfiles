@@ -134,9 +134,11 @@ let g:ctrlp_custom_ignore = {
 \ 'file': '\.pyc$\|\.pyo$|\.class$|\.min\..*\.js',
 \}
 
+" Easy way to open Nerdtree
+nmap ,n :NERDTree<CR>
+
 " Tags stuff
 " toggle Tagbar display
-:let g:easytags_cmd = 'C:/pj/ctags58/ctags'
 map <F4> :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
