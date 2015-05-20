@@ -1,21 +1,6 @@
-:imap ii <Esc>
-
-" tell it to use an undo file
-set undofile
-
-syntax enable
-
 " Plugin manager
 set nocompatible              " be iMproved, required
 filetype off                  " required
-
-" Sets how many lines of history VIM has to remember
-set history=700
-
-" Set to auto read when a file is changed from the outside
-set autoread
-
-set backspace=eol,start,indent
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -65,25 +50,11 @@ Plugin 'marijnh/tern_for_vim'
 call vundle#end()            " required
 filetype plugin indent on    " required
 
-" Theme
-colorscheme molokai
-
-" Line numbers
-:set number
-:set relativenumber
-
-" Whitespace chars
-:set list
-" :set listchars=tab:ÎõÎé
-
-:set expandtab
-
-" Char rulers
-:set textwidth=80
-" :set colorcolumn=+2
-execute "set colorcolumn=" . join(range(81,335), ',')
-
-highlight ColorColumn guibg=Gray14
+" ---- System Settings
+set undofile " tell it to use an undo file
+set history=700 " Sets how many lines of history VIM has to remember
+set autoread " Set to auto read when a file is changed from the outside
+colorscheme molokai " Theme
 
 " airline config
 set laststatus=2
@@ -98,6 +69,31 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 let g:session_autoload = 'yes'
 let g:session_autosave = 'yes'
 
+" ---- Editor Settings
+" Use relative numbers when not inserting
+set relativenumber
+autocmd InsertEnter * :set number
+autocmd InsertLeave * :set relativenumber
+nnoremap <silent><leader>n :set rnu! rnu? <cr>
+
+set undofile " Use undo file
+
+" Whitespace chars
+" :set list
+" :set listchars=tab:ÎõÎé
+
+set expandtab " Tabs to spaces
+
+" Rulers
+set textwidth=80
+execute "set colorcolumn=+" . join(range(1,255), ',+')
+highlight ColorColumn guibg=Gray14
+
+syntax enable
+
+" Make backspace delete line endings.
+set backspace=eol,start,indent
+
 " Utilisnips
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
 " let g:UltiSnipsExpandTrigger="<tab>"
@@ -107,6 +103,24 @@ let g:session_autosave = 'yes'
 " If you want :UltiSnipsEdit to split your window.
 "let g:UltiSnipsEditSplit="vertical"
 
+" Tags stuff
+" toggle Tagbar display
+map <F4> :TagbarToggle<CR>
+" autofocus on Tagbar open
+let g:tagbar_autofocus = 1
+
+set incsearch
+
+" This unsets the "last search pattern" register by hitting return
+nnoremap <CR> :noh<CR><CR>
+
+" Easily rerun vim source file
+nmap <C-s> :w<CR>:source %<CR>
+
+imap ii <Esc>
+imap kj <Esc>
+
+" ---- Interfile Settings
 " CtrlP
 nmap ,f :CtrlP<CR>
 nmap ,b :CtrlPBuffer<CR>
@@ -122,23 +136,14 @@ let g:ctrlp_custom_ignore = {
 
 nmap ,n :NERDTreeToggle<CR>
 
-nmap ,s :Ack 
-
-" Tags stuff
-" toggle Tagbar display
-map <F4> :TagbarToggle<CR>
-" autofocus on Tagbar open
-let g:tagbar_autofocus = 1
-
-:set incsearch
-
-nmap <C-s> :w<CR>:source %<CR>
+nmap ,s :Ack
 
 " silver searcher config
 if executable('ag')
   let g:ackprg = 'ag'
 endif
 
+" ---- Load windows local settings
 :if !empty(glob("~/_vimrc.local"))
 :   source $HOME\_vimrc.local
 :endif
