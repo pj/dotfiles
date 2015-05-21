@@ -79,10 +79,13 @@ nnoremap <silent><leader>n :set rnu! rnu? <cr>
 
 set undofile " Use undo file
 
-" Whitespace chars
-" :set list
-" :set listchars=tab:ÎõÎé
+" assume the /g flag on :s substitutions to replace all matches in a line
+set gdefault
+set nofoldenable    " disable folding
+set autoindent
 
+" Whitespace chars
+set list listchars=tab:»·,trail:·
 set expandtab " Tabs to spaces
 
 " Rulers
@@ -98,14 +101,27 @@ set incsearch
 set showcmd
 set wildmenu
 
+" Disable ex command mode
+command! Q q
+map Q <Nop>
+
+" Don't add the comment prefix when I hit enter or o/O on a comment line.
+autocmd FileType * setlocal formatoptions-=r formatoptions-=o
+
+" Keep search matches in the middle of the window.
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Remap beginning and end of line
+noremap H ^
+noremap L $
+vnoremap L g_
+
 " Utilisnips
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsExpandTrigger="<c-tab>"
-"let g:UltiSnipsJumpForwardTrigger="<tab>"
-"let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-
-" If you want :UltiSnipsEdit to split your window.
-"let g:UltiSnipsEditSplit="vertical"
+let g:UltiSnipsExpandTrigger="<c-k>"
+let g:UltiSnipsJumpForwardTrigger="<c-k>"
+let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
 
 " Tags stuff
 " toggle Tagbar display
