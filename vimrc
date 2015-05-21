@@ -73,11 +73,15 @@ let g:session_autosave = 'yes'
 " ---- Editor Settings
 " Use relative numbers when not inserting
 set relativenumber
+set number
 autocmd InsertEnter * :set number
 autocmd InsertLeave * :set relativenumber
 nnoremap <silent><leader>n :set rnu! rnu? <cr>
+set numberwidth=6
 
 set undofile " Use undo file
+
+set hidden " Hide unwritten buffers rather than forcing them to be written.
 
 " assume the /g flag on :s substitutions to replace all matches in a line
 set gdefault
@@ -85,7 +89,8 @@ set nofoldenable    " disable folding
 set autoindent
 
 " Whitespace chars
-set list listchars=tab:»·,trail:·
+set list listchars=tab:»·
+",trail:·
 set expandtab " Tabs to spaces
 
 " Rulers
@@ -136,7 +141,6 @@ nnoremap <CR> :noh<CR><CR>
 " Easily rerun vim source file
 nmap <C-s> :w<CR>:source %<CR>
 
-imap ii <Esc>
 imap kj <Esc>
 
 " ---- Interfile Settings
@@ -160,6 +164,16 @@ nmap ,s :Ack
 " silver searcher config
 if executable('ag')
   let g:ackprg = 'ag'
+
+  " Use Ag over Grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects
+  " .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor --hidden -g ""'
+
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
 endif
 
 " ---- Load windows local settings
