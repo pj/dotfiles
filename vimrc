@@ -26,9 +26,10 @@ Plugin 'majutsushi/tagbar'
 Bundle 'ntpeters/vim-better-whitespace'
 Plugin 'tpope/vim-surround'  " Surround things.
 Plugin 'aperezdc/vim-template'
+Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
-Plugin 'autoclose'
 Plugin 'godlygeek/tabular'
+Plugin 'Raimondi/delimitMate'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -93,12 +94,15 @@ syntax enable
 
 " Make backspace delete line endings.
 set backspace=eol,start,indent
+set incsearch
+set showcmd
+set wildmenu
 
 " Utilisnips
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-" let g:UltiSnipsExpandTrigger="<tab>"
-" let g:UltiSnipsJumpForwardTrigger="<tab>"
-" let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsExpandTrigger="<c-tab>"
+"let g:UltiSnipsJumpForwardTrigger="<tab>"
+"let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
 " If you want :UltiSnipsEdit to split your window.
 "let g:UltiSnipsEditSplit="vertical"
@@ -109,7 +113,6 @@ map <F4> :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
 
-set incsearch
 
 " This unsets the "last search pattern" register by hitting return
 nnoremap <CR> :noh<CR><CR>
