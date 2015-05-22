@@ -18,7 +18,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'bling/vim-airline'
 
 " File plugins
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'Valloric/YouCompleteMe'
 Plugin 'scrooloose/syntastic'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'xolox/vim-easytags'
@@ -133,7 +133,6 @@ let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
 map <F4> :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
-
 
 " This unsets the "last search pattern" register by hitting return
 nnoremap <CR> :noh<CR><CR>
