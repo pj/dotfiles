@@ -30,6 +30,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'godlygeek/tabular'
 Plugin 'Raimondi/delimitMate'
+Plugin 'junegunn/vim-peekaboo'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -142,6 +143,10 @@ nmap <C-s> :w<CR>:source %<CR>
 
 imap kj <Esc>
 
+" Enter new lines easily
+nmap oo o<Esc>k
+nmap OO O<Esc>j
+
 " ---- Interfile Settings
 " CtrlP
 nmap ,f :CtrlP<CR>
@@ -159,6 +164,7 @@ let g:ctrlp_custom_ignore = {
 nmap ,n :NERDTreeToggle<CR>
 
 nmap ,s :Ack
+
 
 " silver searcher config
 if executable('ag')
