@@ -18,7 +18,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'bling/vim-airline'
 
 " File plugins
-" Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'scrooloose/syntastic'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'xolox/vim-easytags'
@@ -47,6 +47,9 @@ Plugin 'amoffat/snake'
 " Javascript/Node
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'marijnh/tern_for_vim'
+
+" FSharp/Mono
+Plugin 'fsharp/vim-fsharp'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -93,6 +96,8 @@ set autoindent
 set list listchars=tab:»·
 ",trail:·
 set expandtab " Tabs to spaces
+set shiftwidth=4
+set tabstop=4
 
 " Rulers
 set textwidth=80
@@ -165,7 +170,6 @@ nmap ,n :NERDTreeToggle<CR>
 
 nmap ,s :Ack
 
-
 " silver searcher config
 if executable('ag')
   let g:ackprg = 'ag'
@@ -182,10 +186,10 @@ if executable('ag')
 endif
 
 " ---- Load windows local settings
-:if !empty(glob("~/_vimrc.local"))
-:   source $HOME\_vimrc.local
-:endif
+if !empty(glob("~/_vimrc.local"))
+   source $HOME\_vimrc.local
+endif
 
-:if !empty(glob("~/.vimrc.local"))
-:   source $HOME/.vimrc.local
-:endif
+if !empty(glob("~/.vimrc.local"))
+   source $HOME/.vimrc.local
+endif
