@@ -134,6 +134,20 @@ let g:UltiSnipsExpandTrigger="<c-k>"
 let g:UltiSnipsJumpForwardTrigger="<c-k>"
 let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
 
+" Hit enter to accept completion
+
+function! HandleReturn()
+    if pumvisible()
+        return "\<C-y>"
+    else
+        return "\<CR>"
+    endif
+endfunction
+":inoremap <expr> <CR> pumvisible() ? "\<c-y>" : "<Plug>delimitMateCR"
+":inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+:inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+"":inoremap <expr> <CR> HandleReturn()
+
 " Tags stuff
 " toggle Tagbar display
 " map <F4> :TagbarToggle<CR>
@@ -143,7 +157,7 @@ let g:tagbar_autofocus = 1
 let g:tagbar_autoclose = 1
 
 " This unsets the "last search pattern" register by hitting return
-nnoremap <CR> :noh<CR><CR>
+"nnoremap <CR> :noh<CR><CR>
 
 " Easily rerun vim source file
 nmap <C-s> :w<CR>:source %<CR>
