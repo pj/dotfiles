@@ -29,8 +29,8 @@ Plugin 'aperezdc/vim-template'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'godlygeek/tabular'
-Plugin 'Raimondi/delimitMate'
-Plugin 'junegunn/vim-peekaboo'
+Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
+Plugin 'junegunn/vim-peekaboo' " Show contents of yank registers.
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -80,7 +80,7 @@ set relativenumber
 set number
 autocmd InsertEnter * :set number
 autocmd InsertLeave * :set relativenumber
-nnoremap <silent><leader>n :set rnu! rnu? <cr>
+nnoremap <silent><Leader>r :set rnu! rnu? <cr>
 set numberwidth=6
 
 set undofile " Use undo file
@@ -136,9 +136,11 @@ let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
 
 " Tags stuff
 " toggle Tagbar display
-map <F4> :TagbarToggle<CR>
+" map <F4> :TagbarToggle<CR>
+nmap <Leader>o :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
+let g:tagbar_autoclose = 1
 
 " This unsets the "last search pattern" register by hitting return
 nnoremap <CR> :noh<CR><CR>
@@ -151,6 +153,8 @@ imap kj <Esc>
 " Enter new lines easily
 nmap oo o<Esc>k
 nmap OO O<Esc>j
+
+map <Leader> <Plug>(easymotion-prefix)
 
 " ---- Interfile Settings
 " CtrlP
