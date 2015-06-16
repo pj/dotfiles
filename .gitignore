@@ -5,3 +5,4 @@ vim-ycm-*/
 .netrwhist
 sessions/
 vimtest
+.ropeproject/
