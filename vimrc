@@ -145,8 +145,8 @@ function! HandleReturn()
 endfunction
 ":inoremap <expr> <CR> pumvisible() ? "\<c-y>" : "<Plug>delimitMateCR"
 ":inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-:inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-"":inoremap <expr> <CR> HandleReturn()
+":inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+:inoremap <expr> <CR> HandleReturn()
 
 " Tags stuff
 " toggle Tagbar display
