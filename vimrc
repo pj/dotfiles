@@ -16,6 +16,7 @@ Plugin 'flazz/vim-colorschemes'
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'bling/vim-airline'
+Plugin 'pthrasher/conqueterm-vim'
 
 " File plugins
 Plugin 'Valloric/YouCompleteMe'
