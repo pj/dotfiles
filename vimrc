@@ -1,7 +1,7 @@
-" Plugin manager
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+" Plugin manager
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -32,6 +32,8 @@ Plugin 'honza/vim-snippets'
 Plugin 'godlygeek/tabular'
 Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
 Plugin 'junegunn/vim-peekaboo' " Show contents of yank registers.
+Plugin 'michaeljsmith/vim-indent-object'
+Plugin 'nathanaelkane/vim-indent-guides'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -75,6 +77,9 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 let g:session_autoload = 'yes'
 let g:session_autosave = 'yes'
 
+" Mouse support in terminal vim
+set mouse=a
+
 " ---- Editor Settings
 " Use relative numbers when not inserting
 set relativenumber
@@ -99,10 +104,11 @@ set list listchars=tab:»·
 set expandtab " Tabs to spaces
 set shiftwidth=4
 set tabstop=4
+set nowrap
 
 " Rulers
-set textwidth=80
-execute "set colorcolumn=+" . join(range(1,255), ',+')
+" set textwidth=80
+execute "set colorcolumn=" . join(range(80,255), ',')
 highlight ColorColumn guibg=Gray14
 
 syntax enable
@@ -124,11 +130,6 @@ autocmd FileType * setlocal formatoptions-=r formatoptions-=o
 nnoremap n nzzzv
 nnoremap N Nzzzv
 
-" Remap beginning and end of line
-noremap H ^
-noremap L $
-vnoremap L g_
-
 " Store swap files in fixed location, not current directory.
 set dir=~/.vimswap//,/var/tmp//,/tmp//,.
 
@@ -139,7 +140,6 @@ let g:UltiSnipsJumpForwardTrigger="<c-k>"
 let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
 
 " Hit enter to accept completion
-
 function! HandleReturn()
     if pumvisible()
         return "\<C-y>"
@@ -164,7 +164,7 @@ let g:tagbar_autoclose = 1
 "nnoremap <CR> :noh<CR><CR>
 
 " Easily rerun vim source file
-nmap <C-s> :w<CR>:source %<CR>
+" nmap <C-s> :w<CR>:source %<CR>
 
 imap kj <Esc>
 
