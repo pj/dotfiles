@@ -34,6 +34,7 @@ Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
 Plugin 'junegunn/vim-peekaboo' " Show contents of yank registers.
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'scrooloose/nerdcommenter'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -50,6 +51,7 @@ Plugin 'amoffat/snake'
 " Javascript/Node
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'marijnh/tern_for_vim'
+Plugin 'jelera/vim-javascript-syntax'
 
 " FSharp/Mono
 Plugin 'fsharp/vim-fsharp'
@@ -84,9 +86,20 @@ set mouse=a
 " Use relative numbers when not inserting
 set relativenumber
 set number
-autocmd InsertEnter * :set number
-autocmd InsertLeave * :set relativenumber
-nnoremap <silent><Leader>r :set rnu! rnu? <cr>
+
+function! Absolute_number ()
+    :set rnu!
+    :set nu
+endfunction
+
+function! Relative_number ()
+    :set nu
+    :set rnu
+endfunction
+
+autocmd InsertEnter * :call Absolute_number()
+autocmd InsertLeave * :call Relative_number()
+" nnoremap <silent><Leader>r :set rnu! rnu? <cr>
 set numberwidth=6
 
 set undofile " Use undo file
@@ -106,12 +119,11 @@ set shiftwidth=4
 set tabstop=4
 set nowrap
 
-" Rulers
-" set textwidth=80
-execute "set colorcolumn=" . join(range(80,255), ',')
-highlight ColorColumn guibg=Gray14
-
 syntax enable
+
+" Rulers
+execute "set colorcolumn=" . join(range(80,255), ',')
+highlight ColorColumn guibg=Gray14 ctermbg=LightGrey
 
 " Make backspace delete line endings.
 set backspace=eol,start,indent
@@ -131,13 +143,24 @@ nnoremap n nzzzv
 nnoremap N Nzzzv
 
 " Store swap files in fixed location, not current directory.
-set dir=~/.vimswap//,/var/tmp//,/tmp//,.
+if isdirectory($HOME . '/.vimswap') == 0
+    :silent !mkdir -p ~/.vimswap > /dev/null 2>&1
+endif
+if isdirectory($HOME . '/.vimbackup') == 0
+    :silent !mkdir -p ~/.vimbackup > /dev/null 2>&1
+endif
+if isdirectory($HOME . '/.vimundo') == 0
+    :silent !mkdir -p ~/.vimundo > /dev/null 2>&1
+endif
+set directory=~/.vimswap//,/var/tmp//,/tmp//,.
+set backupdir=~/.vimbackup//,/var/tmp//,/tmp//,.
+set undodir=~/.vimundo//,/var/tmp//,/tmp//,.
 
 " Utilisnips
 " Trigger configuration. Do not use <tab> if you use https://github.com/Valloric/YouCompleteMe.
-let g:UltiSnipsExpandTrigger="<c-k>"
-let g:UltiSnipsJumpForwardTrigger="<c-k>"
-let g:UltiSnipsJumpBackwardTrigger="<s-c-j>"
+"let g:UltiSnipsExpandTrigger="<tab>"
+"let g:UltiSnipsJumpForwardTrigger="<tab>"
+"let g:UltiSnipsJumpBackwardTrigger="<C-tab>"
 
 " Hit enter to accept completion
 function! HandleReturn()
@@ -154,7 +177,6 @@ endfunction
 
 " Tags stuff
 " toggle Tagbar display
-" map <F4> :TagbarToggle<CR>
 nmap <Leader>o :TagbarToggle<CR>
 " autofocus on Tagbar open
 let g:tagbar_autofocus = 1
@@ -169,8 +191,8 @@ let g:tagbar_autoclose = 1
 imap kj <Esc>
 
 " Enter new lines easily
-nmap oo o<Esc>k
-nmap OO O<Esc>j
+"nmap oo o<Esc>k
+"nmap OO O<Esc>j
 
 map <Leader> <Plug>(easymotion-prefix)
 
