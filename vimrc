@@ -16,7 +16,8 @@ Plugin 'flazz/vim-colorschemes'
 Plugin 'tpope/vim-fugitive'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'bling/vim-airline'
-Plugin 'pthrasher/conqueterm-vim'
+" Plugin 'pthrasher/conqueterm-vim'
+" Plugin 'tybenz/vimdeck'
 
 " File plugins
 Plugin 'Valloric/YouCompleteMe'
@@ -31,7 +32,7 @@ Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 Plugin 'godlygeek/tabular'
 Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
-Plugin 'junegunn/vim-peekaboo' " Show contents of yank registers.
+Plugin 'junegunn/vim-peekaboo' " Show contents of registers.
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'scrooloose/nerdcommenter'
@@ -47,11 +48,13 @@ Plugin 'ivanov/vim-ipython'
 Plugin 'jmcantrell/vim-virtualenv'
 Plugin 'klen/python-mode'
 Plugin 'amoffat/snake'
+Plugin 'hdima/python-syntax'
 
 " Javascript/Node
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'marijnh/tern_for_vim'
 Plugin 'jelera/vim-javascript-syntax'
+Plugin 'digitaltoad/vim-jade'
 
 " FSharp/Mono
 Plugin 'fsharp/vim-fsharp'
@@ -123,7 +126,7 @@ syntax enable
 
 " Rulers
 execute "set colorcolumn=" . join(range(80,255), ',')
-highlight ColorColumn guibg=Gray14 ctermbg=LightGrey
+highlight ColorColumn guibg=Gray14 ctermbg=Blue
 
 " Make backspace delete line endings.
 set backspace=eol,start,indent
