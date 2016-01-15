@@ -18,6 +18,7 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'bling/vim-airline'
 " Plugin 'pthrasher/conqueterm-vim'
 " Plugin 'tybenz/vimdeck'
+Bundle 'edkolev/tmuxline.vim'
 
 " File plugins
 Plugin 'Valloric/YouCompleteMe'
@@ -67,7 +68,12 @@ filetype plugin indent on    " required
 set undofile " tell it to use an undo file
 set history=700 " Sets how many lines of history VIM has to remember
 set autoread " Set to auto read when a file is changed from the outside
+set t_Co=256 " 256 colors
 colorscheme molokai " Theme
+
+" use unicode
+set encoding=utf-8
+set fileencoding=utf-8
 
 " airline config
 set laststatus=2
@@ -77,6 +83,9 @@ let g:airline#extensions#tabline#enabled = 1
 
 " Show just the filename
 let g:airline#extensions#tabline#fnamemod = ':t'
+
+" Get the correct symbols
+let g:airline_powerline_fonts = 1
 
 " sessions settings
 let g:session_autoload = 'yes'
