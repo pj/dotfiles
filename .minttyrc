@@ -1,9 +1,0 @@
-BoldAsFont=no
-Columns=363
-Rows=114
-Term=xterm-256color
-Font=Roboto Mono for Powerline
-FontQuality=3
-FontHeight=11
-CursorType=line
-Window=max

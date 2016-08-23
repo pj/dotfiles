@@ -48,11 +48,10 @@ COMPLETION_WAITING_DOTS="true"
 
 # User configuration
 
-<<<<<<< e9b88824db0fecd5459c605e6b2e5a71646283c3
 # export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/pauljohnson/bin:/usr/local/heroku/bin:/Users/pauljohnson/Programming/activator-1.2.3-minimal:/Users/pauljohnson/Programming/clojure:/Users/pauljohnson/.rvm/bin"
-=======
->>>>>>> Changes to make zsh/oh-my-zsh work at nab.
 # export MANPATH="/usr/local/man:$MANPATH"
+
+# Are we on Mac OSX or not?
 if type "brew" > /dev/null; then
     plugins=(git osx emoji-clock node npm python autojump)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
@@ -93,10 +92,12 @@ fi
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
+# If nix profile exists then activate it.
 if [[ -e ~/.nix-profile/etc/profile.d/nix.sh ]]; then
     . /Users/pauljohnson/.nix-profile/etc/profile.d/nix.sh;
 fi # added by Nix installer
 
+# Local ZSH config.
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
