@@ -23,7 +23,7 @@ Plugin 'editorconfig/editorconfig-vim'
 
 " File plugins
 " Plugin 'Valloric/YouCompleteMe'
-" Plugin 'scrooloose/syntastic'
+Plugin 'scrooloose/syntastic'
 " Plugin 'Lokaltog/vim-easymotion'
 " Plugin 'xolox/vim-easytags'
 " Plugin 'majutsushi/tagbar'
@@ -67,6 +67,13 @@ Plugin 'fsharp/vim-fsharp'
 
 " OCaml
 Plugin 'let-def/ocp-indent-vim'
+
+" Idris
+Plugin 'idris-hackers/idris-vim'
+
+" Rust
+
+Plugin 'rust-lang/rust.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -159,6 +166,14 @@ map Q <Nop>
 
 " Don't add the comment prefix when I hit enter or o/O on a comment line.
 autocmd FileType * setlocal formatoptions-=r formatoptions-=o
+
+" Commenting settings
+" Align line-wise comment delimiters flush left instead of following code
+" indentation
+let g:NERDDefaultAlign = 'left'
+
+" Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
 
 " Keep search matches in the middle of the window.
 "nnoremap n nzzzv
@@ -271,6 +286,19 @@ else
   let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
+let g:tmuxline_preset = {
+        \ 'a': '🐱 ',
+        \ 'b': '#S',
+        \ 'win': ['#I | #W'],
+        \ 'cwin': ['#I | #W'],
+        \ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
+        \ 'y': '%R %a %b %d',
+        \ 'z': '#(if [ "$(hostname)" = "Paul-Johnsons-MacBook-Pro.local" ]; then echo "🏠 "; else echo hostname; fi)',
+        \'options' : {'status-justify' : 'left'}}
+
+"\ 'z': '#h',
+"\ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
+"\ 'x': '#(python -c "import pypower; print pypower.nice_format()")',
 " ---- Load windows local settings
 if !empty(glob("~/_vimrc.local"))
    source $HOME\_vimrc.local
