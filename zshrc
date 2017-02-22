@@ -100,3 +100,7 @@ fi # added by Nix installer
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
+
+# Disable arrow keys cos I'm 'ardcore
+bindkey -r "^[OC"
+bindkey -r "^[OD"

@@ -21,8 +21,12 @@ Plugin 'bling/vim-airline'
 Bundle 'edkolev/tmuxline.vim'
 Plugin 'editorconfig/editorconfig-vim'
 
+" Editing plugins
+Plugin 'kana/vim-textobj-user'
+Plugin 'bps/vim-textobj-python'
+
 " File plugins
-" Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'scrooloose/syntastic'
 " Plugin 'Lokaltog/vim-easymotion'
 " Plugin 'xolox/vim-easytags'
@@ -38,6 +42,7 @@ Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'nathanaelkane/vim-indent-guides'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'ludovicchabant/vim-gutentags'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
@@ -46,8 +51,8 @@ Plugin 'mileszs/ack.vim'
 " Plugin 'Xuyuanp/nerdtree-git-plugin'
 
 " Python
-Plugin 'ivanov/vim-ipython'
-Plugin 'jmcantrell/vim-virtualenv'
+"Plugin 'ivanov/vim-ipython'
+"Plugin 'jmcantrell/vim-virtualenv'
 Plugin 'klen/python-mode'
 Plugin 'amoffat/snake'
 Plugin 'hdima/python-syntax'
@@ -72,8 +77,10 @@ Plugin 'let-def/ocp-indent-vim'
 Plugin 'idris-hackers/idris-vim'
 
 " Rust
-
 Plugin 'rust-lang/rust.vim'
+
+" Hack lang
+Plugin 'hhvm/vim-hack'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -255,7 +262,8 @@ imap kj <Esc>
 
 " nmap ,n :NERDTreeToggle<CR>
 
-nmap ,s :Ack
+" nmap ,s :Ack
+map <Leader>s ":Ack "
 
 " --- OCaml Settings
 let g:opamshare = substitute(system('opam config var share'),'\n$','','''')
@@ -264,7 +272,7 @@ let g:syntastic_ocaml_checkers = ['merlin']
 
 " silver searcher config
 if executable('ag')
-  let g:ackprg = 'ag'
+  let g:ackprg = 'ag --vimgrep --smart-case'
 
   " Use Ag over Grep
   set grepprg=ag\ --nogroup\ --nocolor
@@ -287,18 +295,30 @@ else
 endif
 
 let g:tmuxline_preset = {
-        \ 'a': '🐱 ',
+        \ 'a': '🇳🇿 ',
         \ 'b': '#S',
         \ 'win': ['#I | #W'],
         \ 'cwin': ['#I | #W'],
         \ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
         \ 'y': '%R %a %b %d',
-        \ 'z': '#(if [ "$(hostname)" = "Paul-Johnsons-MacBook-Pro.local" ]; then echo "🏠 "; else echo hostname; fi)',
+        \ 'z': '#(if [ "$(hostname)" = "Paul-Johnsons-MacBook-Pro.local" ] || [ "$(hostname)" = "PaulJohnsonsMBP.home" ]; then echo "🏠 "; else echo "$(hostname)"; fi)',
         \'options' : {'status-justify' : 'left'}}
 
-"\ 'z': '#h',
-"\ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
-"\ 'x': '#(python -c "import pypower; print pypower.nice_format()")',
+" Syntastic recommended defaults
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+let g:gutentags_define_advanced_commands = 1
+
+" keybindings for ycm
+nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
+
 " ---- Load windows local settings
 if !empty(glob("~/_vimrc.local"))
    source $HOME\_vimrc.local
