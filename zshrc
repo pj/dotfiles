@@ -101,6 +101,14 @@ if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
 
+export PATH="/usr/local/sbin:$PATH"
+
 # Disable arrow keys cos I'm 'ardcore
-bindkey -r "^[OC"
-bindkey -r "^[OD"
+# bindkey -r "^[OC"
+# bindkey -r "^[OD"
+
+PATH="/Users/pauljohnson/perl5/bin${PATH+:}${PATH}"; export PATH;
+PERL5LIB="/Users/pauljohnson/perl5/lib/perl5${PERL5LIB+:}${PERL5LIB}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/Users/pauljohnson/perl5${PERL_LOCAL_LIB_ROOT+:}${PERL_LOCAL_LIB_ROOT}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/Users/pauljohnson/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/Users/pauljohnson/perl5"; export PERL_MM_OPT;

@@ -82,6 +82,9 @@ Plugin 'rust-lang/rust.vim'
 " Hack lang
 Plugin 'hhvm/vim-hack'
 
+" Postgres
+Plugin 'lifepillar/pgsql.vim'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -149,8 +152,8 @@ set autoindent
 set list listchars=tab:»·
 ",trail:·
 set expandtab " Tabs to spaces
-set shiftwidth=4
-set tabstop=4
+set shiftwidth=2
+set tabstop=2
 set nowrap
 
 syntax enable
