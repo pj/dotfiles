@@ -26,7 +26,10 @@ Plugin 'kana/vim-textobj-user'
 Plugin 'bps/vim-textobj-python'
 
 " File plugins
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'Valloric/YouCompleteMe'
+Plugin 'roxma/nvim-yarp'
+Plugin 'roxma/vim-hug-neovim-rpc'
+Plugin 'Shougo/deoplete.nvim'
 Plugin 'scrooloose/syntastic'
 " Plugin 'Lokaltog/vim-easymotion'
 " Plugin 'xolox/vim-easytags'
@@ -46,7 +49,7 @@ Plugin 'ludovicchabant/vim-gutentags'
 
 " Project plugins
 Plugin 'mileszs/ack.vim'
-" Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 " Plugin 'scrooloose/nerdtree'
 " Plugin 'Xuyuanp/nerdtree-git-plugin'
 
@@ -54,11 +57,11 @@ Plugin 'mileszs/ack.vim'
 "Plugin 'ivanov/vim-ipython'
 "Plugin 'jmcantrell/vim-virtualenv'
 Plugin 'klen/python-mode'
-Plugin 'amoffat/snake'
+"Plugin 'amoffat/snake'
 Plugin 'hdima/python-syntax'
 
 " Javascript/Node
-Plugin 'kchmck/vim-coffee-script'
+"Plugin 'kchmck/vim-coffee-script'
 Plugin 'marijnh/tern_for_vim'
 Plugin 'jelera/vim-javascript-syntax'
 Plugin 'digitaltoad/vim-jade'
@@ -68,19 +71,19 @@ Plugin 'leafgarland/typescript-vim'
 Plugin 'niftylettuce/vim-jinja'
 
 " FSharp/Mono
-Plugin 'fsharp/vim-fsharp'
+" Plugin 'fsharp/vim-fsharp'
 
 " OCaml
-Plugin 'let-def/ocp-indent-vim'
+" Plugin 'let-def/ocp-indent-vim'
 
 " Idris
-Plugin 'idris-hackers/idris-vim'
+" Plugin 'idris-hackers/idris-vim'
 
 " Rust
-Plugin 'rust-lang/rust.vim'
+" Plugin 'rust-lang/rust.vim'
 
 " Hack lang
-Plugin 'hhvm/vim-hack'
+" Plugin 'hhvm/vim-hack'
 
 " Postgres
 Plugin 'lifepillar/pgsql.vim'
@@ -88,6 +91,8 @@ Plugin 'lifepillar/pgsql.vim'
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
+
+let g:deoplete#enable_at_startup = 1
 
 " ---- System Settings
 set undofile " tell it to use an undo file
@@ -115,6 +120,7 @@ let g:airline_powerline_fonts = 1
 " sessions settings
 " let g:session_autoload = 'yes'
 " let g:session_autosave = 'yes'
+:let g:session_autosave = 'no'
 
 " Mouse support in terminal vim
 set mouse=a
@@ -258,10 +264,10 @@ imap kj <Esc>
 "nmap ,l :CtrlPLine<CR>
 "nmap ,m :CtrlPMRUFiles<CR>
 "let g:ctrlp_working_path_mode = 0
-"let g:ctrlp_custom_ignore = {
-"\ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor|node_modules)$',
-"\ 'file': '\.pyc$\|\.pyo$|\.class$|\.min\..*\.js',
-"\}
+let g:ctrlp_custom_ignore = {
+\ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor|node_modules)$',
+\ 'file': '\.pyc$\|\.pyo$|\.class$|\.min\..*\.js',
+\}
 
 " nmap ,n :NERDTreeToggle<CR>
 
@@ -269,9 +275,9 @@ imap kj <Esc>
 map <Leader>s ":Ack "
 
 " --- OCaml Settings
-let g:opamshare = substitute(system('opam config var share'),'\n$','','''')
-execute "set rtp+=" . g:opamshare . "/merlin/vim"
-let g:syntastic_ocaml_checkers = ['merlin']
+"let g:opamshare = substitute(system('opam config var share'),'\n$','','''')
+"execute "set rtp+=" . g:opamshare . "/merlin/vim"
+"let g:syntastic_ocaml_checkers = ['merlin']
 
 " silver searcher config
 if executable('ag')
