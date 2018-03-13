@@ -24,6 +24,7 @@ Plugin 'editorconfig/editorconfig-vim'
 " Editing plugins
 Plugin 'kana/vim-textobj-user'
 Plugin 'bps/vim-textobj-python'
+Plugin 'tpope/vim-ragtag'
 
 " File plugins
 " Plugin 'Valloric/YouCompleteMe'
@@ -69,6 +70,8 @@ Plugin 'Shougo/vimproc.vim'
 Plugin 'Quramy/tsuquyomi'
 Plugin 'leafgarland/typescript-vim'
 Plugin 'niftylettuce/vim-jinja'
+Plugin 'pangloss/vim-javascript'
+Plugin 'carlitux/deoplete-ternjs'
 
 " FSharp/Mono
 " Plugin 'fsharp/vim-fsharp'
@@ -257,12 +260,12 @@ imap kj <Esc>
 
 " ---- Interfile Settings
 " CtrlP
-"nmap ,f :CtrlP<CR>
-"nmap ,b :CtrlPBuffer<CR>
-"nmap ,t :CtrlPBufTag<CR>
-"nmap ,T :CtrlPBufTagAll<CR>
+nmap <Leader>f :CtrlP<CR>
+nmap <Leader>b :CtrlPBuffer<CR>
+nmap <Leader>t :CtrlPBufTag<CR>
+nmap <Leader>T :CtrlPBufTagAll<CR>
 "nmap ,l :CtrlPLine<CR>
-"nmap ,m :CtrlPMRUFiles<CR>
+nmap <Leader>m :CtrlPMRUFiles<CR>
 "let g:ctrlp_working_path_mode = 0
 let g:ctrlp_custom_ignore = {
 \ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor|node_modules)$',
@@ -325,8 +328,10 @@ let g:syntastic_check_on_wq = 0
 
 let g:gutentags_define_advanced_commands = 1
 
+au BufNewFile,BufRead *.html,*.htm, *.njk set ft=jinja
+
 " keybindings for ycm
-nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
+"nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
 
 " ---- Load windows local settings
 if !empty(glob("~/_vimrc.local"))
