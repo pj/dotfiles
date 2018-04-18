@@ -55,12 +55,6 @@ end
 local application_watcher = hs.application.watcher.new(onApplicationActivated)
 application_watcher:start()
 
--- Load miros windows
-hyper = {'alt', 'cmd'}
-package.path = package.path .. ";./?.lua"
-require("position")
-
-
 local chooser = nil
 function menuComplete(choice)
   hs.printf('chosen: %s', choice)
@@ -129,13 +123,48 @@ hs.hotkey.bind(
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
 
---local tiling = require("hs.tiling")
---
----- If you want to set the layouts that are enabled
---tiling.set('layouts', {
---  'fullscreen', 'main-vertical'
---})
---
+-- Load miros windows
+--hyper = {'alt', 'cmd'}
+--package.path = package.path .. ";./?.lua"
+--require("position")
+
+local tiling = require("hs.tiling")
+local mash = {"ctrl", "cmd"}
+
+hs.hotkey.bind(mash, "c", function() tiling.cycleLayout() end)
+hs.hotkey.bind(mash, "j", function() tiling.cycle(1) end)
+hs.hotkey.bind(mash, "k", function() tiling.cycle(-1) end)
+hs.hotkey.bind(mash, "space", function() tiling.promote() end)
+hs.hotkey.bind(mash, "f", function() tiling.goToLayout("fullscreen") end)
+
+local layouts = require "hs.tiling.layouts"
+
+tiling.addLayout('side-by-side', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local frame = win:screen():frame()
+
+    if index == 1 then
+      frame.w = frame.w / 2
+    else
+      frame.x = frame.x + frame.w / 2
+      frame.w = frame.w / 2
+    end
+
+    win:setFrame(frame)
+  end
+end)
+
+-- If you want to set the layouts that are enabled
+tiling.set('layouts', {
+  'fullscreen', 'side-by-side'
+})
+
 --local modal = hs.hotkey.modal.new({}, "F17")
 --
 --local pressedF18 = function()
