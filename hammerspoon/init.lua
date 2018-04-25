@@ -136,6 +136,7 @@ hs.hotkey.bind(mash, "j", function() tiling.cycle(1) end)
 hs.hotkey.bind(mash, "k", function() tiling.cycle(-1) end)
 hs.hotkey.bind(mash, "space", function() tiling.promote() end)
 hs.hotkey.bind(mash, "f", function() tiling.goToLayout("fullscreen") end)
+hs.hotkey.bind(mash, "r", function() hs.alert('retiling'); tiling.retile() end)
 
 local layouts = require "hs.tiling.layouts"
 
@@ -160,9 +161,36 @@ tiling.addLayout('side-by-side', function(windows)
   end
 end)
 
+tiling.addLayout('vlc', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    hs.printf('%s', name)
+    if name == 'VLC' then
+    end
+  end
+
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    hs.printf('%s', name)
+    if name == 'VLC' then
+    end
+  end
+
+end)
+
 -- If you want to set the layouts that are enabled
 tiling.set('layouts', {
-  'fullscreen', 'side-by-side'
+  'fullscreen', 'side-by-side', 'vlc'
 })
 
 --local modal = hs.hotkey.modal.new({}, "F17")
