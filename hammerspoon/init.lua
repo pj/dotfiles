@@ -14,8 +14,12 @@ watcher:start()
 -- menu item search
 local application_menu_items = {}
 local currentApp = nil
+local currentWindow = nil
 
 function processItems(items, app)
+  if items == nil then
+    return
+  end
   if items['AXTitle'] == nil then
     if items['AXChildren'] ~= nil then
       for k, item in pairs(items['AXChildren']) do
@@ -57,14 +61,18 @@ application_watcher:start()
 
 local chooser = nil
 function menuComplete(choice)
-  hs.printf('chosen: %s', choice)
+  hs.printf('chosen: %s', hs.inspect.inspect(choice))
   if choice ~= nil then
+    hs.printf('current app: %s', currentApp)
+    hs.printf('current window: %s', currentWindow)
+    currentWindow:focus()
     currentApp:selectMenuItem(choice.item)
   end
 end
 
 function menuSearch()
   currentApp = hs.application.frontmostApplication()
+  currentWindow = hs.window.frontmostWindow()
   chooser:query('')
   chooser:show()
 end
