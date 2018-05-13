@@ -57,7 +57,7 @@ Plugin 'ctrlpvim/ctrlp.vim'
 " Python
 "Plugin 'ivanov/vim-ipython'
 "Plugin 'jmcantrell/vim-virtualenv'
-Plugin 'klen/python-mode'
+"Plugin 'klen/python-mode'
 "Plugin 'amoffat/snake'
 Plugin 'hdima/python-syntax'
 
@@ -271,11 +271,19 @@ let g:ctrlp_custom_ignore = {
 \ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor|node_modules)$',
 \ 'file': '\.pyc$\|\.pyo$|\.class$|\.min\..*\.js',
 \}
+let g:ctrlp_max_files=0
+let g:ctrlp_max_depth=40
+let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
+let g:ctrlp_match_window = 'results:100' " overcome limit imposed by max height
+if executable('ag')
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+  let g:ctrlp_use_caching = 0
+endif
 
 " nmap ,n :NERDTreeToggle<CR>
 
 " nmap ,s :Ack
-map <Leader>s ":Ack "
+map <Leader>s <ESC>:Ack<SPACE>
 
 " --- OCaml Settings
 "let g:opamshare = substitute(system('opam config var share'),'\n$','','''')
@@ -284,17 +292,10 @@ map <Leader>s ":Ack "
 
 " silver searcher config
 if executable('ag')
-  let g:ackprg = 'ag --vimgrep --smart-case'
+  let g:ackprg = 'ag --nogroup --nocolor --column'
 
   " Use Ag over Grep
   set grepprg=ag\ --nogroup\ --nocolor
-
-  " Use ag in CtrlP for listing files. Lightning fast and respects
-  " .gitignore
-  " let g:ctrlp_user_command = 'ag %s -l --nocolor --ignore node_modules --hidden -g ""'
-
-  " ag is fast enough that CtrlP doesn't need to cache
-  " let g:ctrlp_use_caching = 0
 endif
 
 " Set cursor properly when entering insert mode when using tmux.
@@ -325,8 +326,16 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
+let g:syntastic_mode_map = { 'passive_filetypes': ['html'] }
 
 let g:gutentags_define_advanced_commands = 1
+
+" Disable breakpoint keybinding for python mode
+"let g:pymode_breakpoint_bind = ''
+
+" rope makes pymode unusably slow
+"let g:pymode_rope = 0
+
 
 au BufNewFile,BufRead *.html,*.htm, *.njk set ft=jinja
 

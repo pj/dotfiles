@@ -193,6 +193,10 @@ tiling.set('layouts', {
   'fullscreen', 'side-by-side', 'vlc'
 })
 
+hs.hotkey.bind({"cmd", "alt"}, "L", function()
+  hs.caffeinate.startScreensaver()
+end)
+
 --local modal = hs.hotkey.modal.new({}, "F17")
 --
 --local pressedF18 = function()

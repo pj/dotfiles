@@ -1,0 +1,38 @@
+imap kj <Esc>
+set timeoutlen=1000
+
+" NAVIGATION
+" open current file in project tree view
+map <Leader>gp :action SelectInProjectView<CR>
+" go to definition
+map <Leader>gd :action GotoDeclaration<CR>
+" go back
+map <Leader>gb :action Back<CR>
+" go forward
+map <Leader>gf :action Forward<CR>
+
+" FINDING
+" find file by name
+map <Leader>fn :action Forward<CR>
+
+" find in files
+
+" find tags
+
+" find tags in current file
+map <Leader>fn :action FileStructurePopup<CR>
+
+" find usages
+map <Leader>fu :action FindUsages<CR>
+
+" Type Hierarchy
+map <Leader>fh :action TypeHierarchy<CR>
+
+" COMMENTING
+
+" FOLDING
+" Refold
+map <Leader>xr :action CollapseAll<CR> | action ExpandAll<CR>
+
+" MISC
+nnoremap <Leader>mr :source ~/.ideavimrc<CR>

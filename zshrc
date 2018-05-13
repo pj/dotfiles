@@ -89,26 +89,15 @@ fi
 
 # OPAM configuration
 #. /Users/pauljohnson/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
-# If nix profile exists then activate it.
-if [[ -e ~/.nix-profile/etc/profile.d/nix.sh ]]; then
-    . /Users/pauljohnson/.nix-profile/etc/profile.d/nix.sh;
-fi # added by Nix installer
+#test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 # Local ZSH config.
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
 
-export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/sbin:/Users/pauljohnson/Work/google-cloud-sdk/platform/google_appengine:$PATH"
 
 # Disable arrow keys cos I'm 'ardcore
 # bindkey -r "^[OC"
 # bindkey -r "^[OD"
-
-PATH="/Users/pauljohnson/perl5/bin${PATH+:}${PATH}"; export PATH;
-PERL5LIB="/Users/pauljohnson/perl5/lib/perl5${PERL5LIB+:}${PERL5LIB}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/Users/pauljohnson/perl5${PERL_LOCAL_LIB_ROOT+:}${PERL_LOCAL_LIB_ROOT}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/Users/pauljohnson/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/pauljohnson/perl5"; export PERL_MM_OPT;
