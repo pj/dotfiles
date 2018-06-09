@@ -25,6 +25,7 @@ Plugin 'editorconfig/editorconfig-vim'
 Plugin 'kana/vim-textobj-user'
 Plugin 'bps/vim-textobj-python'
 Plugin 'tpope/vim-ragtag'
+Plugin 'kana/vim-textobj-line'
 
 " File plugins
 " Plugin 'Valloric/YouCompleteMe'
