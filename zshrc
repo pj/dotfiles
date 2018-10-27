@@ -53,10 +53,10 @@ COMPLETION_WAITING_DOTS="true"
 
 # Are we on Mac OSX or not?
 if type "brew" > /dev/null; then
-    plugins=(git osx emoji-clock node npm python autojump)
+    plugins=(git osx emoji-clock node npm python autojump vi-mode)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 else
-    plugins=(git emoji-clock node npm python ssh-agent)
+    plugins=(git emoji-clock node npm python ssh-agent vi-mode)
     [[ -s $HOME/etc/profile.d/autojump.sh ]] && . $HOME/etc/profile.d/autojump.sh
 fi
 source $ZSH/oh-my-zsh.sh
@@ -91,13 +91,22 @@ fi
 #. /Users/pauljohnson/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
 #test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
+export PATH="/usr/local/sbin:$PATH"
+#export PYTHONPATH="/Users/pauljohnson/Work/google-cloud-sdk/platform/google_appengine:/Users/pauljohnson/Work/backend_server/app/common/lib:/Users/pauljohnson/Work/backend_server/:$PYTHONPATH"
+export GAE_ROOT="/Users/pauljohnson/Work/google-cloud-sdk"
+export GAE="$GAE_ROOT/platform/google_appengine"
+export BACKEND_SERVER_ROOT="/Users/pauljohnson/Work/backend_server"
+
+export PYTHONPATH="$BACKEND_SERVER_ROOT/app/common/lib"
+
 # Local ZSH config.
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
 
-export PATH="/usr/local/sbin:/Users/pauljohnson/Work/google-cloud-sdk/platform/google_appengine:$PATH"
-
 # Disable arrow keys cos I'm 'ardcore
 # bindkey -r "^[OC"
 # bindkey -r "^[OD"
+
+bindkey -M viins 'kj' vi-cmd-mode
+bindkey -r '^a'

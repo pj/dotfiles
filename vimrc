@@ -329,6 +329,7 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_mode_map = { 'passive_filetypes': ['html'] }
 
 let g:gutentags_define_advanced_commands = 1
+let g:gutentags_cache_dir = $HOME . '/.cache/gutentags'
 
 " Disable breakpoint keybinding for python mode
 "let g:pymode_breakpoint_bind = ''
