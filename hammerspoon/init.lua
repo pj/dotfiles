@@ -244,3 +244,111 @@ end)
 --
 --local f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
 
+local timeLimit = 120
+local hostsFilePath = '/etc/hosts'
+local hostsTemplate = '/Users/pauljohnson/temp/hosts_template'
+
+function updateBlockList(block)
+  local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
+  local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
+  local tmpname = os.tmpname()
+  local dest = io.open(tmpname, 'w')
+  local template = io.open(hostsTemplate, 'r')
+  for line in template:lines() do
+    dest:write(line)
+    dest:write('\n')
+  end
+  if block then
+    for item in blocklist_file:lines() do
+      dest:write(string.format('0.0.0.0    %s\n', item))
+    end
+  end
+  for item in permanent_blocklist_file:lines() do
+    dest:write(string.format('0.0.0.0    %s\n', item))
+  end
+  command = string.format(
+    "/usr/bin/osascript -e 'do shell script \"sudo cp %s %s\" with administrator privileges'",
+    tmpname,
+    hostsFilePath
+  )
+  local handle = io.popen(command)
+  local result = handle:read("*a")
+  hs.printf(result)
+  handle:close()
+  dest:close()
+  os.remove(tmpname)
+  template:close()
+  blocklist_file:close()
+  permanent_blocklist_file:close()
+  if block then
+    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/.vim/hammerspoon/tabCloser.scpt')
+  end
+end
+
+function resetState()
+  hs.settings.set('currentDay', nil)
+  hs.settings.set('timeSpent', 0)
+  currentTimer = nil
+end
+
+local currentTimer = nil
+function toggleSiteBlocking()
+  now = os.date('*t')
+  currentDay = hs.settings.get('currentDay')
+  timeSpent = hs.settings.get('timeSpent')
+  if currentDay == nil or currentDay.day ~= now.day then
+    currentDay = now
+    hs.settings.set('currentDay', currentDay)
+    if currentTimer ~= nil then
+      currentTimer:stop()
+    end
+    currentTimer = nil
+    timeSpent = 0
+    hs.settings.set('timeSpent', timeSpent)
+  end
+
+  if timeSpent > timeLimit then
+    hs.alert('No more time available today.')
+    return
+  end
+
+  if currentTimer ~= nil then
+    currentTimer:stop()
+    -- write block list
+    updateBlockList(true)
+    hs.alert('Starting Blocking...')
+  else
+    -- remove block list
+    updateBlockList(false)
+
+    currentTimer = hs.timer.doEvery(
+      60,
+      function()
+        timeSpent = hs.settings.get('timeSpent')
+        if timeSpent > timeLimit then
+          updateBlockList(true)
+          hs.alert('Times Up, go do something important.')
+          currentTimer:stop()
+          return
+        end
+
+        if timeSpent % 5 == 0 then
+          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+        end
+
+        timeSpent = timeSpent + 1
+        hs.printf(string.format('Ticking... %d', timeSpent))
+        hs.settings.set('timeSpent', timeSpent)
+      end
+    )
+    currentTimer:start()
+    hs.alert('Enjoy internet time...')
+  end
+end
+
+-- toggle site blocking
+hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
+-- report time left
+hs.hotkey.bind(mash, "l", function() hs.alert(hs.settings.get('timeSpent')) end)
+-- reset state
+--hs.hotkey.bind(mash, "s", function() resetState() end)
