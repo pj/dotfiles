@@ -4,36 +4,65 @@ set timeoutlen=1000
 " NAVIGATION
 " open current file in project tree view
 map <Leader>gp :action SelectInProjectView<CR>
+" open current file in finder
+map <Leader>gx :action SelectInProjectView<CR>
 " go to definition
 map <Leader>gd :action GotoDeclaration<CR>
-" go back
+" go back in location stack
 map <Leader>gb :action Back<CR>
-" go forward
+" go forward in location stack
 map <Leader>gf :action Forward<CR>
+" go next error
+map <Leader>gne :action GotoNextError<CR>
+" go previous error
+map <Leader>gne :action GotoPreviousError<CR>
+" Type Hierarchy
+map <Leader>gh :action TypeHierarchy<CR>
+" find usages
+map <Leader>gu :action FindUsages<CR>
+
+
+" EDITING
+" Edit/Modify code at textual level
+map <Leader>ef :action ReformatCode<CR>
+map <Leader>er :action RenameElement<CR>
+" COMMENTING
+map <Leader>cc :action CommentByLineComment<CR>
+map <Leader>cb :action CommentByBlockComment<CR>
+
+
+" WINDOW
+" split vertical
+map <Leader>ww :action SplitVertically<CR>
+" split horizontal
+map <Leader>wh :action SplitHorizontally<CR>
+" split vertical
+map <Leader>wv :action SplitVertically<CR>
+
 
 " FINDING
 " find file by name
-map <Leader>fn :action Forward<CR>
-
-" find in files
-
+map <Leader>ff :action GotoFile<CR>
+" find in open files
+map <Leader>fo :action TabList<CR>
 " find tags
-
+map <Leader>ft :action GotoSymbol<CR>
 " find tags in current file
-map <Leader>fn :action FileStructurePopup<CR>
+map <Leader>fc :action FileStructurePopup<CR>
 
-" find usages
-map <Leader>fu :action FindUsages<CR>
 
-" Type Hierarchy
-map <Leader>fh :action TypeHierarchy<CR>
+" SEARCHING - textual search
+" global textual search
+map <Leader>ss :action FindInPath<CR>
 
-" COMMENTING
-" map <Leader>c<Space> :action
 
 " FOLDING
 " Refold
 map <Leader>xr :action CollapseAll<CR> | action ExpandAll<CR>
 
+
 " MISC
+" Reload config
 nnoremap <Leader>mr :source ~/.ideavimrc<CR>
+" Synchronize code
+map <Leader>ms :action Synchronize<CR>
