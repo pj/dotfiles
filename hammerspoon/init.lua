@@ -219,9 +219,54 @@ tiling.addLayout('vlc', function(windows)
 
 end)
 
+tiling.addLayout('thirds', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local frame = win:screen():frame()
+
+    if index == 1 then
+      frame.w = frame.w / 3
+    elseif index == 2 then
+      frame.x = frame.x + frame.w / 3
+      frame.w = frame.w / 3
+    else
+      frame.x = frame.x + ((frame.w / 3) * 2)
+      frame.w = frame.w / 3
+    end
+
+    win:setFrame(frame)
+  end
+end)
+
+tiling.addLayout('two-thirds', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local frame = win:screen():frame()
+
+    if index == 1 then
+      frame.w = (frame.w / 3) * 2
+    else
+      frame.x = frame.x + ((frame.w / 3) * 2)
+      frame.w = frame.w / 3
+    end
+
+    win:setFrame(frame)
+  end
+end)
+
 -- If you want to set the layouts that are enabled
 tiling.set('layouts', {
-  'fullscreen', 'side-by-side', 'vlc'
+  'fullscreen', 'side-by-side', 'vlc', 'thirds', 'two-thirds'
 })
 
 hs.hotkey.bind({"cmd", "alt"}, "L", function()
@@ -244,9 +289,9 @@ end)
 --
 --local f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
 
-local timeLimit = 120
+local timeLimit = 30
 local hostsFilePath = '/etc/hosts'
-local hostsTemplate = '/Users/pauljohnson/temp/hosts_template'
+local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
 function updateBlockList(block)
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
@@ -351,4 +396,4 @@ hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
 -- report time left
 hs.hotkey.bind(mash, "l", function() hs.alert(hs.settings.get('timeSpent')) end)
 -- reset state
---hs.hotkey.bind(mash, "s", function() resetState() end)
+hs.hotkey.bind(mash, "s", function() resetState() end)
