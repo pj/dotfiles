@@ -289,7 +289,7 @@ end)
 --
 --local f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
 
-local timeLimit = 30
+local timeLimit = 90
 local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
@@ -359,6 +359,7 @@ function toggleSiteBlocking()
 
   if currentTimer ~= nil then
     currentTimer:stop()
+    currentTimer = nil
     -- write block list
     updateBlockList(true)
     hs.alert('Starting Blocking...')
@@ -374,6 +375,7 @@ function toggleSiteBlocking()
           updateBlockList(true)
           hs.alert('Times Up, go do something important.')
           currentTimer:stop()
+          currentTimer = nil
           return
         end
 
