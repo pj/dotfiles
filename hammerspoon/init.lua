@@ -294,6 +294,9 @@ local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
 function updateBlockList(block)
+  if block then
+    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/.vim/hammerspoon/tabCloser.scpt')
+  end
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
   local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
   local tmpname = os.tmpname()
@@ -325,9 +328,6 @@ function updateBlockList(block)
   template:close()
   blocklist_file:close()
   permanent_blocklist_file:close()
-  if block then
-    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/.vim/hammerspoon/tabCloser.scpt')
-  end
 end
 
 function resetState()
@@ -379,7 +379,11 @@ function toggleSiteBlocking()
           return
         end
 
-        if timeSpent % 5 == 0 then
+        if timeSpent < 5 then
+          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+        elseif timeSpent < 5 and timeSpent % 2 == 0 then
+          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+        elseif timeSpent % 5 == 0 then
           hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
         end
 

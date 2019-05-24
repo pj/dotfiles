@@ -94,6 +94,10 @@ Plugin 'carlitux/deoplete-ternjs'
 " Postgres
 Plugin 'lifepillar/pgsql.vim'
 
+" Clojure
+Plugin 'tpope/vim-fireplace'
+Plugin 'guns/vim-sexp'
+
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
