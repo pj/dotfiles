@@ -92,12 +92,9 @@ fi
 #test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 export PATH="/usr/local/sbin:$PATH"
-#export PYTHONPATH="/Users/pauljohnson/Work/google-cloud-sdk/platform/google_appengine:/Users/pauljohnson/Work/backend_server/app/common/lib:/Users/pauljohnson/Work/backend_server/:$PYTHONPATH"
 export GAE_ROOT="/Users/pauljohnson/Work/google-cloud-sdk"
 export GAE="$GAE_ROOT/platform/google_appengine"
 export BACKEND_SERVER_ROOT="/Users/pauljohnson/Work/backend_server"
-
-export PYTHONPATH="$BACKEND_SERVER_ROOT/app/common/lib"
 
 # Local ZSH config.
 if [[ -f ~/.zshrc.local ]]; then
