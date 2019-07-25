@@ -7,3 +7,5 @@ sessions/
 vimtest
 .ropeproject/
 tags
+autoload/
+plugged/

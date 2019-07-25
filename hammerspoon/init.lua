@@ -397,6 +397,35 @@ function toggleSiteBlocking()
   end
 end
 
+permablockTimer = hs.timer.doEvery(
+  15,
+  function()
+    hs.printf('permablock timer running')
+    local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
+    local hosts_file = io.open(hostsFilePath, 'r')
+    local hosts_data = hosts_file:read('*all')
+    local hosts_changed = false
+    for line in permanent_blocklist_file:lines() do
+      --hs.printf(string.format('checking %s', line))
+      local line_formatted = string.format('0.0.0.0    %s', line)
+      if string.find(hosts_data, line_formatted, 1, true) == nil then
+        hs.printf(string.format('host missing %s', line))
+        hosts_changed = true
+      end
+    end
+    permanent_blocklist_file:close()
+    hosts_file:close()
+    if hosts_changed then
+      if currentTimer == nil then
+        updateBlockList(true)
+      else
+        updateBlockList(false)
+      end
+    end
+  end
+)
+permablockTimer:start()
+
 -- toggle site blocking
 hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
 -- report time left
