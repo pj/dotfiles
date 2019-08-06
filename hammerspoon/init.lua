@@ -295,7 +295,7 @@ local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
 function updateBlockList(block)
   if block then
-    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/.vim/hammerspoon/tabCloser.scpt')
+    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt')
   end
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
   local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
