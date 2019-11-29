@@ -1,0 +1,26 @@
+{
+    "vim.insertModeKeyBindings": [
+        {
+            "before": ["k", "j"],
+            "after": ["<Esc>"]
+        }
+    ],
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": ["j"],
+            "after": ["g", "j"]
+        },
+        {
+            "before": ["k"],
+            "after": ["g", "k"]
+        },
+        {
+            "before": ["down"],
+            "after": ["g", "j"]
+        },
+        {
+            "before": ["up"],
+            "after": ["g", "k"]
+        }
+      ]]
+}
