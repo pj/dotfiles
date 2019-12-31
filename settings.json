@@ -1,4 +1,5 @@
 {
+    "editor.minimap.enabled": false,
     "vim.insertModeKeyBindings": [
         {
             "before": ["k", "j"],
@@ -21,6 +22,32 @@
         {
             "before": ["up"],
             "after": ["g", "k"]
+        },
+        {
+            "before": ["<leader>", "c", "c"],
+            "commands": ["editor.action.commentLine"],
+            "when": "editorTextFocus && !editorReadonly"
+        },
+        {
+            "before": ["<leader>", "w", "w"],
+            "commands": ["workbench.action.splitEditor"]
+        },
+        {
+            "before": ["<leader>", "w", "v"],
+            "commands": ["workbench.action.splitEditorOrthogonal"]
+        },
+        {
+            "before": ["<leader>", "g", "b"],
+            "commands": ["workbench.action.navigateBack"]
         }
-      ]]
+
+    ],
+    "vim.visualModeKeyBindings": [
+        {
+            "before": ["<leader>", "c", "c"],
+            "commands": ["editor.action.commentLine", "extension.vim_escape"],
+            "when": "editorTextFocus && !editorReadonly"
+        }
+    ],
+    "diffEditor.ignoreTrimWhitespace": true
 }
