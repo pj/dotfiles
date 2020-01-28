@@ -2,104 +2,87 @@ set nocompatible              " be iMproved, required
 filetype off                  " required
 
 " Plugin manager
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+call plug#begin('~/.vim/plugged')
 
 " let Vundle manage Vundle, required
-Plugin 'gmarik/Vundle.vim'
+Plug 'gmarik/Vundle.vim'
 
 " System plugins
-Plugin 'xolox/vim-misc'
-Plugin 'xolox/vim-session'
-Plugin 'flazz/vim-colorschemes'
-" Plugin 'tpope/vim-fugitive'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'bling/vim-airline'
-" Plugin 'pthrasher/conqueterm-vim'
-" Plugin 'tybenz/vimdeck'
-Bundle 'edkolev/tmuxline.vim'
-Plugin 'editorconfig/editorconfig-vim'
+Plug 'xolox/vim-misc'
+"Plug 'xolox/vim-session'
+Plug 'flazz/vim-colorschemes'
+" Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+"Plug 'bling/vim-airline'
+" Plug 'pthrasher/conqueterm-vim'
+" Plug 'tybenz/vimdeck'
+"Bundle 'edkolev/tmuxline.vim'
+Plug 'editorconfig/editorconfig-vim'
 
 " Editing plugins
-Plugin 'kana/vim-textobj-user'
-Plugin 'bps/vim-textobj-python'
-Plugin 'tpope/vim-ragtag'
-Plugin 'kana/vim-textobj-line'
+Plug 'kana/vim-textobj-user'
+Plug 'bps/vim-textobj-python'
+Plug 'tpope/vim-ragtag'
+Plug 'kana/vim-textobj-line'
 
 " File plugins
-" Plugin 'Valloric/YouCompleteMe'
-Plugin 'roxma/nvim-yarp'
-Plugin 'roxma/vim-hug-neovim-rpc'
-Plugin 'Shougo/deoplete.nvim'
-Plugin 'scrooloose/syntastic'
-" Plugin 'Lokaltog/vim-easymotion'
-" Plugin 'xolox/vim-easytags'
-" Plugin 'majutsushi/tagbar'
-Bundle 'ntpeters/vim-better-whitespace'
-Plugin 'tpope/vim-surround'  " Surround things.
-" Plugin 'aperezdc/vim-template'
-" Plugin 'SirVer/ultisnips'
-" Plugin 'honza/vim-snippets'
-Plugin 'godlygeek/tabular'
-Plugin 'Raimondi/delimitMate' " Automatically close parens etc.
-" Plugin 'junegunn/vim-peekaboo' " Show contents of registers.
-Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'nathanaelkane/vim-indent-guides'
-Plugin 'scrooloose/nerdcommenter'
-Plugin 'ludovicchabant/vim-gutentags'
+" Plug 'Valloric/YouCompleteMe'
+Plug 'roxma/nvim-yarp'
+Plug 'roxma/vim-hug-neovim-rpc'
+Plug 'Shougo/deoplete.nvim'
+Plug 'scrooloose/syntastic'
+" Plug 'Lokaltog/vim-easymotion'
+" Plug 'xolox/vim-easytags'
+" Plug 'majutsushi/tagbar'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'tpope/vim-surround'  " Surround things.
+" Plug 'aperezdc/vim-template'
+" Plug 'SirVer/ultisnips'
+" Plug 'honza/vim-snippets'
+Plug 'godlygeek/tabular'
+Plug 'Raimondi/delimitMate' " Automatically close parens etc.
+" Plug 'junegunn/vim-peekaboo' " Show contents of registers.
+Plug 'michaeljsmith/vim-indent-object'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'scrooloose/nerdcommenter'
+Plug 'ludovicchabant/vim-gutentags'
 
 " Project plugins
-Plugin 'mileszs/ack.vim'
-Plugin 'ctrlpvim/ctrlp.vim'
-" Plugin 'scrooloose/nerdtree'
-" Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'junkblocker/patchreview-vim'
-Plugin 'codegram/vim-codereview'
+Plug 'mileszs/ack.vim'
+Plug 'ctrlpvim/ctrlp.vim'
+" Plug 'scrooloose/nerdtree'
+" Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'junkblocker/patchreview-vim'
+Plug 'codegram/vim-codereview'
 
 " Python
-"Plugin 'ivanov/vim-ipython'
-"Plugin 'jmcantrell/vim-virtualenv'
-"Plugin 'klen/python-mode'
-"Plugin 'amoffat/snake'
-Plugin 'hdima/python-syntax'
+"Plug 'ivanov/vim-ipython'
+"Plug 'jmcantrell/vim-virtualenv'
+"Plug 'klen/python-mode'
+"Plug 'amoffat/snake'
+Plug 'hdima/python-syntax'
 
 " Javascript/Node
-"Plugin 'kchmck/vim-coffee-script'
-Plugin 'marijnh/tern_for_vim'
-Plugin 'jelera/vim-javascript-syntax'
-Plugin 'digitaltoad/vim-jade'
-Plugin 'Shougo/vimproc.vim'
-Plugin 'Quramy/tsuquyomi'
-Plugin 'leafgarland/typescript-vim'
-Plugin 'niftylettuce/vim-jinja'
-Plugin 'pangloss/vim-javascript'
-Plugin 'carlitux/deoplete-ternjs'
-
-" FSharp/Mono
-" Plugin 'fsharp/vim-fsharp'
-
-" OCaml
-" Plugin 'let-def/ocp-indent-vim'
-
-" Idris
-" Plugin 'idris-hackers/idris-vim'
-
-" Rust
-" Plugin 'rust-lang/rust.vim'
-
-" Hack lang
-" Plugin 'hhvm/vim-hack'
+"Plug 'kchmck/vim-coffee-script'
+Plug 'marijnh/tern_for_vim'
+Plug 'jelera/vim-javascript-syntax'
+Plug 'digitaltoad/vim-jade'
+Plug 'Shougo/vimproc.vim'
+Plug 'Quramy/tsuquyomi'
+Plug 'leafgarland/typescript-vim'
+Plug 'niftylettuce/vim-jinja'
+Plug 'pangloss/vim-javascript'
+Plug 'carlitux/deoplete-ternjs'
 
 " Postgres
-Plugin 'lifepillar/pgsql.vim'
+Plug 'lifepillar/pgsql.vim'
 
 " Clojure
-Plugin 'tpope/vim-fireplace'
-Plugin 'guns/vim-sexp'
+Plug 'tpope/vim-fireplace'
+Plug 'guns/vim-sexp'
 
 " All of your Plugins must be added before the following line
-call vundle#end()            " required
+call plug#end()            " required
 filetype plugin indent on    " required
 
 let g:deoplete#enable_at_startup = 1
@@ -116,21 +99,21 @@ set encoding=utf-8
 set fileencoding=utf-8
 
 " airline config
-set laststatus=2
+"set laststatus=2
 
 " Enable the list of buffers
-let g:airline#extensions#tabline#enabled = 1
+"let g:airline#extensions#tabline#enabled = 1
 
 " Show just the filename
-let g:airline#extensions#tabline#fnamemod = ':t'
+"let g:airline#extensions#tabline#fnamemod = ':t'
 
 " Get the correct symbols
-let g:airline_powerline_fonts = 1
+"let g:airline_powerline_fonts = 1
 
 " sessions settings
 " let g:session_autoload = 'yes'
 " let g:session_autosave = 'yes'
-:let g:session_autosave = 'no'
+":let g:session_autosave = 'no'
 
 " Mouse support in terminal vim
 set mouse=a
@@ -314,21 +297,21 @@ else
   let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
-let g:tmuxline_preset = {
-        \ 'a': '🇳🇿 ',
-        \ 'b': '#S',
-        \ 'win': ['#I | #W'],
-        \ 'cwin': ['#I | #W'],
-        \ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
-        \ 'y': '%R %a %b %d',
-        \ 'z': '#(if [ "$(hostname)" = "Paul-Johnsons-MacBook-Pro.local" ] || [ "$(hostname)" = "PaulJohnsonsMBP.home" ]; then echo "🏠 "; else echo "$(hostname)"; fi)',
-        \'options' : {'status-justify' : 'left'}}
+"let g:tmuxline_preset = {
+"        \ 'a': '🇳🇿 ',
+"        \ 'b': '#S',
+"        \ 'win': ['#I | #W'],
+"        \ 'cwin': ['#I | #W'],
+"        \ 'x': ['#(python -c "import pypower; print pypower.nice_format()")' ],
+"        \ 'y': '%R %a %b %d',
+"        \ 'z': '#(if [ "$(hostname)" = "Paul-Johnsons-MacBook-Pro.local" ] || [ "$(hostname)" = "PaulJohnsonsMBP.home" ]; then echo "🏠 "; else echo "$(hostname)"; fi)',
+"        \'options' : {'status-justify' : 'left'}}
 
 " Syntastic recommended defaults
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
+"set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+"set statusline+=%*
+"
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
@@ -338,17 +321,8 @@ let g:syntastic_mode_map = { 'passive_filetypes': ['html'] }
 let g:gutentags_define_advanced_commands = 1
 let g:gutentags_cache_dir = $HOME . '/.cache/gutentags'
 
-" Disable breakpoint keybinding for python mode
-"let g:pymode_breakpoint_bind = ''
-
-" rope makes pymode unusably slow
-"let g:pymode_rope = 0
-
-
 au BufNewFile,BufRead *.html,*.htm, *.njk set ft=jinja
-
-" keybindings for ycm
-"nnoremap <leader>d :YcmCompleter GoToDeclaration<CR>
+au BufRead,BufNewFile *.FCMacro set filetype=python
 
 " ---- Load windows local settings
 if !empty(glob("~/_vimrc.local"))
