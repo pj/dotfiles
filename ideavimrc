@@ -44,7 +44,7 @@ map <Leader>wv :action SplitVertically<CR>
 " find file by name
 map <Leader>ff :action GotoFile<CR>
 " find in open files
-map <Leader>fo :action TabList<CR>
+map <Leader>fb :action TabList<CR>
 " find tags
 map <Leader>ft :action GotoSymbol<CR>
 " find tags in current file

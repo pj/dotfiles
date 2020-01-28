@@ -289,7 +289,7 @@ end)
 --
 --local f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
 
-local timeLimit = 60
+local timeLimit = 20
 local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 

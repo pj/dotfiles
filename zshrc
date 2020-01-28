@@ -53,7 +53,7 @@ COMPLETION_WAITING_DOTS="true"
 
 # Are we on Mac OSX or not?
 if type "brew" > /dev/null; then
-    plugins=(git osx emoji-clock node npm python autojump vi-mode pyenv)
+    plugins=(git osx emoji-clock node npm python autojump vi-mode)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 else
     plugins=(git emoji-clock node npm python ssh-agent vi-mode)
@@ -103,3 +103,4 @@ fi
 
 bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
+export PATH="/usr/local/opt/ruby/bin:$PATH"

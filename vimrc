@@ -1,6 +1,12 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 " Plugin manager
 call plug#begin('~/.vim/plugged')
 
@@ -17,6 +23,14 @@ Plug 'airblade/vim-gitgutter'
 " Plug 'pthrasher/conqueterm-vim'
 " Plug 'tybenz/vimdeck'
 "Bundle 'edkolev/tmuxline.vim'
+Plug 'xolox/vim-session'
+Plug 'flazz/vim-colorschemes'
+" Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'bling/vim-airline'
+" Plug 'pthrasher/conqueterm-vim'
+" Plug 'tybenz/vimdeck'
+Plug 'edkolev/tmuxline.vim'
 Plug 'editorconfig/editorconfig-vim'
 
 " Editing plugins
@@ -50,6 +64,8 @@ Plug 'ludovicchabant/vim-gutentags'
 " Project plugins
 Plug 'mileszs/ack.vim'
 Plug 'ctrlpvim/ctrlp.vim'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 " Plug 'scrooloose/nerdtree'
 " Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'junkblocker/patchreview-vim'
@@ -74,6 +90,21 @@ Plug 'niftylettuce/vim-jinja'
 Plug 'pangloss/vim-javascript'
 Plug 'carlitux/deoplete-ternjs'
 
+" FSharp/Mono
+" Plug 'fsharp/vim-fsharp'
+
+" OCaml
+" Plug 'let-def/ocp-indent-vim'
+
+" Idris
+" Plug 'idris-hackers/idris-vim'
+
+" Rust
+" Plug 'rust-lang/rust.vim'
+
+" Hack lang
+" Plug 'hhvm/vim-hack'
+
 " Postgres
 Plug 'lifepillar/pgsql.vim'
 
@@ -82,6 +113,7 @@ Plug 'tpope/vim-fireplace'
 Plug 'guns/vim-sexp'
 
 " All of your Plugins must be added before the following line
+" All of your Plugs must be added before the following line
 call plug#end()            " required
 filetype plugin indent on    " required
 
@@ -250,12 +282,12 @@ imap kj <Esc>
 
 " ---- Interfile Settings
 " CtrlP
-nmap <Leader>f :CtrlP<CR>
-nmap <Leader>b :CtrlPBuffer<CR>
-nmap <Leader>t :CtrlPBufTag<CR>
-nmap <Leader>T :CtrlPBufTagAll<CR>
+nmap <Leader>ff :CtrlPMixed<CR>
+nmap <Leader>fb :CtrlPBuffer<CR>
+nmap <Leader>ft :CtrlPTag<CR>
+nmap <Leader>fc :CtrlPBufTag<CR>
 "nmap ,l :CtrlPLine<CR>
-nmap <Leader>m :CtrlPMRUFiles<CR>
+nmap <Leader>fm :CtrlPMRUFiles<CR>
 "let g:ctrlp_working_path_mode = 0
 let g:ctrlp_custom_ignore = {
 \ 'dir':  '\v[\/](\.git|\.hg|\.svn|\.meteor|node_modules)$',
