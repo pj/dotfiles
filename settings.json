@@ -49,5 +49,6 @@
             "when": "editorTextFocus && !editorReadonly"
         }
     ],
-    "diffEditor.ignoreTrimWhitespace": true
+    "diffEditor.ignoreTrimWhitespace": true,
+    "typescript.updateImportsOnFileMove.enabled": "always"
 }
