@@ -1,4 +1,6 @@
 {
+    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\wsl.exe",
+    "editor.rulers": [80],
     "editor.minimap.enabled": false,
     "vim.insertModeKeyBindings": [
         {
@@ -39,8 +41,23 @@
         {
             "before": ["<leader>", "g", "b"],
             "commands": ["workbench.action.navigateBack"]
+        },
+        {
+            "before": ["<leader>", "s", "s"],
+            "commands": [
+                {
+                    "command": "workbench.action.findInFiles"
+                }
+            ]
+        },
+        {
+            "before": ["<leader>", "f", "f"],
+            "commands": [
+                {
+                    "command": "workbench.action.quickOpen"
+                }
+            ]
         }
-
     ],
     "vim.visualModeKeyBindings": [
         {
@@ -49,5 +66,14 @@
             "when": "editorTextFocus && !editorReadonly"
         }
     ],
-    "diffEditor.ignoreTrimWhitespace": true
+    "diffEditor.ignoreTrimWhitespace": true,
+    "editor.wordWrap": "off",
+    "editor.wordWrapColumn": 80,
+    "[markdown]": {
+        "editor.wordWrap": "wordWrapColumn",
+    },
+    "workbench.list.openMode": "doubleClick",
+    "files.associations": {
+        "*.pgsql": "sql"
+    }
 }
