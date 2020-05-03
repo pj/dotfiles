@@ -75,5 +75,6 @@
     "workbench.list.openMode": "doubleClick",
     "files.associations": {
         "*.pgsql": "sql"
-    }
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always"
 }
