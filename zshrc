@@ -85,7 +85,6 @@ fi
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-# export PYTHONPATH=".:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python27.zip:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-darwin:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac/lib-scriptpackages:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-tk:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-old:/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload:/usr/local/lib/python2.7/site-packages"
 
 export PATH="/usr/local/sbin:$PATH"
 export GAE_ROOT="/Users/pauljohnson/Work/google-cloud-sdk"
@@ -104,3 +103,8 @@ fi
 bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 export PATH="/usr/local/opt/ruby/bin:$PATH"
+
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# eval "$(pyenv init -)"
+export PATH="$HOME/.poetry/bin:$PATH"

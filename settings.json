@@ -49,5 +49,9 @@
             "when": "editorTextFocus && !editorReadonly"
         }
     ],
-    "diffEditor.ignoreTrimWhitespace": true
+    "diffEditor.ignoreTrimWhitespace": true,
+    "window.zoomLevel": 1,
+    "python.venvPath": "~/Library/Caches/pypoetry/virtualenvs/",
+    "workbench.editor.enablePreview": true,
+    "workbench.list.openMode": "doubleClick"
 }

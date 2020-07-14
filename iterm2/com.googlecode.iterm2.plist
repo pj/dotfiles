@@ -6,6 +6,8 @@
 	<true/>
 	<key>AppleAntiAliasingThreshold</key>
 	<integer>1</integer>
+	<key>ApplePressAndHoldEnabled</key>
+	<false/>
 	<key>AppleScrollAnimationEnabled</key>
 	<integer>0</integer>
 	<key>AppleSmoothFixedFontsSizeThreshold</key>
@@ -67,12 +69,14 @@
 		<key>TB Is Shown</key>
 		<integer>1</integer>
 	</dict>
+	<key>NSWindow Frame SUStatusFrame</key>
+	<string>1520 967 400 129 0 0 1680 1027 </string>
 	<key>NSWindow Frame SUUpdateAlert</key>
-	<string>530 476 620 392 0 0 1680 1027 </string>
+	<string>650 498 620 392 0 0 1920 1057 </string>
 	<key>NSWindow Frame SharedPreferences</key>
 	<string>699 580 1018 447 0 0 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 599 1680 429 0 0 1680 1027 </string>
+	<string>0 989 3440 429 0 0 3440 1417 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>627 30 1264 877 0 0 1920 1057 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
@@ -1327,6 +1331,7 @@
 	<key>NoSyncAllAppVersions</key>
 	<array>
 		<string>3.3.6</string>
+		<string>3.3.8</string>
 		<string>3.3.1</string>
 		<string>3.3.3</string>
 		<string>3.3.7</string>
@@ -1348,7 +1353,7 @@
 	<key>NoSyncInstallationId</key>
 	<string>F8D33977-874D-4E52-9911-782720F9522E</string>
 	<key>NoSyncLaunchExperienceControllerRunCount</key>
-	<integer>13</integer>
+	<integer>16</integer>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile</key>
 	<true/>
 	<key>NoSyncNeverRemindPrefsChangesLostForFile_selection</key>
@@ -2121,11 +2126,13 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2020-01-24T07:01:30Z</date>
+	<date>2020-02-13T16:36:26Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
+	<key>SUUpdateGroupIdentifier</key>
+	<integer>3375302677</integer>
 	<key>SUUpdateRelaunchingMarker</key>
-	<false/>
+	<true/>
 	<key>Selection Respects Soft Boundaries</key>
 	<true/>
 	<key>SoundForEsc</key>
@@ -2137,6 +2144,6 @@
 	<key>findMode_iTerm</key>
 	<integer>0</integer>
 	<key>iTerm Version</key>
-	<string>3.3.7</string>
+	<string>3.3.8</string>
 </dict>
 </plist>
