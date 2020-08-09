@@ -10,9 +10,6 @@ endif
 " Plugin manager
 call plug#begin('~/.vim/plugged')
 
-" let Vundle manage Vundle, required
-Plug 'gmarik/Vundle.vim'
-
 " System plugins
 Plug 'xolox/vim-misc'
 "Plug 'xolox/vim-session'

@@ -11,130 +11,8 @@ end
 local watcher = hs.caffeinate.watcher.new(muteOnSleep)
 watcher:start()
 
--- menu item search
---local application_menu_items = {}
---local currentApp = nil
---local currentWindow = nil
---
---function processItems(items, app)
---  if items == nil then
---    return
---  end
---  if items['AXTitle'] == nil then
---    if items['AXChildren'] ~= nil then
---      for k, item in pairs(items['AXChildren']) do
---        processItems(item, app)
---      end
---    else
---      for k, item in pairs(items) do
---        processItems(item, app)
---      end
---    end
---  else
---    if items['AXEnabled'] ~= nil and items['AXEnabled'] and items['AXRole'] == 'AXMenuItem' then
---      local pid = app:pid()
---      if application_menu_items[pid] == nil then
---        application_menu_items[pid] = {items['AXTitle']}
---      else
---        table.insert(application_menu_items[pid], items['AXTitle'])
---      end
---    end
---    if items['AXChildren'] ~= nil then
---      for k, item in pairs(items['AXChildren']) do
---        processItems(item, app)
---      end
---    end
---  end
---end
---
---function onApplicationActivated(name, event, app)
---  if event == hs.application.watcher.activated then
---    local pid = app:pid()
---    if application_menu_items[pid] == nil then
---      app:getMenuItems(function (items) processItems(items, app) end)
---    end
---  end
---end
---
---local application_watcher = hs.application.watcher.new(onApplicationActivated)
---application_watcher:start()
---
---local chooser = nil
---function menuComplete(choice)
---  hs.printf('chosen: %s', hs.inspect.inspect(choice))
---  if choice ~= nil then
---    hs.printf('current app: %s', currentApp)
---    hs.printf('current window: %s', currentWindow)
---    currentWindow:focus()
---    currentApp:selectMenuItem(choice.item)
---  end
---end
---
---function menuSearch()
---  currentApp = hs.application.frontmostApplication()
---  currentWindow = hs.window.frontmostWindow()
---  chooser:query('')
---  chooser:show()
---end
---
---chooser = hs.chooser.new(menuComplete)
---
---function queryChanged()
---  local query = chooser:query():lower()
---  if query:len() < 2 then
---    return
---  end
---  hs.printf('query: %s', chooser:query())
---  if currentApp == nil then
---    return
---  end
---
---  local pid = currentApp:pid()
---  --hs.printf('%d', pid)
---  --for k, item in pairs(application_menu_items) do
---  --  hs.printf('%s', type(k))
---  --end
---  --hs.printf('%s', hs.inspect.inspect(application_menu_items))
---  --hs.printf('%s', hs.inspect.inspect(application_menu_items[pid]))
---
---  if application_menu_items[pid] ~= nil then
---    --hs.printf('has items')
---    local newChoices = {}
---    local items = application_menu_items[pid]
---    --hs.printf('%s', hs.inspect.inspect(items))
---    for i, item in ipairs(items) do
---      --hs.printf('item %s', item)
---      if item:lower():match(query) then
---        --hs.printf('qwer')
---        table.insert(newChoices, {text = item, item = item})
---        --hs.printf('lllll')
---      end
---    end
---    --hs.printf('asdf')
---    hs.printf('%s', hs.inspect.inspect(newChoices))
---    chooser:choices(newChoices)
---    --hs.printf('here')
---  else
---    currentApp:getMenuItems(function (items) processItems(items, currentApp) end)
---  end
---end
---
---chooser:queryChangedCallback(queryChanged)
---
---hs.hotkey.bind(
---  {'alt', 'ctrl', 'cmd'},
---  'space',
---  nil,
---  menuSearch
---)
-
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
-
--- Load miros windows
---hyper = {'alt', 'cmd'}
---package.path = package.path .. ";./?.lua"
---require("position")
 
 local tiling = require("hs.tiling")
 local mash = {"ctrl", "cmd"}
@@ -273,23 +151,8 @@ hs.hotkey.bind({"cmd", "alt"}, "L", function()
   hs.caffeinate.startScreensaver()
 end)
 
---local modal = hs.hotkey.modal.new({}, "F17")
---
---local pressedF18 = function()
---  -- hs.alert.show('enter modal')
---  modal:enter()
---end
---
---local releasedF18 = function()
---  -- hs.alert.show('exit modal')
---  modal:exit()
---end
---
---modal:bind({}, "f", 'caps-h', function() tiling.goToLayout("fullscreen") end)
---
---local f18 = hs.hotkey.bind({}, 'F18', pressedF18, releasedF18)
-
-local timeLimit = 20
+local timeLimit = 0
+local weekendTimeLimit = 0
 local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
@@ -298,7 +161,7 @@ function updateBlockList(block)
     local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt')
   end
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
-  --local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
+  local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
   local tmpname = os.tmpname()
   local dest = io.open(tmpname, 'w')
   local template = io.open(hostsTemplate, 'r')
@@ -311,9 +174,9 @@ function updateBlockList(block)
       dest:write(string.format('0.0.0.0    %s\n', item))
     end
   end
-  --for item in permanent_blocklist_file:lines() do
-  --  dest:write(string.format('0.0.0.0    %s\n', item))
-  --end
+  for item in permanent_blocklist_file:lines() do
+   dest:write(string.format('0.0.0.0    %s\n', item))
+  end
   command = string.format(
     "/usr/bin/osascript -e 'do shell script \"sudo cp %s %s\" with administrator privileges'",
     tmpname,
@@ -327,7 +190,7 @@ function updateBlockList(block)
   os.remove(tmpname)
   template:close()
   blocklist_file:close()
-  --permanent_blocklist_file:close()
+  permanent_blocklist_file:close()
 end
 
 function resetState()
@@ -352,7 +215,8 @@ function toggleSiteBlocking()
     hs.settings.set('timeSpent', timeSpent)
   end
 
-  if timeSpent > timeLimit then
+  weekday = now.wday > 1 and now.wday < 7
+  if (weekday and timeSpent > timeLimit) or (not weekday and timeSpent > weekendTimeLimit) then
     hs.alert('No more time available today.')
     return
   end
@@ -364,14 +228,22 @@ function toggleSiteBlocking()
     updateBlockList(true)
     hs.alert('Starting Blocking...')
   else
+    -- Check day of week
+    if currentDay.wday > 1 and currentDay.wday < 7 and now.hour > 8 and now.hour < 17 then
+      hs.alert('Go back too work.') 
+      return
+    end
+
     -- remove block list
     updateBlockList(false)
 
     currentTimer = hs.timer.doEvery(
       60,
       function()
+        now = os.date('*t')
+        weekday = now.wday > 1 and now.wday < 7
         timeSpent = hs.settings.get('timeSpent')
-        if timeSpent > timeLimit then
+        if (weekday and timeSpent > timeLimit) or (not weekday and timeSpent > weekendTimeLimit) then
           updateBlockList(true)
           hs.alert('Times Up, go do something important.')
           currentTimer:stop()
@@ -425,6 +297,19 @@ end
 --  end
 --)
 --permablockTimer:start()
+timeOfDayTimer = hs.timer.doEvery(
+ 15,
+ function()
+    hs.printf('time of day')
+    now = os.date('*t')
+    if now.wday > 1 and now.wday < 7 and now.hour > 8 and now.hour < 17 then
+      updateBlockList(true)
+      hs.alert('Go back to work.') 
+      return
+    end
+ end
+)
+timeOfDayTimer:start()
 
 -- toggle site blocking
 hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)

@@ -1,4 +1,5 @@
 {
+    "terminal.integrated.shell.windows": "C:\\WINDOWS\\System32\\wsl.exe",
     "editor.minimap.enabled": false,
     "vim.insertModeKeyBindings": [
         {
@@ -107,7 +108,7 @@
                 "p"
             ],
             "commands": [
-                "revealInExplorer"
+                "workbench.action.files.revealActiveFileInWindows"
             ]
         },
         {
@@ -117,9 +118,11 @@
                 "n"
             ],
             "commands": [
-                "editor.action.marker.next"
-            ],
-            "when": "editorFocus && !editorReadonly"
+                {
+                    "command": "editor.action.marker.next",
+                    "when": "editorFocus && !editorReadonly"
+                }
+            ]
         },
         {
             "before": [
@@ -131,7 +134,7 @@
                 {
                     "command": "editor.action.formatDocument",
                     "when": "editorHasDocumentFormattingProvider && editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly"
-                },
+                }
             ]
         },
         {
@@ -186,18 +189,18 @@
         }
     ],
     "vim.visualModeKeyBindings": [
-        {
-            "before": [
-                "<leader>",
-                "c",
-                "c"
-            ],
-            "commands": [
-                "editor.action.commentLine",
-                "extension.vim_escape"
-            ],
-            "when": "editorTextFocus && !editorReadonly"
-        }
+      {
+        "before": [
+          "<leader>",
+          "c",
+          "c"
+        ],
+        "commands": [
+          "editor.action.commentLine",
+          "extension.vim_escape"
+        ],
+        "when": "editorTextFocus && !editorReadonly"
+      }
     ],
     "diffEditor.ignoreTrimWhitespace": true,
     "editor.rulers": [
@@ -223,4 +226,9 @@
     "search.exclude": {
         "services/build": true
     },
+    "files.associations": {
+      "*.hacn": "typescriptreact",
+      "*.pgsql": "sql"
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always"
 }
