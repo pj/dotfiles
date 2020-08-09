@@ -1,0 +1,116 @@
+-- menu item search
+--local application_menu_items = {}
+--local currentApp = nil
+--local currentWindow = nil
+--
+--function processItems(items, app)
+--  if items == nil then
+--    return
+--  end
+--  if items['AXTitle'] == nil then
+--    if items['AXChildren'] ~= nil then
+--      for k, item in pairs(items['AXChildren']) do
+--        processItems(item, app)
+--      end
+--    else
+--      for k, item in pairs(items) do
+--        processItems(item, app)
+--      end
+--    end
+--  else
+--    if items['AXEnabled'] ~= nil and items['AXEnabled'] and items['AXRole'] == 'AXMenuItem' then
+--      local pid = app:pid()
+--      if application_menu_items[pid] == nil then
+--        application_menu_items[pid] = {items['AXTitle']}
+--      else
+--        table.insert(application_menu_items[pid], items['AXTitle'])
+--      end
+--    end
+--    if items['AXChildren'] ~= nil then
+--      for k, item in pairs(items['AXChildren']) do
+--        processItems(item, app)
+--      end
+--    end
+--  end
+--end
+--
+--function onApplicationActivated(name, event, app)
+--  if event == hs.application.watcher.activated then
+--    local pid = app:pid()
+--    if application_menu_items[pid] == nil then
+--      app:getMenuItems(function (items) processItems(items, app) end)
+--    end
+--  end
+--end
+--
+--local application_watcher = hs.application.watcher.new(onApplicationActivated)
+--application_watcher:start()
+--
+--local chooser = nil
+--function menuComplete(choice)
+--  hs.printf('chosen: %s', hs.inspect.inspect(choice))
+--  if choice ~= nil then
+--    hs.printf('current app: %s', currentApp)
+--    hs.printf('current window: %s', currentWindow)
+--    currentWindow:focus()
+--    currentApp:selectMenuItem(choice.item)
+--  end
+--end
+--
+--function menuSearch()
+--  currentApp = hs.application.frontmostApplication()
+--  currentWindow = hs.window.frontmostWindow()
+--  chooser:query('')
+--  chooser:show()
+--end
+--
+--chooser = hs.chooser.new(menuComplete)
+--
+--function queryChanged()
+--  local query = chooser:query():lower()
+--  if query:len() < 2 then
+--    return
+--  end
+--  hs.printf('query: %s', chooser:query())
+--  if currentApp == nil then
+--    return
+--  end
+--
+--  local pid = currentApp:pid()
+--  --hs.printf('%d', pid)
+--  --for k, item in pairs(application_menu_items) do
+--  --  hs.printf('%s', type(k))
+--  --end
+--  --hs.printf('%s', hs.inspect.inspect(application_menu_items))
+--  --hs.printf('%s', hs.inspect.inspect(application_menu_items[pid]))
+--
+--  if application_menu_items[pid] ~= nil then
+--    --hs.printf('has items')
+--    local newChoices = {}
+--    local items = application_menu_items[pid]
+--    --hs.printf('%s', hs.inspect.inspect(items))
+--    for i, item in ipairs(items) do
+--      --hs.printf('item %s', item)
+--      if item:lower():match(query) then
+--        --hs.printf('qwer')
+--        table.insert(newChoices, {text = item, item = item})
+--        --hs.printf('lllll')
+--      end
+--    end
+--    --hs.printf('asdf')
+--    hs.printf('%s', hs.inspect.inspect(newChoices))
+--    chooser:choices(newChoices)
+--    --hs.printf('here')
+--  else
+--    currentApp:getMenuItems(function (items) processItems(items, currentApp) end)
+--  end
+--end
+--
+--chooser:queryChangedCallback(queryChanged)
+--
+--hs.hotkey.bind(
+--  {'alt', 'ctrl', 'cmd'},
+--  'space',
+--  nil,
+--  menuSearch
+--)
