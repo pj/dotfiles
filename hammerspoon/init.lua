@@ -1,15 +1,15 @@
 -- Mute sound when we sleep - avoids problem where system will start playing
 -- sound if headphones are unplugged when sleeping.
-function muteOnSleep(event)
-    if event == hs.caffeinate.watcher.systemWillSleep or event == hs.caffeinate.watcher.systemDidWake then
-        for k, device in pairs(hs.audiodevice.allOutputDevices()) do
-            device:setMuted(true)
-        end
-    end
-end
+--function muteOnSleep(event)
+--   if event == hs.caffeinate.watcher.systemWillSleep or event == hs.caffeinate.watcher.systemDidWake then
+--         for k, device in pairs(hs.audiodevice.allOutputDevices()) do
+--             device:setMuted(true)
+--         end
+--     end
+-- end
 
-local watcher = hs.caffeinate.watcher.new(muteOnSleep)
-watcher:start()
+-- local watcher = hs.caffeinate.watcher.new(muteOnSleep)
+-- watcher:start()
 
 hs.loadSpoon("ReloadConfiguration")
 spoon.ReloadConfiguration:start()
@@ -302,7 +302,7 @@ timeOfDayTimer = hs.timer.doEvery(
  function()
     hs.printf('time of day')
     now = os.date('*t')
-    if now.wday > 1 and now.wday < 7 and now.hour > 8 and now.hour < 17 then
+    if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour > 8 and now.hour < 17 then
       updateBlockList(true)
       hs.alert('Go back to work.') 
       return
