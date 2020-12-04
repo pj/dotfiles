@@ -152,7 +152,7 @@ hs.hotkey.bind({"cmd", "alt"}, "L", function()
 end)
 
 local timeLimit = 60
-local weekendTimeLimit = 90
+local weekendTimeLimit = 60
 local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
@@ -228,9 +228,11 @@ function toggleSiteBlocking()
     updateBlockList(true)
     hs.alert('Starting Blocking...')
   else
+    hs.printf(hs.inspect(currentDay))
+    hs.printf(hs.inspect(now))
     -- Check day of week
-    if currentDay.wday > 1 and currentDay.wday < 7 and now.hour > 8 and now.hour < 17 then
-      hs.alert('Go back too work.') 
+    if currentDay.wday > 1 and currentDay.wday < 7 and now.hour >= 8 and now.hour < 17 then
+      hs.alert('Go back too work.')
       return
     end
 
@@ -243,7 +245,14 @@ function toggleSiteBlocking()
         now = os.date('*t')
         weekday = now.wday > 1 and now.wday < 7
         timeSpent = hs.settings.get('timeSpent')
-        if (weekday and timeSpent > timeLimit) or (not weekday and timeSpent > weekendTimeLimit) then
+        actualTimeLimit = nil
+        if weekday then
+          actualTimeLimit = timeLimit
+        else
+          actualTimeLimit = weekendTimeLimit
+        end
+
+        if timeSpent > actualTimeLimit then
           updateBlockList(true)
           hs.alert('Times Up, go do something important.')
           currentTimer:stop()
@@ -251,12 +260,12 @@ function toggleSiteBlocking()
           return
         end
 
-        if timeSpent < 5 then
-          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+        if actualTimeLimit < 5 then
+          hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
         elseif timeSpent < 5 and timeSpent % 2 == 0 then
-          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+          hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
         elseif timeSpent % 5 == 0 then
-          hs.alert(string.format('%d Minutes remaining', timeLimit - timeSpent))
+          hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
         end
 
         timeSpent = timeSpent + 1
@@ -302,9 +311,11 @@ timeOfDayTimer = hs.timer.doEvery(
  function()
     hs.printf('time of day')
     now = os.date('*t')
-    if now.wday > 1 and now.wday < 7 and now.hour > 8 and now.hour < 17 then
+    if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour >= 8 and now.hour < 17 then
+      currentTimer:stop()
+      currentTimer = nil
       updateBlockList(true)
-      hs.alert('Go back to work.') 
+      hs.alert('Go back to work.')
       return
     end
  end

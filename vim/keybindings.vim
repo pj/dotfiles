@@ -1,9 +1,12 @@
 "nmap <Leader>ff :CtrlP<CR>
 nnoremap <silent><nowait> <Leader>ff  :<C-u>CocList files<cr>
-nmap <Leader>fo :CtrlPBuffer<CR>
+nnoremap <silent><nowait> <Leader>fb  :<C-u>CocList -I buffers<cr>
+"nmap <Leader>fo :CtrlPBuffer<CR>
 "nmap <Leader>t :CtrlPBufTag<CR>
 "nmap <Leader>T :CtrlPBufTagAll<CR>
-nmap <Leader>fm :CtrlPMRUFiles<CR>
+"nmap <Leader>fm :CtrlPMRUFiles<CR>
+nnoremap <silent><nowait> <Leader>fr  :<C-u>CocList mru<cr>
+nnoremap <silent><nowait> <Leader>fl  :<C-u>CocList location<cr>
 
 " Search workspace symbols.
 nnoremap <silent><nowait> <Leader>st  :<C-u>CocList -I symbols<cr>

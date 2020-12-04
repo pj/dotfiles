@@ -218,5 +218,6 @@
     },
     "typescript.updateImportsOnFileMove.enabled": "always",
     "editor.tabSize": 2,
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "terminal.integrated.scrollback": 10000000
 }
