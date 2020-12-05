@@ -320,10 +320,31 @@ timeOfDayTimer = hs.timer.doEvery(
     end
  end
 )
-timeOfDayTimer:start()
+-- timeOfDayTimer:start()
+
+-- Evening timer based accessing.
+local blockState = "unknown"
+eveningTimer = hs.timer.doEvery(
+  60,
+  function()
+    now = os.date('*t')
+    if blockState ~= "unblocked" and now.hour >= 20 and now.hour < 23 then
+      updateBlockList(false)
+      blockState = "unblocked"
+      hs.printf('Setting unblocked')
+    elseif blockState ~= "blocking" then
+      updateBlockList(true)
+      blockState = "blocking"
+      hs.printf('Setting blocking')
+    else
+      hs.printf(string.format('blockState = %s', blockState))
+    end
+ end
+)
+eveningTimer:start()
 
 -- toggle site blocking
-hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
+-- hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
 -- report time left
 hs.hotkey.bind(mash, "l", function() hs.alert(hs.settings.get('timeSpent')) end)
 -- reset state
