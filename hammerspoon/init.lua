@@ -97,6 +97,58 @@ tiling.addLayout('vlc', function(windows)
 
 end)
 
+tiling.addLayout('plex', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+  local width
+
+  -- Find and set the size of plex
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    -- hs.printf('%s', name)
+    if name == 'Plex' then
+      win:setSize(hs.geometry(nil, nil, 100, 100))
+      width = win:size().w
+      height = win:size().h
+      --hs.printf('vlc width: %d', width)
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.x = frame.x + (frame.w - width)
+      frame.w = width
+      frame.h = height
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+      break
+    end
+  end
+
+  if width == nil then
+    return
+  end
+
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    --hs.printf('%s', name)
+    if name ~= 'Plex' then
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.w = frame.w - width
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+    end
+  end
+
+end)
+
 tiling.addLayout('thirds', function(windows)
   local winCount = #windows
 
@@ -144,7 +196,7 @@ end)
 
 -- If you want to set the layouts that are enabled
 tiling.set('layouts', {
-  'fullscreen', 'side-by-side', 'vlc', 'thirds', 'two-thirds'
+  'fullscreen', 'side-by-side', 'vlc', 'plex', 'thirds', 'two-thirds'
 })
 
 hs.hotkey.bind({"cmd", "alt"}, "L", function()
