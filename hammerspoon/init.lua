@@ -358,20 +358,20 @@ end
 --  end
 --)
 --permablockTimer:start()
-timeOfDayTimer = hs.timer.doEvery(
- 15,
- function()
-    hs.printf('time of day')
-    now = os.date('*t')
-    if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour >= 8 and now.hour < 17 then
-      currentTimer:stop()
-      currentTimer = nil
-      updateBlockList(true)
-      hs.alert('Go back to work.')
-      return
-    end
- end
-)
+-- timeOfDayTimer = hs.timer.doEvery(
+--  15,
+--  function()
+--     hs.printf('time of day')
+--     now = os.date('*t')
+--     if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour >= 8 and now.hour < 17 then
+--       currentTimer:stop()
+--       currentTimer = nil
+--       updateBlockList(true)
+--       hs.alert('Go back to work.')
+--       return
+--     end
+--  end
+-- )
 -- timeOfDayTimer:start()
 
 -- Evening timer based accessing.
@@ -380,11 +380,12 @@ eveningTimer = hs.timer.doEvery(
   60,
   function()
     now = os.date('*t')
-    if blockState ~= "unblocked" and now.hour >= 20 and now.hour < 23 then
+    isUnblockTime = now.hour >= 20 and now.hour < 23
+    if blockState ~= "unblocked" and isUnblockTime then
       updateBlockList(false)
       blockState = "unblocked"
       hs.printf('Setting unblocked')
-    elseif blockState ~= "blocking" then
+    elseif blockState ~= "blocking" and not isUnblockTime then
       updateBlockList(true)
       blockState = "blocking"
       hs.printf('Setting blocking')
