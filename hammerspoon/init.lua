@@ -211,9 +211,9 @@ local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
 function updateBlockList(block)
-  if block then
-    local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt')
-  end
+  -- if block then
+  --   local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt')
+  -- end
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
   local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
   local tmpname = os.tmpname()
@@ -381,6 +381,7 @@ local blockState = "unknown"
 eveningTimer = hs.timer.doEvery(
   60,
   function()
+    hs.printf(string.format('blockState = %s', blockState))
     now = os.date('*t')
     isUnblockTime = now.hour >= 20 and now.hour < 23
     if blockState ~= "unblocked" and isUnblockTime then
@@ -391,12 +392,10 @@ eveningTimer = hs.timer.doEvery(
       updateBlockList(true)
       blockState = "blocking"
       hs.printf('Setting blocking')
-    else
-      hs.printf(string.format('blockState = %s', blockState))
     end
  end
 )
-eveningTimer:start()
+-- eveningTimer:start()
 
 -- toggle site blocking
 -- hs.hotkey.bind(mash, "t", function() toggleSiteBlocking() end)
