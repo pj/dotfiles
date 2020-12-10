@@ -211,13 +211,13 @@ local hostsFilePath = '/etc/hosts'
 local hostsTemplate = '/Users/pauljohnson/.hosts_template'
 
 function updateBlockList(block)
-  if block then
-    local status, err = pcall(function () 
-      local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt') 
-      handle:close() 
-    end)
-    hs.printf(string.format("status: %s err: %s", status, hs.inspect(err)))
-  end
+  -- if block then
+  --   local status, err = pcall(function () 
+  --     local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt') 
+  --     handle:close() 
+  --   end)
+  --   hs.printf(string.format("status: %s err: %s", status, hs.inspect(err)))
+  -- end
   local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
   local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
   local tmpname = os.tmpname()
