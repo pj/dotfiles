@@ -22,6 +22,8 @@ hs.hotkey.bind(mash, "j", function() tiling.cycle(1) end)
 hs.hotkey.bind(mash, "k", function() tiling.cycle(-1) end)
 hs.hotkey.bind(mash, "space", function() tiling.promote() end)
 hs.hotkey.bind(mash, "f", function() tiling.goToLayout("fullscreen") end)
+hs.hotkey.bind(mash, "p", function() tiling.goToLayout("plex") end)
+hs.hotkey.bind(mash, "v", function() tiling.goToLayout("vlc") end)
 hs.hotkey.bind(mash, "r", function() hs.alert('retiling'); tiling.retile() end)
 
 local layouts = require "hs.tiling.layouts"
