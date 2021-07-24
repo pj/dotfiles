@@ -38,4 +38,13 @@ Plug 'pangloss/vim-javascript'
 
 " Postgres
 Plug 'lifepillar/pgsql.vim'
+
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
+
+Plug 'ionide/Ionide-vim', {
+      \ 'do':  'make fsautocomplete',
+      \}
 call plug#end()            " required

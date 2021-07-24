@@ -100,3 +100,12 @@ fi
 
 bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
+alias pm2='/Users/pauljohnson/Programming/pm2/bin/pm2'
+
+eval "$(pyenv init -)"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; fi
