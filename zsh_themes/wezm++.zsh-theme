@@ -2,9 +2,12 @@ setopt PROMPT_SUBST
 setopt interactivecomments
 setopt PROMPT_SUBST
 
-vim_ins_mode="%{${fg_bold[green]}%}פֿ%{$reset_color%}"
-vim_cmd_mode="%{${fg_bold[red]}%}%{$reset_color%}"
+vim_ins_mode="%{${fg_bold[green]}%}%{$reset_color%}"
+vim_cmd_mode="%{${fg_bold[red]}%}%{$reset_color%}"
 vim_mode=$vim_ins_mode
+
+
+
 
 function zle-keymap-select {
   vim_mode="${${KEYMAP/vicmd/${vim_cmd_mode}}/(main|viins)/${vim_ins_mode}}"
@@ -17,10 +20,22 @@ function zle-line-finish {
 }
 zle -N zle-line-finish
 
-PROMPT='$(git_prompt_info)${vim_mode} '
-RPROMPT='%(?,,%{${fg_bold[white]}%}%?%{$reset_color%}) %{$fg[green]%}%~%{$reset_color%}'
+precmd() {
+    local Z_LAST_RETVAL=$?
+    if [ -n $TMUX ]; then
+        tmux setenv -g TMUX_EXIT_CODE_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") "$Z_LAST_RETVAL"
+        tmux setenv -g TMUX_PWD_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") $PWD
+        tmux setenv -g TMUX_VENV_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") "$VIRTUAL_ENV"
+    fi;
+}
 
-ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[039]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[039]%}%{$fg[red]%}✗%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$FG[039]%}"
+# PROMPT='$(git_prompt_info)${vim_mode} '
+PROMPT='${vim_mode} $([ -n $TMUX ] && tmux refresh -S)'
+# PROMPT='${vim_mode} $(~/dotfiles/set_tmux_vars.sh)'
+# RPROMPT='%(?,,%{${fg_bold[white]}%}%?%{$reset_color%}) %{$fg[green]%}%~%{$reset_color%}'
+# RPROMPT=''
+
+# ZSH_THEME_GIT_PROMPT_PREFIX="%{$FG[039]%}"
+# ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+# ZSH_THEME_GIT_PROMPT_DIRTY="%{$FG[039]%}%{$fg[red]%} %{$reset_color%}"
+# ZSH_THEME_GIT_PROMPT_CLEAN="%{$FG[039]%}"

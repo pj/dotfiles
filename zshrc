@@ -100,3 +100,19 @@ fi
 
 bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export PIP_INDEX_URL=https://nexus.dragos.services/repository/pypi-group/simple
+eval "$(pyenv init --path)"
+
+export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+export PATH="$GEM_HOME/bin:$PATH"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
