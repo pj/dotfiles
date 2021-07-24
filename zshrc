@@ -102,10 +102,26 @@ bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 alias pm2='/Users/pauljohnson/Programming/pm2/bin/pm2'
 
-eval "$(pyenv init -)"
+eval "$(pyenv init --path)"
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export PIP_INDEX_URL=https://nexus.dragos.services/repository/pypi-group/simple
+
+export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+export PATH="$GEM_HOME/bin:$PATH"
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
+
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+>>>>>>> c7329b3936750391cf8b4bbc69125a42890d58d1
