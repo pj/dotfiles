@@ -102,8 +102,6 @@ bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 alias pm2='/Users/pauljohnson/Programming/pm2/bin/pm2'
 
-eval "$(pyenv init --path)"
-
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; fi
 
@@ -124,4 +122,5 @@ export PATH="$GEM_HOME/bin:$PATH"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
->>>>>>> c7329b3936750391cf8b4bbc69125a42890d58d1
+eval "$(pyenv init --path)"
+
