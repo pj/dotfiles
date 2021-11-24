@@ -53,7 +53,7 @@ COMPLETION_WAITING_DOTS="true"
 
 # Are we on Mac OSX or not?
 if type "brew" > /dev/null; then
-    plugins=(git osx emoji-clock node npm python autojump vi-mode pyenv)
+    plugins=(git osx emoji-clock node npm python autojump vi-mode pyenv ssh-agent)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 else
     plugins=(git emoji-clock node npm python ssh-agent vi-mode)
@@ -112,13 +112,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
+#export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$GEM_HOME/bin:$PATH"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 eval "$(pyenv init --path)"
+eval "$(rbenv init -)"
 
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
