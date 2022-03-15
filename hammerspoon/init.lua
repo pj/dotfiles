@@ -1,11 +1,14 @@
 -- Mute sound when we sleep - avoids problem where system will start playing
 -- sound if headphones are unplugged when sleeping.
 function muteOnSleep(event)
-    if event == hs.caffeinate.watcher.systemWillSleep or event == hs.caffeinate.watcher.systemDidWake then
-        for k, device in pairs(hs.audiodevice.allOutputDevices()) do
-            device:setMuted(true)
-        end
-    end
+    -- if event == hs.caffeinate.watcher.systemWillSleep or event == hs.caffeinate.watcher.systemDidWake then
+    --     for k, device in pairs(hs.audiodevice.allOutputDevices()) do
+    --         device:setMuted(true)
+    --     end
+    -- end
+  if eventType == hs.caffeinate.watcher.screensDidUnlock then
+      hs.execute("/usr/local/bin/blueutil -p 0 && sleep 1 && /usr/local/bin/blueutil -p 1")
+  end
 end
 
 local watcher = hs.caffeinate.watcher.new(muteOnSleep)
@@ -196,9 +199,45 @@ tiling.addLayout('two-thirds', function(windows)
   end
 end)
 
+tiling.addLayout('plex-thirds', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    --hs.printf('%s', name)
+    if name ~= 'Plex' then
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.x = 0
+      frame.w = (frame.w / 3) * 2
+
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+    else
+      win:setSize(hs.geometry(nil, nil, 100, 100))
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.x = (frame.w / 3) * 2
+      frame.w = frame.w / 3
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+
+    end
+  end
+
+end)
+
 -- If you want to set the layouts that are enabled
 tiling.set('layouts', {
-  'fullscreen', 'side-by-side', 'vlc', 'plex', 'thirds', 'two-thirds'
+  'fullscreen', 'side-by-side', 'vlc', 'plex', 'thirds', 'two-thirds', 'plex-thirds'
 })
 
 hs.hotkey.bind({"cmd", "alt"}, "L", function()
