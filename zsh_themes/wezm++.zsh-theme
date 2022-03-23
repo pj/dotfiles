@@ -23,13 +23,26 @@ function zle-line-finish {
 }
 zle -N zle-line-finish
 
+function set-gcloud {
+  SESSION_ID=$(tmux display -p "#{=-1:session_id}")
+  WINDOW_ID=$(tmux display -p "#{=-1:window_id}")
+  PANE_ID=$(tmux display -p "#{=-1:pane_id}")
+  IDS="_${SESSION_ID}_${WINDOW_ID}_${PANE_ID}"
+  tmux setenv -g "TMUX_EXIT_CODE${IDS}" "$Z_LAST_RETVAL"
+  tmux setenv -g "TMUX_PWD${IDS}" $PWD
+  tmux setenv -g "TMUX_VENV${IDS}" "$VIRTUAL_ENV"
+  tmux refresh -S
+  tmux setenv -g "TMUX_GCLOUD_PROJECT${IDS}" "$(gcloud config get-value project)"
+  tmux refresh -S
+}
+
 precmd() {
     local Z_LAST_RETVAL=$?
     if [[ -n $TMUX ]]; then
-        tmux setenv -g TMUX_EXIT_CODE_$(tmux display -p "#{=-1:session_id}")_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") "$Z_LAST_RETVAL"
-        tmux setenv -g TMUX_PWD_$(tmux display -p "#{=-1:session_id}")_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") $PWD
-        tmux setenv -g TMUX_VENV_$(tmux display -p "#{=-1:session_id}")_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") "$VIRTUAL_ENV"
+        # tmux setenv -g TMUX_GCLOUD_PROJECT_$(tmux display -p "#{=-1:session_id}")_$(tmux display -p "#{=-1:window_id}")_$(tmux display -p "#{=-1:pane_id}") "$(gcloud config get-value project)"
+        (set-gcloud &)
     fi;
 }
 
-PROMPT='%{$fg[green]%}%{$reset_color%} $(if [[ -n "$TMUX" ]]; then tmux refresh -S; fi)'
+# PROMPT='%{$fg[green]%}%{$reset_color%} $(if [[ -n "$TMUX" ]]; then tmux refresh -S; fi)'
+PROMPT='%{$fg[green]%}%{$reset_color%} '

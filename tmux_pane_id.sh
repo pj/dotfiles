@@ -40,6 +40,11 @@ if [ "$exit_code" != "0" ]; then
     left_segments+=("#[fg=color160,bg=black]🤬  $exit_code")
 fi;
 
+gcloud_project="$(tmux showenv -g TMUX_GCLOUD_PROJECT_$1_$2_$3 | sed 's/^.*=//')"
+if [ "$gcloud_project" != "" ]; then
+    left_segments+=("#[fg=color128,bg=black] $gcloud_project")
+fi;
+
 separator=" #[fg=color112,bg=black] "
 venv="$(tmux showenv -g TMUX_VENV_$1_$2_$3 | sed 's/^.*=//')"
 venv_formatted=""
