@@ -32,8 +32,10 @@ function set-gcloud {
   tmux setenv -g "TMUX_PWD${IDS}" $PWD
   tmux setenv -g "TMUX_VENV${IDS}" "$VIRTUAL_ENV"
   tmux refresh -S
-  tmux setenv -g "TMUX_GCLOUD_PROJECT${IDS}" "$(gcloud config get-value project)"
-  tmux refresh -S
+  if type "gcloud" > /dev/null; then
+    tmux setenv -g "TMUX_GCLOUD_PROJECT${IDS}" "$(gcloud config get-value project)"
+    tmux refresh -S
+  fi
 }
 
 precmd() {

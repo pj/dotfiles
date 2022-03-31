@@ -53,7 +53,7 @@ COMPLETION_WAITING_DOTS="true"
 
 # Are we on Mac OSX or not?
 if type "brew" > /dev/null; then
-    plugins=(git osx emoji-clock node npm python autojump vi-mode pyenv)
+    plugins=(git macos emoji-clock node npm python autojump vi-mode pyenv)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 else
     plugins=(git emoji-clock node npm python ssh-agent vi-mode)
@@ -119,11 +119,16 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="$GEM_HOME/bin:$PATH"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
 
-export VIRTUAL_ENV_DISABLE_PROMPT=1
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
+if type "pyenv" > /dev/null; then
+  export VIRTUAL_ENV_DISABLE_PROMPT=1
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+fi
 
-eval "$(fnm env --use-on-cd)"
-. "$HOME/.cargo/env"
+if type "fnm" > /dev/null; then
+  eval "$(fnm env --use-on-cd)"
+fi
 
-export PATH="$PATH:/Users/pauljohnson/bin"
+[[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+
+export PATH="$PATH:$HOME/bin"
