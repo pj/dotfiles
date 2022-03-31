@@ -132,3 +132,6 @@ fi
 [[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
 export PATH="$PATH:$HOME/bin"
+if [ -f "$HOME/.zsh_local" ]; then 
+  . "$HOME/.zsh_local"; 
+fi
