@@ -64,4 +64,17 @@ if git status &>/dev/null; then
 fi
 
 left_segments_joined=$(join_by " #[fg=color112,bg=black] " "${left_segments[@]}")
-echo "#[align=left]#[fg=color235,bg=black] $left_segments_joined #[fg=black,bg=color235]#[align=right,bg=color235,fg=black]#[fg=green,bg=black] $path_with_home #[bg=black,fg=color235]"
+
+BG_COLOR="18"
+if echo "$(hostname)" | grep -q "local"; then
+    BG_COLOR="235"
+fi
+
+HOST="$(hostname|cut -d"." -f1)"
+if echo "$(hostname)" | grep -q "local"; then
+    HOST="local"
+fi
+
+tmux set -g pane-border-style "bg=color$BG_COLOR,fg=color$BG_COLOR"
+tmux set -g pane-active-border-style "bg=color$BG_COLOR,fg=color$BG_COLOR"
+echo "#[align=left]#[fg=color235,bg=black] $left_segments_joined #[fg=black,bg=color$BG_COLOR]#[align=right,bg=color$BG_COLOR,fg=black]#[fg=yellow,bg=black] $HOST #[bg=black,fg=color112]#[fg=green,bg=black] $path_with_home #[bg=black,fg=color$BG_COLOR]"

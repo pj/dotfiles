@@ -67,3 +67,9 @@ fi
 if type "kubectl" > /dev/null; then
   source <(kubectl completion zsh)
 fi
+
+# alias lsl="exa -1lFagh --group-diretories-first "
+# alias lsa="exa -1lFagh --git --group-directories-first "
+# alias lst="exa -Ta -L 3 --group-directories-first"
+# alias lsg="exa -x --group-directories-first"
+# alias ls="lsl"
