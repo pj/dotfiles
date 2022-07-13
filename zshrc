@@ -5,6 +5,16 @@ ZSH_THEME="wezm++"
 
 COMPLETION_WAITING_DOTS="true"
 
+if ! type "brew" > /dev/null && [ -d '/opt/homebrew' ]; then
+    export HOMEBREW_PREFIX="/opt/homebrew";
+    export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
+    export HOMEBREW_REPOSITORY="/opt/homebrew";
+    export HOMEBREW_SHELLENV_PREFIX="/opt/homebrew";
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
+    export MANPATH="/opt/homebrew/share/man${MANPATH+:$MANPATH}:";
+    export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
+fi
+
 if type "brew" > /dev/null; then
     plugins=(git macos emoji-clock node npm python autojump vi-mode)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
@@ -12,12 +22,13 @@ else
     plugins=(git emoji-clock node npm python ssh-agent vi-mode)
     [[ -s $HOME/etc/profile.d/autojump.sh ]] && . $HOME/etc/profile.d/autojump.sh
 fi
+
 source $ZSH/oh-my-zsh.sh
 
 if [[ -n $SSH_CONNECTION ]]; then
-   export EDITOR='vim'
+    export EDITOR='vim'
 else
-   export EDITOR='vim'
+    export EDITOR='vim'
 fi
 
 export PATH="/usr/local/sbin:$PATH"
@@ -27,7 +38,6 @@ if [[ -f ~/.zshrc.local ]]; then
 fi
 bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
-alias pm2='/Users/pauljohnson/Programming/pm2/bin/pm2'
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; fi
@@ -38,14 +48,13 @@ if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; 
 export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
 
 export PATH="$PATH:$HOME/.rvm/bin"
-export PATH="$GEM_HOME/bin:$PATH"
+# export PATH="$GEM_HOME/bin:$PATH"
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
 
 if type "pyenv" > /dev/null; then
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init --path)"
   eval "$(pyenv init --path)"
   eval "$(pyenv init -)"
 fi
