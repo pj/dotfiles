@@ -18,6 +18,10 @@ fi
 if type "brew" > /dev/null; then
     plugins=(git macos emoji-clock node npm python autojump vi-mode)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
+
+    if [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]; then
+        . /usr/local/opt/asdf/libexec/asdf.sh
+    fi
 else
     plugins=(git emoji-clock node npm python ssh-agent vi-mode)
     [[ -s $HOME/etc/profile.d/autojump.sh ]] && . $HOME/etc/profile.d/autojump.sh
@@ -40,10 +44,14 @@ bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then 
+    . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; 
+fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; fi
+if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; then 
+    . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; 
+fi
 
 export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
 
@@ -64,10 +72,6 @@ if type "fnm" > /dev/null; then
 fi
 
 [[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
-if [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]; then
-  . /usr/local/opt/asdf/libexec/asdf.sh
-fi
 
 if type "fnm" > /dev/null; then
   eval "$(fnm env --use-on-cd)"
