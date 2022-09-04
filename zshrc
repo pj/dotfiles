@@ -55,10 +55,6 @@ fi
 
 export PATH="/usr/local/opt/openjdk@11/bin:$PATH"
 
-export PATH="$PATH:$HOME/.rvm/bin"
-# export PATH="$GEM_HOME/bin:$PATH"
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" 
-
 if type "pyenv" > /dev/null; then
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   export PYENV_ROOT="$HOME/.pyenv"
@@ -69,13 +65,11 @@ fi
 
 if type "fnm" > /dev/null; then
   eval "$(fnm env --use-on-cd)"
+elif [[ -d ~/.fnm ]]; then
+  export PATH="$PATH:$HOME/.fnm"
 fi
 
 [[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
-if type "fnm" > /dev/null; then
-  eval "$(fnm env --use-on-cd)"
-fi
 
 if type "kubectl" > /dev/null; then
   source <(kubectl completion zsh)
