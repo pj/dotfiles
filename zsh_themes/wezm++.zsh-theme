@@ -47,7 +47,7 @@ function update-tmux-variables  {
         tmux setenv -g "TMUX_PWD${IDS}" $PWD
         tmux setenv -g "TMUX_VENV${IDS}" "$VIRTUAL_ENV"
         tmux refresh-client -S
-        (set-gcloud &)
+        #(set-gcloud &)
     fi;
 }
 

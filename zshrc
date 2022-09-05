@@ -44,13 +44,19 @@ bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc' ]; then 
+if [ -f "$HOME/Programming/google-cloud-sdk/path.zsh.inc" ]; then 
     . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; 
 fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc' ]; then 
+if [ -f "$HOME/Programming/google-cloud-sdk/completion.zsh.inc" ]; then 
     . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; 
+fi
+
+if type "gcloud" > /dev/null; then
+  GCLOUD_PATH=$(gcloud info --format="value(installation.sdk_root)")
+  . "$GCLOUD_PATH/path.zsh.inc"
+  . "$GCLOUD_PATH/completion.zsh.inc"
 fi
 
 if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then
