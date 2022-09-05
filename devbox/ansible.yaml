@@ -1,0 +1,167 @@
+---
+  - name: Setup Devbox
+    hosts: all
+    tasks:
+      - name: Copy github private key
+        ansible.builtin.copy:
+          src: ~/.ssh/id_rsa
+          dest: ~/.ssh/id_rsa
+          owner: paul
+          group: paul
+          mode: '0600'
+
+      - name: Copy github public key
+        ansible.builtin.copy:
+          src: ~/.ssh/id_rsa.pub
+          dest: ~/.ssh/id_rsa.pub
+          owner: paul
+          group: paul
+          mode: '0644'
+
+      - name: Add me as an authorized user
+        authorized_key:
+          user: "paul"
+          state: present
+          key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+      - name: Add github to known hosts
+        known_hosts:
+          name: "github.com"
+          state: present
+          key: "{{ lookup('pipe', 'ssh-keyscan github.com') }}"
+
+      - name: Create programming directory
+        ansible.builtin.file:
+          path: /home/paul/Programming
+          state: directory
+          mode: '0755'
+
+      - name: Checkout dotfiles
+        ansible.builtin.git:
+          repo: git@github.com:pj/dotfiles.git
+          dest: /home/paul/dotfiles
+          update: no
+
+      - name: Checkout lazy test
+        ansible.builtin.git:
+          repo: git@github.com:lazytest-io/lazy_test.git
+          dest: /home/paul/Programming/lazy_test
+          update: no
+
+      - name: Install packages
+        ansible.builtin.package:
+          name:
+            - mosh
+            - vim
+            - zsh
+            - tmux
+            - wget
+            - unzip
+            - jq
+          state: latest
+        become: true
+
+      - name: Install Oh-My-Zsh
+        ansible.builtin.shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+        args:
+          creates: ~/.oh-my-zsh
+
+      - name: Symlink tmux
+        ansible.builtin.file:
+          src: ~/dotfiles/tmux.conf
+          dest: ~/.tmux.conf
+          state: link
+
+      - name: Symlink vim
+        ansible.builtin.file:
+          src: ~/dotfiles/vimrc
+          dest: ~/.vimrc
+          state: link
+
+      - name: Remove existing zshrc
+        ansible.builtin.file:
+          path: ~/.zshrc
+          state: absent
+
+      - name: Symlink zsh
+        ansible.builtin.file:
+          src: ~/dotfiles/zshrc
+          dest: ~/.zshrc
+          state: link
+
+      - name: Symlink theme
+        ansible.builtin.file:
+          src: ~/dotfiles/zsh_themes/wezm++.zsh-theme
+          dest: ~/.oh-my-zsh/themes/wezm++.zsh-theme
+          state: link
+
+      - name: Set shell to zsh
+        ansible.builtin.command: usermod --shell /bin/zsh {{ ansible_env.USER }}
+        become: true
+        changed_when: false
+
+      - name: Install Terraform
+        ansible.builtin.unarchive:
+          src: https://releases.hashicorp.com/terraform/1.2.8/terraform_1.2.8_linux_amd64.zip
+          dest: /usr/local/bin
+          remote_src: yes
+          creates: /usr/local/bin/terraform
+        become: true
+
+      - name: Install Cue
+        ansible.builtin.unarchive:
+          src: https://github.com/cue-lang/cue/releases/download/v0.4.3/cue_v0.4.3_linux_amd64.tar.gz
+          dest: /usr/local/bin
+          remote_src: yes
+          creates: /usr/local/bin/cue
+        become: true
+
+      - name: Install FNM
+        ansible.builtin.shell: curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+        args:
+          creates: ~/.fnm
+
+      - name: Install Node
+        ansible.builtin.shell: ~/.fnm/fnm install v16.17.0
+
+      - name: Install snaps
+        community.general.snap:
+          name:
+            # - google-cloud-cli
+            - kubectl
+          classic: yes
+        become: true
+
+      - name: Google are total cunts
+        ansible.builtin.unarchive:
+          src: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-400.0.0-linux-x86_64.tar.gz
+          dest: ~/
+          remote_src: yes
+          creates: ~/google-cloud-sdk/bin/gcloud
+
+      - name: Die google you dumb cunts
+        ansible.builtin.shell: ~/google-cloud-sdk/bin/gcloud components install gke-gcloud-auth-plugin --quiet
+
+      - name: Install Go
+        ansible.builtin.unarchive:
+          src: https://go.dev/dl/go1.19.linux-amd64.tar.gz
+          dest: /usr/local
+          remote_src: yes
+          creates: /usr/local/go
+        become: true
+
+      - name: Install Helm
+        ansible.builtin.unarchive:
+          src: https://get.helm.sh/helm-v3.9.4-linux-amd64.tar.gz
+          dest: /usr/local/bin
+          remote_src: yes
+          creates: /usr/local/bin/helm
+        become: true
+  
+      - name: Helm are retards
+        ansible.builtin.copy:
+          src: /usr/local/bin/linux-amd64/helm
+          remote_src: yes
+          dest: /usr/local/bin/helm
+          mode: 'a+x'
+        become: true
