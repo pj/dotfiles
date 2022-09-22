@@ -30,10 +30,10 @@ function set-gcloud {
   WINDOW_ID=$(tmux display -p "#{=-1:window_id}")
   PANE_ID=$(tmux display -p "#{=-1:pane_id}")
   IDS="_${SESSION_ID}_${WINDOW_ID}_${PANE_ID}"
-  if type "gcloud" > /dev/null; then
-    tmux setenv -g "TMUX_GCLOUD_PROJECT${IDS}" "$(gcloud config get-value project)"
-    tmux refresh-client -S
-  fi
+#  if type "gcloud" > /dev/null && gcloud projects list > /dev/null 2>&1 ; then
+#    tmux setenv -g "TMUX_GCLOUD_PROJECT${IDS}" "$(gcloud config get-value project)"
+#    tmux refresh-client -S
+#  fi
 }
 
 function update-tmux-variables  {
@@ -55,6 +55,4 @@ precmd() {
     update-tmux-variables
 }
 
-# PROMPT='%{$fg[green]%}%{$reset_color%} $(if [[ -n "$TMUX" ]]; then tmux refresh -S; fi)'
-# PROMPT='%{$fg[green]%}%{$reset_color%} '
 PROMPT='%{$fg[green]%}%{$reset_color%} $(update-tmux-variables)'

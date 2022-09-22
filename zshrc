@@ -17,14 +17,14 @@ if ! type "brew" > /dev/null && [ -d '/opt/homebrew' ]; then
 fi
 
 if type "brew" > /dev/null; then
-    plugins=(git macos emoji-clock node npm python autojump vi-mode)
+    plugins=(git macos emoji-clock node npm python autojump vi-mode zsh-autosuggestions)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 
     if [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]; then
         . /usr/local/opt/asdf/libexec/asdf.sh
     fi
 else
-    plugins=(git emoji-clock node npm python vi-mode)
+    plugins=(git emoji-clock node npm python ssh-agent vi-mode zsh-autosuggestions)
     [[ -s $HOME/etc/profile.d/autojump.sh ]] && . $HOME/etc/profile.d/autojump.sh
 fi
 
