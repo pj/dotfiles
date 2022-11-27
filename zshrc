@@ -1,4 +1,5 @@
 # Path to your oh-my-zsh installation.
+export LC_ALL=en_US.UTF-8
 export ZSH="$HOME/.oh-my-zsh"
 
 ZSH_THEME="wezm++"
@@ -23,7 +24,7 @@ if type "brew" > /dev/null; then
         . /usr/local/opt/asdf/libexec/asdf.sh
     fi
 else
-    plugins=(git emoji-clock node npm python ssh-agent vi-mode)
+    plugins=(git emoji-clock node npm python vi-mode)
     [[ -s $HOME/etc/profile.d/autojump.sh ]] && . $HOME/etc/profile.d/autojump.sh
 fi
 
@@ -55,8 +56,15 @@ fi
 
 if type "gcloud" > /dev/null; then
   GCLOUD_PATH=$(gcloud info --format="value(installation.sdk_root)")
-  . "$GCLOUD_PATH/path.zsh.inc"
-  . "$GCLOUD_PATH/completion.zsh.inc"
+
+  if [ -f "$GCLOUD_PATH/path.zsh.inc" ]; then
+      . "$GCLOUD_PATH/path.zsh.inc";
+  fi
+
+  # The next line enables shell command completion for gcloud.
+  if [ -f "$GCLOUD_PATH/completion.zsh.inc" ]; then
+      . "$GCLOUD_PATH/completion.zsh.inc";
+  fi
 fi
 
 if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then
