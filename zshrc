@@ -99,3 +99,6 @@ fi
 # alias lst="exa -Ta -L 3 --group-directories-first"
 # alias lsg="exa -x --group-directories-first"
 # alias ls="lsl"
+
+# direnv
+eval "$(direnv hook zsh)"
