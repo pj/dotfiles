@@ -103,5 +103,4 @@ fi
 if [[ -d "$HOME/Programming/webos_tv_cli" ]]; then
   export LG_WEBOS_TV_SDK_HOME="/Users/pauljohnson/Programming/webos_tv_cli"
   export PATH="/Users/pauljohnson/Programming/webos_tv_cli/bin:$PATH"
-
 fi
