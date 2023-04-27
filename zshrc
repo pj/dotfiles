@@ -17,7 +17,7 @@ if ! type "brew" > /dev/null && [ -d '/opt/homebrew' ]; then
 fi
 
 if type "brew" > /dev/null; then
-    plugins=(git macos emoji-clock node npm python autojump vi-mode zsh-autosuggestions)
+    plugins=(git macos emoji-clock node npm python autojump vi-mode zsh-autosuggestions zsh-fzf-history-search)
     [[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
 
     if [ -f "$(brew --prefix asdf)/libexec/asdf.sh" ]; then
@@ -45,13 +45,13 @@ bindkey -M viins 'kj' vi-cmd-mode
 bindkey -r '^a'
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f "$HOME/Programming/google-cloud-sdk/path.zsh.inc" ]; then 
-    . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc'; 
+if [ -f "$HOME/Programming/google-cloud-sdk/path.zsh.inc" ]; then
+    . '/Users/pauljohnson/Programming/google-cloud-sdk/path.zsh.inc';
 fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f "$HOME/Programming/google-cloud-sdk/completion.zsh.inc" ]; then 
-    . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc'; 
+if [ -f "$HOME/Programming/google-cloud-sdk/completion.zsh.inc" ]; then
+    . '/Users/pauljohnson/Programming/google-cloud-sdk/completion.zsh.inc';
 fi
 
 if type "gcloud" > /dev/null; then
@@ -86,11 +86,11 @@ if type "pyenv" > /dev/null; then
   eval "$(pyenv init -)"
 fi
 
-if type "fnm" > /dev/null; then
-  eval "$(fnm env --use-on-cd)"
-elif [[ -d ~/.fnm ]]; then
-  export PATH="$PATH:$HOME/.fnm"
-fi
+#if type "fnm" > /dev/null; then
+#  eval "$(fnm env --use-on-cd)"
+#elif [[ -d ~/.fnm ]]; then
+#  export PATH="$PATH:$HOME/.fnm"
+#fi
 
 [[ -s "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
@@ -116,4 +116,8 @@ fi
 # direnv
 if type "direnv" > /dev/null; then
   eval "$(direnv hook zsh)"
+fi
+
+if type "gt" > /dev/null; then
+  eval "$(gt completion)"
 fi
