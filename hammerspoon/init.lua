@@ -235,9 +235,45 @@ tiling.addLayout('plex-thirds', function(windows)
 
 end)
 
+tiling.addLayout('vlc-thirds', function(windows)
+  local winCount = #windows
+
+  if winCount == 1 then
+    return layouts['fullscreen'](windows)
+  end
+
+  for index, win in pairs(windows) do
+    local application = win:application()
+    local name = application:title()
+
+    --hs.printf('%s', name)
+    if name ~= 'VLC' then
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.x = 0
+      frame.w = (frame.w / 3) * 2
+
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+    else
+      win:setSize(hs.geometry(nil, nil, 100, 100))
+      local frame = win:screen():frame()
+      --hs.printf('window frame x: %d', frame.x)
+      --hs.printf('window frame width: %d', frame.w)
+      frame.x = (frame.w / 3) * 2
+      frame.w = frame.w / 3
+      --hs.printf('window new x: %d', frame.x)
+      win:setFrame(frame)
+
+    end
+  end
+
+end)
+
 -- If you want to set the layouts that are enabled
 tiling.set('layouts', {
-  'fullscreen', 'side-by-side', 'vlc', 'plex', 'thirds', 'two-thirds', 'plex-thirds'
+  'fullscreen', 'side-by-side', 'vlc', 'plex', 'thirds', 'two-thirds', 'plex-thirds', 'vlc-thirds'
 })
 
 hs.hotkey.bind({"cmd", "alt"}, "L", function()
