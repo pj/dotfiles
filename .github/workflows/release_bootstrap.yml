@@ -32,6 +32,8 @@ jobs:
         run: |
           NAME="${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
           ls -al ${{ steps.build_assets.outputs.release_asset_dir }}
+          id
+          cat "asdf" > "xyz"
           cat "$NAME" | base64 > "$NAME-b64"
           cat ./bootstrap/pasteable.sh "$NAME-b64" > "$NAME-pasteable"
 
