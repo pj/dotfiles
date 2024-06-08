@@ -10,3 +10,5 @@ tags
 autoload/
 plugged/
 direnv/
+.vscode
+.direnv
