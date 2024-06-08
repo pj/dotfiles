@@ -29,8 +29,7 @@ jobs:
           compress_assets: "OFF"
           upload: "OFF"
       - name: Create pasteable versions
-        run: 
-          ls "${{ steps.build_assets.outputs.release_asset_dir }}"
+        run: |
           NAME="${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
           cat $NAME | base64 > $NAME-b64
           cat ./bootstrap/pasteable.sh $NAME-b64 > $NAME-pasteable
