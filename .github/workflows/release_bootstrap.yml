@@ -31,8 +31,8 @@ jobs:
       - name: Create pasteable versions
         run: |
           NAME="${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
-          cat $NAME | base64 > $NAME-b64
-          cat ./bootstrap/pasteable.sh $NAME-b64 > $NAME-pasteable
+          cat "$NAME" | base64 > "$NAME-b64"
+          cat ./bootstrap/pasteable.sh "$NAME-b64" > "$NAME-pasteable"
 
       # - uses: "marvinpinto/action-automatic-releases@latest"
       #   with:
