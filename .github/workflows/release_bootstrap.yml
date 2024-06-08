@@ -31,12 +31,21 @@ jobs:
       - name: List assets
         run: ls "${{ steps.build_assets.outputs.release_asset_dir }}"
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      # - uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     automatic_release_tag: "${{github.run_number}}"
+      #     prerelease: false
+      #     title: "Bootstrap build ${{github.run_number}}"
+      #     files: |
+      #       "${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap*"
+      - uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{github.run_number}}"
+          tag_name: "${{github.run_number}}"
+          name: "Bootstrap build ${{github.run_number}}"
           prerelease: false
-          title: "Bootstrap build ${{github.run_number}}"
+          make_latest: true
+          fail_on_unmatched_files: true
           files: |
             "${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap*"
 
