@@ -29,7 +29,7 @@ jobs:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           release_tag: "${{github.run_number}}"
+          asset_name: bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
           goversion: "1.22"
           project_path: "./bootstrap"
-          binary_name: "bootstrap"
           compress_assets: "OFF"
