@@ -47,7 +47,7 @@ jobs:
           make_latest: true
           fail_on_unmatched_files: true
           files: |
-            "${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap*"
+            "${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
 
       # - name: Run bootstrap test
       #   run: docker build ./bootstrap
