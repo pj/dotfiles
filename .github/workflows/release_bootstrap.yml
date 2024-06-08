@@ -17,6 +17,12 @@ jobs:
         goarch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v4
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{github.run_number}}"
+          prerelease: false
+          title: "Bootstrap build ${{github.run_number}}"
       - uses: wangyoucao577/go-release-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -26,3 +32,4 @@ jobs:
           goversion: "1.22"
           project_path: "./bootstrap"
           binary_name: "bootstrap"
+          compress_assets: "OFF"
