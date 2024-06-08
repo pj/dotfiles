@@ -56,5 +56,5 @@ jobs:
             ${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
             bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}-pasteable
 
-      # - name: Run bootstrap test
-      #   run: docker build ./bootstrap
+      - name: Run bootstrap test
+        run: docker build ./bootstrap
