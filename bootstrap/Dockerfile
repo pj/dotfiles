@@ -1,11 +1,11 @@
 FROM alpine AS test-alpine
-USER test
+COPY ./bootstrap.sh ./bootstrap.sh
 RUN ./bootstrap.sh
 
 FROM ubuntu AS test-ubuntu
-USER test
+COPY ./bootstrap.sh ./bootstrap.sh
 RUN ./bootstrap.sh
 
-FROM wolfi AS test-wolfi
-USER test
+FROM chainguard/wolfi-base AS test-wolfi
+COPY ./bootstrap.sh ./bootstrap.sh
 RUN ./bootstrap.sh
