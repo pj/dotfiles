@@ -28,6 +28,9 @@ jobs:
           project_path: "./bootstrap"
           compress_assets: "OFF"
           upload: "OFF"
+      - name: List assets
+        run: ls "${{ steps.build_assets.outputs.release_asset_dir }}"
+
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
