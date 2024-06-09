@@ -2,44 +2,121 @@ package main
 
 import "fmt"
 
+func downloadFileStream(url string) (io.Reader, error) {
+  // Get the data
+  resp, err := http.Get(url)
+  if err != nil {
+    return nil, err
+  }
+
+  // Check server response
+  if resp.StatusCode != http.StatusOK {
+    return nil, fmt.Errorf("bad status: %s", resp.Status)
+  }
+
+  return resp.Body, nil
+}
+
+func downloadFile(filepath string, url string) (err error) {
+  // Create the file
+  out, err := os.Create(filepath)
+  if err != nil  {
+    return err
+  }
+  defer out.Close()
+
+	downloadStream, err = downloadFileStream(url)
+  defer downloadStream.Close()
+
+  // Writer the body to file
+  _, err = io.Copy(out, downloadStream)
+  if err != nil  {
+    return err
+  }
+
+  return nil
+}
+
+func extractTarGz(gzipStream io.Reader, rootDir string) error {
+	uncompressedStream, err := gzip.NewReader(gzipStream)
+	if err != nil {
+			return fmt.Errorf("ExtractTarGz: NewReader failed: %v", err)
+	}
+
+	tarReader := tar.NewReader(uncompressedStream)
+
+	for true {
+			header, err := tarReader.Next()
+
+			if err == io.EOF {
+					break
+			}
+
+			if err != nil {
+					return fmt.Errorf("ExtractTarGz: Next() failed: %v", err)
+			}
+
+			switch header.Typeflag {
+			case tar.TypeDir:
+					if err := os.Mkdir(filepath.Join(rootDir, header.Name), 0755); err != nil {
+							return fmt.Errorf("ExtractTarGz: Mkdir() failed: %v", err)
+					}
+			case tar.TypeReg:
+					outFile, err := os.Create(filepath.Join(rootDir, header.Name))
+					if err != nil {
+							return fmt.Errorf("ExtractTarGz: Create() failed: %v", err)
+					}
+					if _, err := io.Copy(outFile, tarReader); err != nil {
+							return fmt.Errorf("ExtractTarGz: Copy() failed: %v", err)
+					}
+					outFile.Close()
+
+			default:
+					return fmt.Errorf("ExtractTarGz: uknown type: %s in %s", header.Typeflag, header.Name)
+			}
+	}
+}
+
+func die(err error) {
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(1)
+	}
+}
+
 func main() {
-	fmt.Printf("hello world")
-	// 	#!/bin/sh
+	fmt.Printf("Bootstrapping!")
 
-	// function bootstrap() {
-	//     # Check if curl is installed
-	//     if !type "curl" > /dev/null; then
-	//         echo "curl not found, will try to install"
+	homeDir, err := os.UserHomeDir()
+	die(err)
 
-	//         if !type "apk" > /dev/null; then
-	//             apk update && apk upgrade && apk add curl
-	//         elif !type "apt" > /dev/null; then
-	//             apt update && apt upgrade && apt install -y curl
-	//         else
-	//             echo "unable to find or install curl, aborting"
-	//             exit 1
-	//         fi
-	//     fi
+	binDir := filepath.Join(homeDir, "bin")
+	err = os.MkdirAll(newpath, os.ModePerm)
+	die(err)
 
-	//     # Install packages
-	//     mkdir -p ~/bin
+	dotfilesDir := filepath.Join(homeDir, "dotfiles")
+	err = os.MkdirAll(newpath, os.ModePerm)
+	die(err)
 
-	//     # Detect arch
-	//     ARCH="$(uname -p)"
+	// Download dotfiles
+	sourceFile := filepath.Join(dotfilesDir, "source.tar.gz")
+	stream, err = downloadFileStream("https://github.com/pj/dotfiles/archive/refs/heads/main.tar.gz")
+	die(err)
+	defer stream.Close()
 
-	//     # Download dotfiles
+	gzipStream(stream, sourceFile)
 
-	//     # Link vimrc basic
+	// Link vimrc basic
 
-	//     # Link bashrc basic
+	// Link bashrc basic
 
-	//     # Install vim
+	// Install vim
 
-	//     # Install kubectl
+	// Install kubectl
 
-	//     # Install k3s
+	// Install k3s
 
-	//     # Install jq
+	// Install jq
 
-	// # Install yq
+	// Install yq
 }
