@@ -33,11 +33,8 @@ jobs:
         run: |
           FILENAME="bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
           NAME="${{ steps.build_assets.outputs.release_asset_dir }}/$FILENAME"
-          ls -al ${{ steps.build_assets.outputs.release_asset_dir }}
           cat "$NAME" | base64 > "$FILENAME-b64"
           cat ./bootstrap/pasteable_pre.sh "$FILENAME-b64" ./bootstrap/pasteable_post.sh > "$FILENAME-pasteable.sh"
-          ls -al
-          ls -al ${{ steps.build_assets.outputs.release_asset_dir }}
           chmod u+x ./$FILENAME-pasteable.sh
 
       # - uses: "marvinpinto/action-automatic-releases@latest"
@@ -59,5 +56,5 @@ jobs:
             ${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
             bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}-pasteable.sh
 
-      # - name: Run bootstrap test
-      #   run: docker build --progress plain --target test-alpine-pasteable --target test-alpine -f ./bootstrap/Dockerfile.ci ./bootstrap
+      - name: Run bootstrap test
+        run: docker build --progress plain --target test-alpine-pasteable --target test-alpine -f ./bootstrap/Dockerfile.ci ./bootstrap

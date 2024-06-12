@@ -1,14 +1,17 @@
 FROM alpine AS test-alpine
 WORKDIR /root
+RUN https://github.com/pj/dotfiles/releases/download//bootstrap-linux-amd64
+RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-amd64 -o bootstrap
+RUN chmod u+x bootstrap
 RUN ./bootstrap
 
 COPY test_bootstrap.sh test_bootstrap.sh
 RUN ./test_bootstrap.sh
 
-FROM alpine AS test-alpine-pasteable
-WORKDIR /root
+# FROM alpine AS test-alpine-pasteable
+# WORKDIR /root
 
-RUN ./bootstrap-pasteable.sh
+# RUN ./bootstrap-pasteable.sh
 
-COPY test_bootstrap.sh test_bootstrap.sh
-RUN ./test_bootstrap.sh
+# COPY test_bootstrap.sh test_bootstrap.sh
+# RUN ./test_bootstrap.sh
