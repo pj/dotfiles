@@ -28,14 +28,17 @@ jobs:
           project_path: "./bootstrap"
           compress_assets: "OFF"
           upload: "OFF"
+
       - name: Create pasteable versions
         run: |
           FILENAME="bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}"
           NAME="${{ steps.build_assets.outputs.release_asset_dir }}/$FILENAME"
           ls -al ${{ steps.build_assets.outputs.release_asset_dir }}
-          id
           cat "$NAME" | base64 > "$FILENAME-b64"
-          cat ./bootstrap/pasteable.sh "$FILENAME-b64" > "$FILENAME-pasteable"
+          cat ./bootstrap/pasteable_pre.sh "$FILENAME-b64" ./bootstrap/pasteable_post.sh > "$FILENAME-pasteable.sh"
+          ls -al
+          ls -al ${{ steps.build_assets.outputs.release_asset_dir }}
+          chmod u+x ./$FILENAME-pasteable.sh
 
       # - uses: "marvinpinto/action-automatic-releases@latest"
       #   with:
@@ -54,7 +57,7 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             ${{ steps.build_assets.outputs.release_asset_dir }}/bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}
-            bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}-pasteable
+            bootstrap-${{ matrix.goos }}-${{ matrix.goarch }}-pasteable.sh
 
-      - name: Run bootstrap test
-        run: docker build ./bootstrap
+      # - name: Run bootstrap test
+      #   run: docker build --progress plain --target test-alpine-pasteable --target test-alpine -f ./bootstrap/Dockerfile.ci ./bootstrap

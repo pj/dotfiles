@@ -1,0 +1,14 @@
+FROM alpine AS test-alpine
+WORKDIR /root
+RUN ./bootstrap
+
+COPY test_bootstrap.sh test_bootstrap.sh
+RUN ./test_bootstrap.sh
+
+FROM alpine AS test-alpine-pasteable
+WORKDIR /root
+
+RUN ./bootstrap-pasteable.sh
+
+COPY test_bootstrap.sh test_bootstrap.sh
+RUN ./test_bootstrap.sh
