@@ -7,6 +7,7 @@ RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-l
 RUN chmod u+x bootstrap
 RUN ls -al
 RUN file ./bootstrap
+RUN head -n 10 ./bootstrap
 RUN ./bootstrap
 
 COPY test_bootstrap.sh test_bootstrap.sh
