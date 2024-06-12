@@ -2,9 +2,11 @@ FROM alpine AS test-alpine
 WORKDIR /root
 
 ARG TARGETARCH
-RUN apk update && apk add curl
+RUN apk update && apk add curl file
 RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-${TARGETARCH} -o bootstrap
 RUN chmod u+x bootstrap
+RUN ls -al
+RUN file ./bootstrap
 RUN ./bootstrap
 
 COPY test_bootstrap.sh test_bootstrap.sh
