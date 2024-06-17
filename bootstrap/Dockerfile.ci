@@ -18,7 +18,7 @@ WORKDIR /root
 
 ARG TARGETARCH
 RUN apk update && apk add curl
-RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-${TARGETARCH}-pasteable.sh -o bootstrap-pasteable.sh
+RUN curl -L0 https://github.com/pj/dotfiles/releases/latest/download/bootstrap-linux-${TARGETARCH}-pasteable.sh
 RUN chmod u+x bootstrap-pasteable.sh
 
 RUN ./bootstrap-pasteable.sh

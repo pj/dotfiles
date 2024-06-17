@@ -3,7 +3,9 @@ WORKDIR /build
 COPY bootstrap.go bootstrap.go
 COPY go.mod go.mod
 
-RUN CGO_ENABLED=0 go build -o bootstrap
+RUN CGO_ENABLED=0 go build -o bootstrap -ldflags "-s -w"
+
+RUN ls -alh
 
 FROM alpine AS test-alpine
 WORKDIR /root
