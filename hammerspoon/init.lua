@@ -7,7 +7,7 @@ local window_control = "f16"
 
 local new_wm = require("new_wm")
 
-new_wm:init(true)
+local wm = new_wm.new(true)
 
 -- Bind Movements
 -- local movement_modal = hs.hotkey.modal.new("", window_control)
@@ -38,10 +38,10 @@ end
 
 layouts = {
     default = {
-        columns = {
+        columns = {{
             type = new_wm.__STACK,
             span = 1
-        }
+        }}
     },
     v = {
         columns = {
@@ -80,39 +80,100 @@ layouts = {
                 span = 1,
             }
         }
+    },
+    f = {
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            }
+        }
     }
 }
 
-new_wm:addCurrentScreen(layouts["default"])
+wm:setLayout(layouts["default"])
 
 ControlPressed = false
-local eventTapper = hs.eventtap.new({hs.eventtap.event.types.keyDown, hs.eventtap.event.types.keyUp}, function(event)
+EventTapper = hs.eventtap.new({hs.eventtap.event.types.keyDown, hs.eventtap.event.types.keyUp}, function(event)
     local eventType = event:getType()
     if eventType == hs.eventtap.event.types.keyDown then
         local keycode = hs.keycodes.map[event:getKeyCode()]
         if keycode == window_control then
             ControlPressed = true
+            hs.printf("control pressed down")
         elseif NUMBER_CODES[keycode] and ControlPressed then
             local flags = event:getFlags()
             if flags["ctrl"] then
-                new_wm:set_column_span(tonumber(keycode))
+                wm:setColumnSpan(tonumber(keycode))
             elseif flags["alt"] then
-                new_wm:set_splits(tonumber(keycode))
+                wm:setSplits(tonumber(keycode))
             else
-                new_wm:move_focused_to(tonumber(keycode))
+                wm:moveFocusedTo(tonumber(keycode))
             end
+            ControlPressed = false
         elseif ControlPressed and isAlphabetChar(keycode) then
-            new_wm:set_layout(layous[keycode])
+            local layout = layouts[keycode]
+            if layout == nil then
+                hs.printf("No layout for key: %s", keycode)
+                return
+            end
+            wm:setLayout(layout)
+            ControlPressed = false
         end
     elseif eventType == hs.eventtap.event.types.keyUp then
         local keycode = hs.keycodes.map[event:getKeyCode()]
         if keycode == window_control then
             ControlPressed = false
+            hs.printf("control pressed up")
         end
     end
+
+    hs.printf("ControlPressed: %s", ControlPressed)
 end)
 
--- eventTapper:start()
+EventTapper:start()
+
+-- local profile_data = {}
+-- 
+-- local function hook(event)
+--     local info = debug.getinfo(2, "nS")
+--     local name = info.name or "unknown"
+--     
+--     if event == "call" then
+--         if not profile_data[name] then
+--             profile_data[name] = { calls = 0, time = 0 }
+--         end
+--         profile_data[name].start_time = os.clock()
+--     elseif event == "return" and profile_data[name] then
+--         local diff = os.clock() - profile_data[name].start_time
+--         profile_data[name].calls = profile_data[name].calls + 1
+--         profile_data[name].time = profile_data[name].time + diff
+--     end
+-- end
+-- 
+-- function start_profiling()
+--     debug.sethook(hook, "cr")  -- Hook on function call and return
+-- end
+-- 
+-- function stop_profiling()
+--     debug.sethook()  -- Stop the hook
+-- end
+-- 
+-- function print_profile_data()
+--     for name, data in pairs(profile_data) do
+--         print(string.format("Function '%s' - Calls: %d, Total Time: %.6f seconds", name, data.calls, data.time))
+--     end
+-- end
+-- 
+-- -- Example usage
+-- start_profiling()
+-- 
+-- wm:setLayout(layouts["v"])
+-- 
+-- stop_profiling()
+-- print_profile_data()
+-- 
+
 
 -- Bind layouts to keys
 -- for key, value in pairs(layouts) do
