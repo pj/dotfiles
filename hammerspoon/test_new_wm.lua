@@ -126,7 +126,7 @@ function testSetLayout()
                 window = fooWindow
             }
         }
-    })
+    }, true)
 
     lu.assertEquals(fooWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
     lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
@@ -147,7 +147,11 @@ function testMoveTo()
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -176,7 +180,11 @@ function testMoveToExtend()
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+            }
         },
         {
             type = new_wm.__EMPTY,
@@ -221,14 +229,18 @@ function testMoveToExistingPosition()
                 window = bazWindow
             }
         }
-    })
+    }, true)
 
     wm:moveFocusedTo(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -269,14 +281,18 @@ function testMoveToSamePosition()
                 window = bazWindow
             }
         }
-    })
+    }, true)
 
     wm:moveFocusedTo(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -313,26 +329,29 @@ function testMoveToStack()
                 window = bazWindow
             }
         }
-    })
+    }, true)
 
-    wm:moveFocusedTo(2)
+    wm:moveFocusedTo(1)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
-            type = new_wm.__WINDOW,
+            type = new_wm.__EMPTY,
             span = 1,
-            name = bazWindow:title(),
-            window = bazWindow
         },
     })
 
     lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
     lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
-    lu.assertEquals(bazWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
 end
 
 function testSetSpanOnPositionedWindow()
@@ -357,14 +376,18 @@ function testSetSpanOnPositionedWindow()
                 window = bazWindow
             }
         }
-    })
+    }, true)
 
     wm:setColumnSpan(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -401,14 +424,18 @@ function testSetSpanOnStackWindow()
                 window = fooWindow
             }
         }
-    })
+    }, true)
 
     wm:setColumnSpan(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 2
+            span = 2,
+            windows = {
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -435,7 +462,12 @@ function testSplit()
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__EMPTY,
@@ -451,7 +483,12 @@ function testSplit()
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__EMPTY,
@@ -481,13 +518,18 @@ function testSplitMultiple()
                 span = 1
             },
         }
-    })
+    }, true)
 
     wm:setSplits(3)
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__EMPTY,
@@ -529,14 +571,18 @@ function testReduceSplit()
                 window = bazWindow
             }
         }
-    })
+    }, true)
 
     wm:setSplits(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -573,14 +619,18 @@ function testReduceSplitMultiple()
             { type = new_wm.__EMPTY, span = 1 },
             { type = new_wm.__EMPTY, span = 1 },
         }
-    })
+    }, true)
 
     wm:setSplits(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         },
         {
             type = new_wm.__WINDOW,
@@ -615,14 +665,203 @@ function testReduceSplitRepositionStack()
                 span = 1
             }
         }
-    })
+    }, true)
 
     wm:setSplits(1)
 
     lu.assertEquals(wm._current_layout[1].columns, {
         {
             type = new_wm.__STACK,
-            span = 1
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
+        }
+    })
+
+    lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
+end
+
+function testAddNewWindow()
+    local fooWindow = mockWindow(1, "Foo")
+    local barWindow = mockWindow(2, "Bar")
+    local bazWindow = mockWindow(3, "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow }))
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__WINDOW,
+                span = 1,
+                name = fooWindow:title(),
+                window = fooWindow
+            }
+        }
+    }, true)
+
+    wm:addWindow(bazWindow)
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+            windows = {
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            },
+        },
+        {
+            type = new_wm.__WINDOW,
+            span = 1,
+            name = fooWindow:title(),
+            window = fooWindow
+        }
+    }
+    )
+
+    lu.assertEquals(fooWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
+function testRemoveWindow()
+    local fooWindow = mockWindow(1, "Foo")
+    local barWindow = mockWindow(2, "Bar")
+    local bazWindow = mockWindow(3, "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__WINDOW,
+                span = 1,
+                name = fooWindow:title(),
+                window = fooWindow
+            }
+        }
+    }, true)
+
+    wm:removeWindow(bazWindow)
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+            windows = {
+                [barWindow:id()] = barWindow,
+            },
+        },
+        {
+            type = new_wm.__WINDOW,
+            span = 1,
+            name = fooWindow:title(),
+            window = fooWindow
+        }
+    }
+    )
+
+    lu.assertEquals(fooWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
+function testRemovePinnedWindow()
+    local fooWindow = mockWindow(1, "Foo")
+    local barWindow = mockWindow(2, "Bar")
+    local bazWindow = mockWindow(3, "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__WINDOW,
+                span = 1,
+                name = fooWindow:title(),
+                window = fooWindow
+            }
+        }
+    }, true)
+
+    wm:removeWindow(fooWindow)
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+            windows = {
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow,
+            },
+        },
+        {
+            type = new_wm.__EMPTY,
+            span = 1,
+        }
+    }
+    )
+
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
+function testSetLayoutNormalRefresh()
+    local fooWindow = mockWindow(1, "Foo")
+    local barWindow = mockWindow(2, "Bar")
+    local bazWindow = mockWindow(3, "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__WINDOW,
+                span = 1,
+                name = fooWindow:title(),
+                window = fooWindow
+            },
+        }
+    }, true)
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+        }
+    })
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
         }
     })
 

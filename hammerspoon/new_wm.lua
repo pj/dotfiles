@@ -1,4 +1,4 @@
-local obj={}
+local obj = {}
 obj.__STACK = {}
 obj.__EMPTY = {}
 obj.__WINDOW = {}
@@ -45,25 +45,223 @@ function obj.new(debug, _logger, _hs)
     return self
 end
 
-function obj:_setupCurrentScreen(layout)
+function obj:_setupCurrentScreen()
     self._logger.d("Adding current screen")
     local current_space = self._hs.spaces.focusedSpace()
     if self._current_layout == nil then
         self._current_layout = {}
-        if layout then
-            self._current_layout[current_space] = layout
-        else
-            self._current_layout[current_space] = {columns = {{type = obj.__STACK, span = 1}}}
-        end
+        self._current_layout[current_space] = { columns = { { type = obj.__STACK, span = 1, windows = {} } } }
+        self:_fullRefreshWindows()
         self._logger.d("added current screen")
     else
         self._logger.d("current screen already exists")
     end
 end
 
+function obj:addWindow(window)
+    self._logger.d("Adding new window")
+    local current_space = self._hs.spaces.focusedSpace()
+    local current_layout = self._current_layout[current_space]
+    local new_columns = {}
+
+    for _, column in pairs(current_layout.columns) do
+        if column.type == obj.__STACK then
+            local updatedStack = {}
+            for k, v in pairs(column.windows) do
+                updatedStack[k] = v
+            end
+            updatedStack[window:id()] = window
+            table.insert(new_columns, {
+                type = obj.__STACK,
+                span = column.span,
+                windows = updatedStack
+            })
+        else
+            table.insert(new_columns, column)
+        end
+    end
+
+    self._current_layout[current_space].columns = new_columns
+
+    self:_rerender()
+    self._logger.d("done refreshing windows")
+end
+
+function obj:removeWindow(window)
+    local current_space = self._hs.spaces.focusedSpace()
+    local current_layout = self._current_layout[current_space]
+    local new_columns = {}
+
+    for _, column in pairs(current_layout.columns) do
+        if column.type == obj.__STACK then
+            local updatedStack = {}
+            for k, v in pairs(column.windows) do
+                if v:id() ~= window:id() then
+                    updatedStack[k] = v
+                end
+            end
+            table.insert(new_columns, {
+                type = obj.__STACK,
+                span = column.span,
+                windows = updatedStack
+            })
+        elseif column.window and column.window:id() == window:id() then
+            table.insert(new_columns, { type = obj.__EMPTY, span = 1 })
+        else
+            table.insert(new_columns, column)
+        end
+    end
+
+    self._current_layout[current_space].columns = new_columns
+
+    self._logger.d("done refreshing windows")
+end
+
+function obj:_fullRefreshWindows()
+    self._logger.d("full refreshing windows")
+    local current_space = self._hs.spaces.focusedSpace()
+    local current_layout = self._current_layout[current_space]
+    local new_columns = {}
+    local pinned_windows = {}
+
+    for _, column in ipairs(current_layout.columns) do
+        if column.type == obj.__WINDOW then
+            if column.window == nil and column.application then
+                local application = self._hs.application.find(column.application)
+                if application == nil then
+                    self._logger.ef("application %s not found", column.application)
+                    goto continue
+                end
+
+                if application[1] ~= nil then
+                    self._logger.ef("first result nil")
+                    if #application > 1 then
+                        self._logger.ef("more than 1 application found for application name %s", column.application)
+                    end
+                    application = application[1]
+                end
+
+                local appWindows = application:visibleWindows()
+                if #appWindows == 0 then
+                    self._logger.ef("no windows for %s found", column.application)
+                    goto continue
+                end
+
+                if #appWindows > 1 then
+                    self._logger.ef("more than 1 window found for application name %s", column.application)
+                end
+
+                column.window = appWindows[1]
+            end
+            pinned_windows[column.window:id()] = true
+        end
+        ::continue::
+    end
+
+    for _, column in pairs(current_layout.columns) do
+        if column.type == obj.__STACK then
+            local space_filter = self._hs.window.filter.new()
+
+            local windows = space_filter:getWindows()
+            local updatedStack = {}
+            for _, window in pairs(windows) do
+                local win_id = window:id()
+                if pinned_windows[win_id] == nil then
+                    updatedStack[win_id] = window
+                end
+            end
+
+            table.insert(new_columns, {
+                type = obj.__STACK,
+                span = column.span,
+                windows = updatedStack
+            })
+        else
+            table.insert(new_columns, column)
+        end
+    end
+
+    self._current_layout[current_space].columns = new_columns
+
+    self:_rerender()
+    self._logger.d("done full refreshing windows")
+end
+
+function obj:_refreshWindows(existingWindows)
+    self._logger.d("refreshing windows")
+    local current_space = self._hs.spaces.focusedSpace()
+    local current_layout = self._current_layout[current_space]
+    local new_columns = {}
+
+    local stackAt = nil
+
+    for i, column in ipairs(current_layout.columns) do
+        if column.type == obj.__WINDOW then
+            if column.window == nil and column.application then
+                local application = self._hs.application.find(column.application)
+                if application == nil then
+                    self._logger.ef("application %s not found", column.application)
+                    goto continue
+                end
+
+                if application[1] ~= nil then
+                    self._logger.ef("first result nil")
+                    if #application > 1 then
+                        self._logger.ef("more than 1 application found for application name %s", column.application)
+                    end
+                    application = application[1]
+                end
+
+                local appWindows = application:visibleWindows()
+                if #appWindows == 0 then
+                    self._logger.ef("no windows for %s found", column.application)
+                    goto continue
+                end
+
+                if #appWindows > 1 then
+                    self._logger.ef("more than 1 window found for application name %s", column.application)
+                end
+
+                local appWindow = appWindows[1]
+
+                table.insert(new_columns, {
+                    type = obj.__WINDOW,
+                    span = column.span,
+                    window = appWindow
+                })
+                existingWindows[appWindow:id()] = nil
+            else
+                table.insert(new_columns, column)
+                existingWindows[column.window:id()] = nil
+            end
+        else
+            if column.type == obj.__STACK then
+                stackAt = i
+            end
+            table.insert(new_columns, column)
+        end
+        ::continue::
+    end
+
+    if stackAt == nil then
+        error("No stack found")
+    end
+
+    new_columns[stackAt] = {
+        type = obj.__STACK,
+        span = current_layout.columns[stackAt].span,
+        windows = existingWindows
+    }
+
+    self._current_layout[current_space].columns = new_columns
+
+    self._logger.d("done refreshing windows")
+end
+
 -- Rerender the current window
 function obj:_rerender()
     self._logger.d("rerendering")
+    hs.printf("render start %s", hs.timer.secondsSinceEpoch())
     local current_space = self._hs.spaces.focusedSpace()
     local current_layout = self._current_layout[current_space]
     local current_screen = self._hs.screen.mainScreen()
@@ -77,34 +275,10 @@ function obj:_rerender()
 
     -- list of pinned windows
     local pinned_windows = {}
-    local application_windows = {}
     for _, column in ipairs(current_layout.columns) do
         if column.type == obj.__WINDOW then
             pinned_windows[column.window:id()] = true
-            
-        elseif column.type == obj.__APPLICATION then
-            local application = self._hs.application.find(column.application)
-            if application == nil then
-                self._logger.ef("application %s not found", column.application)
-                goto continue
-            end
-
-            if application[1] ~= nil then
-                if #application ~= 1 then
-                    self._logger.ef("more than 1 application found for application name %s", column.application)
-                    goto continue
-                end
-                application = application[1]
-            end
-
-            local appWindows = application:visibleWindows()
-            application_windows[application:pid()] = appWindows
-
-            for _, window in pairs(appWindows) do
-                pinned_windows[window:id()] = true
-            end
         end
-        ::continue::
     end
 
     local window_width = current_frame.w / divisions
@@ -112,57 +286,43 @@ function obj:_rerender()
 
     local left_offset = 0
     for _, column in pairs(current_layout.columns) do
+        hs.printf("rendering column %s", hs.timer.secondsSinceEpoch())
         local new_frame = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
         if column.type == obj.__STACK then
-            local space_filter = self._hs.window.filter.new()
-
-            local windows = space_filter:getWindows()
-            for _, window in pairs(windows) do
+            for _, window in pairs(column.windows) do
+                hs.printf("rendering stack %s", hs.timer.secondsSinceEpoch())
                 local win_id = window:id()
                 if pinned_windows[win_id] == nil then
                     local win_frame = self._hs.geometry.copy(new_frame)
-                    window:setFrame(win_frame, 0)
-                end
-            end
-        elseif column.type == obj.__APPLICATION then
-            local application = self._hs.application.find(column.application)
-            if application == nil then
-                self._logger.ef("application %s not found", column.application)
-                goto continue
-            end
-
-            if application[1] ~= nil then
-                if #application ~= 1 then
-                    self._logger.ef("more than 1 application found for application name %s", column.application)
-                    goto continue
-                end
-                application = application[1]
-            end
-
-            local appWindows = application_windows[application:pid()]
-            for _, window in pairs(appWindows) do
-                local spaces = self._hs.spaces.windowSpaces(window:id())
-                if spaces[current_space] then
-                    window:setFrame(new_frame, 0)
+                    local current_frame = window:frame()
+                    if not current_frame:equals(win_frame) then
+                        if current_frame.x ~= win_frame.x then
+                            window:setTopLeft(hs.geometry.point(win_frame.x, win_frame.y))
+                        end
+                        if current_frame.w ~= win_frame.w then
+                            window:setSize(hs.geometry.size(win_frame.w, win_frame.h))
+                        end
+                    end
                 end
             end
         elseif column.type ~= obj.__EMPTY then
             local window = column.window
-            window:setFrame(new_frame, 0)
+            local current_frame = window:frame()
+            if not current_frame:equals(new_frame) then
+                if current_frame.x ~= new_frame.x then
+                    window:setTopLeft(hs.geometry.point(new_frame.x, new_frame.y))
+                end
+                if current_frame.w ~= new_frame.w then
+                    window:setSize(hs.geometry.size(new_frame.w, new_frame.h))
+                end
+            end
         end
 
         left_offset = left_offset + (column.span * window_width)
-        ::continue::
     end
 
     self._logger.d("done rendering")
-end
-
--- Make sure that pinned apps are running and replace with __EMPTY if they aren't
-function obj:_refresh_pinned_apps()
-    self._logger.d("refreshing pinned")
-
-    self._logger.d("done refreshing pinned")
+    hs.printf("render end %s", hs.timer.secondsSinceEpoch())
 end
 
 function obj:incrementSplit()
@@ -178,7 +338,7 @@ function obj:decrementSplit()
 end
 
 -- Set the number of splits
-function obj:setSplits(number_of_splits) 
+function obj:setSplits(number_of_splits)
     self._logger.df("setting splits to %s", number_of_splits)
     self:_setupCurrentScreen()
     local current_space = self._hs.spaces.focusedSpace()
@@ -189,43 +349,57 @@ function obj:setSplits(number_of_splits)
     end
 
     -- Reduce number of splits
-    if number_of_splits < #current_layout.columns then
-        -- First check if the stack is within range
-        local stack_in_range = false
-        for i = 1, number_of_splits do
-            local column = current_layout.columns[i]
-            if column.type == obj.__STACK then
-                stack_in_range = true
-            end
-        end
-
-        if stack_in_range then
-            for _, column in ipairs(current_layout.columns) do
-                table.insert(new_columns, column)
-            end
+    local stackInRange = nil
+    local existingStack
+    local addToStack = {}
+    for i = 1, math.max(number_of_splits, #current_layout.columns) do
+        local column = current_layout.columns[i]
+        if column == nil then
+            table.insert(new_columns, { type = obj.__EMPTY, span = 1 })
         else
-            -- If stack is not in range, move it to the first position then reposition all the others
-            table.insert(new_columns, {type = obj.__STACK, span = 1})
-            for _, column in ipairs(current_layout.columns) do
-                if column.type ~= obj.__STACK then
-                    table.insert(new_columns, column)
+            if column.type == obj.__STACK then
+                existingStack = column
+            end
+            if i <= number_of_splits then
+                if column.type == obj.__STACK then
+                    stackInRange = i
+                end
+                table.insert(new_columns, column)
+            else
+                if column.type == obj.__WINDOW then
+                    addToStack[column.window:id()] = column.window
                 end
             end
         end
+    end
 
-        -- Truncate to the correct size
-        while #new_columns > number_of_splits do
-            table.remove(new_columns, #new_columns)
+    if stackInRange then
+        local updatedStack = {}
+        for k, v in pairs(current_layout.columns[stackInRange].windows) do
+            updatedStack[k] = v
         end
+        for k, v in pairs(addToStack) do
+            updatedStack[k] = v
+        end
+        new_columns[stackInRange] = {
+            type = obj.__STACK,
+            span = current_layout.columns[stackInRange].span,
+            windows = updatedStack
+        }
     else
-        for _, column in ipairs(current_layout.columns) do
-            table.insert(new_columns, column)
+        local updatedStack = {}
+        for k, v in pairs(existingStack.windows) do
+            updatedStack[k] = v
         end
-
-        -- Add empty columns to fill out the list
-        while #new_columns < number_of_splits do
-            table.insert(new_columns, {type = obj.__EMPTY, span = 1})
+        for k, v in pairs(addToStack) do
+            updatedStack[k] = v
         end
+        local last = new_columns[#new_columns]
+        if last.type == obj.__WINDOW then
+            updatedStack[last.window:id()] = last.window
+        end
+        table.insert(new_columns, 1, { type = obj.__STACK, span = 1, windows = updatedStack })
+        table.remove(new_columns, #new_columns)
     end
 
     self._current_layout[current_space].columns = new_columns
@@ -315,49 +489,100 @@ function obj:moveRight()
     self:moveFocusedTo(self:_index_for_current_window() + 1)
 end
 
-function obj:moveFocusedTo(position) 
-    self._logger.df("moving focused to %s", position)
+function obj:moveFocusedTo(destIndex)
+    self._logger.df("moving focused to %s", destIndex)
     self:_setupCurrentScreen()
     local current_space = self._hs.spaces.focusedSpace()
     local current_layout = self._current_layout[current_space]
     local new_columns = {}
-    local window = self._hs.window.focusedWindow()
+    local focusedWindow = self._hs.window.focusedWindow()
 
     -- if the list of columns is shorter than the position, add empty columns to fill out the list
-    local length = math.max(#current_layout.columns, position)
-    
+    local length = math.max(#current_layout.columns, destIndex)
+
+    local sourceIndex = nil
+    local stackIndex = nil
+
     for i = 1, length do
         local column = current_layout.columns[i]
         if column == nil then
-            if i == position then
-                table.insert(
-                    new_columns,
-                    {
-                        type = obj.__WINDOW,
-                        name = window:title(),
-                        window = window,
-                        span = 1
-                    }
-                )
-            else
-                table.insert(new_columns, {type = obj.__EMPTY, span = 1})
-            end
+            table.insert(new_columns, { type = obj.__EMPTY, span = 1 })
         else
-            -- If the window is already pinned, replace it with __empty
-            if column.window ~= nil and column.window:id() == window:id() and i ~= position then
-                new_columns[i] = {type = obj.__EMPTY, span = 1}
-            elseif i == position then
-                if column.type ~= obj.__STACK then
-                    new_columns[i] = {
-                        type = obj.__WINDOW,
-                        name = window:title(),
-                        window = window,
-                        span = 1
-                    }
-                end
-            else
-                table.insert(new_columns, column)
+            if column.window ~= nil and column.window:id() == focusedWindow:id() then
+                sourceIndex = i
             end
+            if column.type == obj.__STACK then
+                stackIndex = i
+            end
+            new_columns[i] = column
+        end
+    end
+
+    if stackIndex == nil then
+        error("No stack found")
+    end
+
+    if sourceIndex == destIndex then
+        return
+    end
+
+    -- moving from stack to dest remove from stack and add to destIndex
+    if sourceIndex == nil then
+        local existingStack = current_layout.columns[stackIndex]
+        local updatedStack = {}
+        local currentDest = new_columns[destIndex]
+        -- update the destination with the new window
+        new_columns[destIndex] = {
+            type = obj.__WINDOW,
+            name = focusedWindow:title(),
+            window = focusedWindow,
+            span = currentDest.span
+        }
+
+        -- if it's a window add it back to the stack
+        if currentDest.window then
+            updatedStack[currentDest.window:id()] = currentDest.window
+        end
+
+        for k, v in pairs(existingStack.windows) do
+            -- remove focused if it's in the stack
+            if v:id() ~= focusedWindow:id() then
+                updatedStack[k] = v
+            end
+        end
+        new_columns[stackIndex] = { type = obj.__STACK, span = existingStack.span, windows = updatedStack }
+    elseif stackIndex == destIndex then
+        -- moving from source to stack, remove source and add to stack
+        local source = new_columns[sourceIndex]
+        new_columns[sourceIndex] = { type = obj.__EMPTY, span = source.span }
+
+        local updatedStack = {}
+        local existingStack = new_columns[stackIndex]
+        for k, v in pairs(existingStack.windows) do
+            updatedStack[k] = v
+        end
+        updatedStack[focusedWindow:id()] = focusedWindow
+        new_columns[stackIndex] = { type = obj.__STACK, span = existingStack.span, windows = updatedStack }
+    else
+        -- moving from to location to location
+        local source = new_columns[sourceIndex]
+        new_columns[sourceIndex] = { type = obj.__EMPTY, span = source.span }
+
+        local dest = new_columns[destIndex]
+        new_columns[destIndex] = {
+            type = obj.__WINDOW,
+            name = focusedWindow:title(),
+            window = focusedWindow,
+            span = dest.span
+        }
+
+        if dest.window then
+            local updatedStack = {}
+            for k, v in pairs(dest.window) do
+                updatedStack[k] = v
+            end
+            updatedStack[dest.window:id()] = dest.window
+            new_columns[destIndex] = { type = obj.__STACK, span = dest.span, windows = updatedStack }
         end
     end
 
@@ -367,17 +592,36 @@ function obj:moveFocusedTo(position)
 end
 
 -- Set the specific layout
-function obj:setLayout(layout)
+function obj:setLayout(layout, fullRefresh)
+    hs.printf("setLayout start %s", hs.timer.secondsSinceEpoch())
     self._logger.df("setting layout to", layout)
     local current_space = self._hs.spaces.focusedSpace()
     if self._current_layout == nil then
         self._current_layout = {}
     end
 
-    self._current_layout[current_space] = layout
+    if fullRefresh then
+        self._current_layout[current_space] = layout
+        self:_fullRefreshWindows()
+    else
+        local existingWindows = {}
+        for _, column in pairs(self._current_layout[current_space].columns) do
+            if column.type == obj.__WINDOW then
+                table.insert(existingWindows, column.window)
+                existingWindows[column.window:id()] = column.window
+            elseif column.type == obj.__STACK then
+                for _, window in pairs(column.windows) do
+                    existingWindows[window:id()] = window
+                end
+            end
+        end
+        self._current_layout[current_space] = layout
+        self:_refreshWindows(existingWindows)
+    end
 
     self:_rerender()
     self._logger.d("done setting layout")
+    hs.printf("setLayout end %s", hs.timer.secondsSinceEpoch())
 end
 
 return obj
