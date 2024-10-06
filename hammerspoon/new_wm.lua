@@ -261,7 +261,6 @@ end
 -- Rerender the current window
 function obj:_rerender()
     self._logger.d("rerendering")
-    hs.printf("render start %s", hs.timer.secondsSinceEpoch())
     local current_space = self._hs.spaces.focusedSpace()
     local current_layout = self._current_layout[current_space]
     local current_screen = self._hs.screen.mainScreen()
@@ -286,21 +285,19 @@ function obj:_rerender()
 
     local left_offset = 0
     for _, column in pairs(current_layout.columns) do
-        hs.printf("rendering column %s", hs.timer.secondsSinceEpoch())
         local new_frame = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
         if column.type == obj.__STACK then
             for _, window in pairs(column.windows) do
-                hs.printf("rendering stack %s", hs.timer.secondsSinceEpoch())
                 local win_id = window:id()
                 if pinned_windows[win_id] == nil then
                     local win_frame = self._hs.geometry.copy(new_frame)
                     local current_frame = window:frame()
                     if not current_frame:equals(win_frame) then
                         if current_frame.x ~= win_frame.x then
-                            window:setTopLeft(hs.geometry.point(win_frame.x, win_frame.y))
+                            window:setTopLeft(self._hs.geometry.point(win_frame.x, win_frame.y))
                         end
                         if current_frame.w ~= win_frame.w then
-                            window:setSize(hs.geometry.size(win_frame.w, win_frame.h))
+                            window:setSize(self._hs.geometry.size(win_frame.w, win_frame.h))
                         end
                     end
                 end
@@ -310,10 +307,10 @@ function obj:_rerender()
             local current_frame = window:frame()
             if not current_frame:equals(new_frame) then
                 if current_frame.x ~= new_frame.x then
-                    window:setTopLeft(hs.geometry.point(new_frame.x, new_frame.y))
+                    window:setTopLeft(self._hs.geometry.point(new_frame.x, new_frame.y))
                 end
                 if current_frame.w ~= new_frame.w then
-                    window:setSize(hs.geometry.size(new_frame.w, new_frame.h))
+                    window:setSize(self._hs.geometry.size(new_frame.w, new_frame.h))
                 end
             end
         end
@@ -322,7 +319,6 @@ function obj:_rerender()
     end
 
     self._logger.d("done rendering")
-    hs.printf("render end %s", hs.timer.secondsSinceEpoch())
 end
 
 function obj:incrementSplit()
@@ -593,7 +589,6 @@ end
 
 -- Set the specific layout
 function obj:setLayout(layout, fullRefresh)
-    hs.printf("setLayout start %s", hs.timer.secondsSinceEpoch())
     self._logger.df("setting layout to", layout)
     local current_space = self._hs.spaces.focusedSpace()
     if self._current_layout == nil then
@@ -621,7 +616,6 @@ function obj:setLayout(layout, fullRefresh)
 
     self:_rerender()
     self._logger.d("done setting layout")
-    hs.printf("setLayout end %s", hs.timer.secondsSinceEpoch())
 end
 
 return obj

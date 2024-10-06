@@ -8,15 +8,19 @@ obj.name = "PaulsSiteBlocker"
 obj._debug = false
 obj._logger = nil
 obj._hs = nil
+obj._io = nil
+obj._os = nil
 
-obj._timeLimit = 60
-obj._weekendTimeLimit = 60
+obj._timeLimit = nil
+obj._weekendTimeLimit = nil
 obj._hostsFilePath = '/etc/hosts'
-obj._hostsTemplate = '/Users/pauljohnson/.hosts_template'
-
+obj._hostsTemplate = nil
 obj._currentTimer = nil
+obj._store = nil
+obj._blocklistFilename = nil
+obj._permanentBlocklistFilename = nil
 
-function obj.new(config, debug, _logger, _hs)
+function obj.new(config, debug, _logger, _hs, _io, _os)
     local self = setmetatable({}, obj)
     if _hs then
         obj._hs = _hs
@@ -29,6 +33,7 @@ function obj.new(config, debug, _logger, _hs)
     if self._debug then
         loglevel = 'debug'
     end
+
     if _logger then
         self._logger = _logger
     else
@@ -36,34 +41,55 @@ function obj.new(config, debug, _logger, _hs)
         self._logger.d("initializing...")
     end
 
+    if _io then
+        self._io = _io
+    else
+        self._io = io
+    end
+
+    if _os then
+        self._os = _os
+    else
+        self._os = os
+    end
+
+    for key, value in pairs(config) do
+        local formatted_key = string.format("_%s", key)
+        self[formatted_key] = value
+    end
+
     return self
 end
 
-function obj:updateBlockList(block)
+function obj:_updateBlockList(block)
     if block then
         local status, err = pcall(function()
-            local handle = io.popen('/usr/bin/osascript /Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt')
+            local closerScript = string.format("/usr/bin/osascript %s", self._close_tab_script_filename)
+            local handle = self._io.popen(closerScript)
             if handle == nil then
                 error('handle is nil')
             end
             handle:close()
         end)
-        self._hs.printf(string.format("status: %s err: %s", status, self._hs.inspect(err)))
+        self._logger.e(string.format("status: %s err: %s", status, self._hs.inspect(err)))
     end
-    local blocklist_file = io.open('/Users/pauljohnson/.blocklist', 'r')
+
+    local blocklist_file = self._io.open(self._blocklistFilename, 'r')
     if blocklist_file == nil then
         error('blocklist_file is nil')
     end
-    local permanent_blocklist_file = io.open('/Users/pauljohnson/.permanent_blocklist', 'r')
+
+    local permanent_blocklist_file = self._io.open(self._permanentBlocklistFilename, 'r')
     if permanent_blocklist_file == nil then
         error('permanent_blocklist_file is nil')
     end
-    local tmpname = os.tmpname()
-    local dest = io.open(tmpname, 'w')
+
+    local tmpname = self._os.tmpname()
+    local dest = self._io.open(tmpname, 'w')
     if dest == nil then
         error('dest is nil')
     end
-    local template = io.open(self._hostsTemplate, 'r')
+    local template = self._io.open(self._hostsTemplate, 'r')
     if template == nil then
         error('template is nil')
     end
@@ -72,11 +98,11 @@ function obj:updateBlockList(block)
         dest:write('\n')
     end
     if block then
-        for item in self._blocklist_file:lines() do
+        for item in blocklist_file:lines() do
             dest:write(string.format('0.0.0.0    %s\n', item))
         end
     end
-    for item in self._permanent_blocklist_file:lines() do
+    for item in permanent_blocklist_file:lines() do
         dest:write(string.format('0.0.0.0    %s\n', item))
     end
     local command = string.format(
@@ -84,98 +110,106 @@ function obj:updateBlockList(block)
         tmpname,
         self._hostsFilePath
     )
-    local handle = io.popen(command)
+    local handle = self._io.popen(command)
     if handle == nil then
         error('handle is nil')
     end
-    --   local result = handle:read("*a")
-    --   self._hs.printf(result)
     handle:close()
     dest:close()
-    os.remove(tmpname)
+    self._os.remove(tmpname)
     template:close()
     blocklist_file:close()
     permanent_blocklist_file:close()
 end
 
 function obj:resetState()
-    self._hs.settings.set('currentDay', nil)
-    self._hs.settings.set('timeSpent', 0)
+    self._store.set('currentDay', nil)
+    self._store.set('timeSpent', 0)
     self._currentTimer = nil
 end
 
+function obj:_runBlockTimer()
+    local now = self._os.date('*t')
+    local weekday = now.wday > 1 and now.wday < 7
+    local timeSpent = self._store.get('timeSpent')
+    local actualTimeLimit = nil
+    if weekday then
+        actualTimeLimit = self._timeLimit
+    else
+        actualTimeLimit = self._weekendTimeLimit
+    end
+
+    local message = self:_checkTime(now)
+
+    if message ~= nil then
+        self:_updateBlockList(true)
+        self._hs.alert(message)
+        self._currentTimer:stop()
+        self._currentTimer = nil
+        return
+    end
+
+    if timeSpent > 55 then
+        self._hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
+    elseif timeSpent % 5 == 0 then
+        self._hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
+    end
+
+    timeSpent = timeSpent + 1
+    self._store.set('timeSpent', timeSpent)
+end
+
+function obj:_checkTime(now)
+    local timeSpent = self._store.get('timeSpent')
+    local weekday = now.wday > 1 and now.wday < 7
+    if (weekday and timeSpent > self._timeLimit) or (not weekday and timeSpent > self._weekendTimeLimit) then
+        return 'No more time available today.'
+    end
+
+    -- if currentDay.wday > 1 and currentDay.wday < 7 and now.hour >= 8 and now.hour < 17 then
+    if now.hour >= 1 and now.hour < 18 then
+        return "Go back too work."
+    end
+
+    return nil
+end
+
 function obj:toggleSiteBlocking()
-    local now = os.date('*t')
-    local currentDay = self._hs.settings.get('currentDay')
-    local timeSpent = self._hs.settings.get('timeSpent')
+    local now = self._os.date('*t')
+    local currentDay = self._store.get('currentDay')
+    local timeSpent = self._store.get('timeSpent')
     if currentDay == nil or currentDay.day ~= now.day then
         currentDay = now
-        self._hs.settings.set('currentDay', currentDay)
+        self._store.set('currentDay', currentDay)
         if self._currentTimer ~= nil then
             self._currentTimer:stop()
         end
         self._currentTimer = nil
         timeSpent = 0
-        self._hs.settings.set('timeSpent', timeSpent)
-    end
-
-    local weekday = now.wday > 1 and now.wday < 7
-    if (weekday and timeSpent > self._timeLimit) or (not weekday and timeSpent > self._weekendTimeLimit) then
-        self._hs.alert('No more time available today.')
-        return
+        self._store.set('timeSpent', timeSpent)
     end
 
     if self._currentTimer ~= nil then
         self._currentTimer:stop()
         self._currentTimer = nil
         -- write block list
-        self:updateBlockList(true)
+        self:_updateBlockList(true)
         self._hs.alert('Starting Blocking...')
     else
-        -- hs.printf(hs.inspect(currentDay))
-        -- hs.printf(hs.inspect(now))
-        -- Check day of week
-        -- if currentDay.wday > 1 and currentDay.wday < 7 and now.hour >= 8 and now.hour < 17 then
-        if self._currentTimer ~= nil and now.hour >= 1 and now.hour < 18 then
-            self._hs.alert('Go back too work.')
+        local message = self:_checkTime(now)
+        if message ~= nil then
+            self._hs.alert(message)
+            self:_updateBlockList(true)
             return
         end
 
         -- remove block list
-        self._updateBlockList(false)
+        self:_updateBlockList(false)
 
         self._currentTimer = self._hs.timer.doEvery(
             60,
             function()
-                local now = os.date('*t')
-                local weekday = now.wday > 1 and now.wday < 7
-                local timeSpent = self._hs.settings.get('timeSpent')
-                local actualTimeLimit = nil
-                if weekday then
-                    actualTimeLimit = self._timeLimit
-                else
-                    actualTimeLimit = self._weekendTimeLimit
-                end
-
-                if timeSpent > actualTimeLimit then
-                    self._updateBlockList(true)
-                    self._hs.alert('Times Up, go do something important.')
-                    self._currentTimer:stop()
-                    self._currentTimer = nil
-                    return
-                end
-
-                if self._actualTimeLimit < 5 then
-                    self._hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
-                elseif timeSpent < 5 and timeSpent % 2 == 0 then
-                    self._hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
-                elseif timeSpent % 5 == 0 then
-                    self._hs.alert(string.format('%d Minutes remaining', actualTimeLimit - timeSpent))
-                end
-
-                timeSpent = timeSpent + 1
-                -- hs.printf(string.format('Ticking... %d', timeSpent))
-                self._hs.settings.set('timeSpent', timeSpent)
+                self:_runBlockTimer()
             end
         )
         self._currentTimer:start()
@@ -183,19 +217,23 @@ function obj:toggleSiteBlocking()
     end
 end
 
-function obj:_startBlockingTimer()
+function obj:_runTimeOfDayTimer()
+    local now = self._os.date('*t')
+    -- if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour >= 8 and now.hour < 17 then
+    if self._currentTimer ~= nil and now.hour >= 1 and now.hour < 18 then
+        self._currentTimer:stop()
+        self._currentTimer = nil
+        self:_updateBlockList(true)
+        self._hs.alert('Go back to work.')
+        return
+    end
+end
+
+function obj:start()
     self._timeOfDayTimer = self._hs.timer.doEvery(
         15,
         function()
-            local now = os.date('*t')
-            -- if currentTimer ~= nil and now.wday > 1 and now.wday < 7 and now.hour >= 8 and now.hour < 17 then
-            if self._currentTimer ~= nil and now.hour >= 1 and now.hour < 18 then
-                self._currentTimer:stop()
-                self._currentTimer = nil
-                self._updateBlockList(true)
-                self._hs.alert('Go back to work.')
-                return
-            end
+            self:_runTimeOfDayTimer()
         end
     )
 end

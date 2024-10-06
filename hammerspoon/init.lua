@@ -1,8 +1,12 @@
 -- TODO
--- - Saving/Loading Layouts
 -- - Modal controls
 -- - Test site blocking changes
 -- - Web interface for controls
+-- - Window Manager
+-- -- Vertical splits
+-- -- Floats
+-- -- Zoom
+-- -- Saving/Loading Layouts
 
 package.path = package.path .. ";./?.lua"
 require("site_blocker")
@@ -16,13 +20,14 @@ local window_manager_watcher = require("window_manager_watcher")
 
 WMWatcher = window_manager_watcher.new(WM, true)
 
-
 local Layouts = {
     default = {
-        columns = { {
-            type = new_wm.__STACK,
-            span = 1
-        } }
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            }
+        }
     },
     v = {
         columns = {
@@ -112,41 +117,44 @@ WindowManagerKey:start("f16", function(event)
     end
 end)
 
--- c = require("hs.canvas")
--- a = c.new{ x = 100, y = 100, h = 100, w = 100 }:show()
--- a:insertElement({ type = "rectangle", id = "part1", fillColor = { blue = 1 } })
--- a:insertElement({ type = "circle", id = "part2", fillColor = { green = 1 } })
-
 local ControlModal = hs.hotkey.modal.new("", "f15")
 
 ModalCanvas = nil
 Browser = nil
 
 function ControlModal:entered()
-    hs.printf("Entered")
-    Browser = hs.webview.newBrowser({ x = 100, y = 100, h = 100, w = 100 })
-    Browser:url(string.format("file://%s", hs.fs.pathToAbsolute("wmui/index.html")))
-    
+    local usercontent = hs.webview.usercontent.new("wmui")
+    usercontent:setCallback(function(event)
+        hs.printf("Event: %s", hs.inspect(event))
+    end)
+    Browser = hs.webview.newBrowser({ x = 100, y = 100, h = 400, w = 600 }, {}, usercontent)
+    Browser:url("http://localhost:3000")
+    function postMessageToWebview(message)
+        Browser:evaluateJavaScript([[
+        window.postMessage('hello from evaluateJavaScript', 'http://localhost:3000');
+        ]], function(result, error)
+            hs.printf("Evaluated JavaScript: %s", hs.inspect(result))
+            hs.printf("Evaluated JavaScript error: %s", hs.inspect(error))
+        end)
+    end
+
     Browser:show()
-    -- local canvas = require("hs.canvas")
-    -- ModalCanvas = canvas.new{ x = 100, y = 100, h = 100, w = 100 }:show()
-    -- ModalCanvas:insertElement({ type = "rectangle", id = "part1", fillColor = { blue = 1 } })
-    -- ModalCanvas:insertElement({ type = "circle", id = "part2", fillColor = { green = 1 } })
+    Browser:bringToFront()
+    Browser:navigationCallback(function(event)
+        hs.printf("Navigation event: %s", hs.inspect(event))
+    end)
 end
 
--- ControlModal:bind("", "c", function()
---     hs.alert("Setting target column")
---     ControlModal:exit()
--- end)
-
 ControlModal:bind("", "escape", function()
-    hs.alert("Escape")
-    -- ModalCanvas:delete()
     Browser:hide()
     ControlModal:exit()
 end)
 
--- ControlModal:bind("", "enter", function()
---     hs.alert("Enter")
---     ControlModal:exit()
--- end)
+ControlModal:bind("", "f15", function()
+    Browser:hide()
+    ControlModal:exit()
+end)
+
+ControlModal:bind("", "s", function()
+    postMessageToWebview({ message = "Hello from Hammerspoon" })
+end)

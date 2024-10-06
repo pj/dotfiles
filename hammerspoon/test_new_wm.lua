@@ -8,27 +8,33 @@ local new_wm = require("new_wm")
 -- local current_dir = lfs.currentdir()
 -- print("Current Working Directory: " .. current_dir)
 
-function mockGeometry()
-    local mockGeometry = {}
-    function mockGeometry.new(x, y, w, h)
-        return {
-            x = x,
-            y = y,
-            w = w,
-            h = h
-        }
-    end
+local mockGeometry = {}
+mockGeometry.__index = mockGeometry
+function mockGeometry.new(x, y, w, h)
+    local self = setmetatable({}, mockGeometry)
 
-    function mockGeometry.copy(frame)
-        return {
-            x = frame.x,
-            y = frame.y,
-            w = frame.w,
-            h = frame.h
-        }
-    end
+    self.x = x
+    self.y = y
+    self.w = w
+    self.h = h
 
-    return mockGeometry
+    return self
+end
+
+function mockGeometry:equals(t2)
+    return self.x==t2.x and self.y==t2.y and self.w==t2.w and self.h==t2.h
+end
+
+function mockGeometry.copy(frame)
+    return mockGeometry.new(frame.x, frame.y, frame.w, frame.h)
+end
+
+function mockGeometry.point(x, y)
+    return mockGeometry.new(x, y, nil, nil)
+end
+
+function mockGeometry.size(w, h)
+    return mockGeometry.new(nil, nil, w, h)
 end
 
 function mockWindowModule(windows)
@@ -62,17 +68,12 @@ function mockHs(windows)
             mainScreen = function()
                 return {
                     frame = function()
-                        return {
-                            x = 0,
-                            y = 0,
-                            w = 120,
-                            h = 100
-                        }
+                        return mockGeometry.new(0, 0, 120, 100)
                     end
                 }
             end
         },
-        geometry = mockGeometry(),
+        geometry = mockGeometry,
         window = mockWindowModule(windows)
     }
 end
@@ -90,7 +91,9 @@ function mockLogger()
 end
 
 function mockWindow(id, name)
-    local mockWindow = {}
+    local mockWindow = {
+        _frame = mockGeometry.new(999, 999, 999, 999)
+    }
     function mockWindow:id()
         return id
     end
@@ -99,8 +102,20 @@ function mockWindow(id, name)
         self._frame = frame
     end
 
+    function mockWindow:setTopLeft(frame)
+        self._frame = mockGeometry.new(frame.x, frame.y, self._frame.w, self._frame.h)
+    end
+
+    function mockWindow:setSize(frame)
+        self._frame = mockGeometry.new(self._frame.x, self._frame.y, frame.w, frame.h)
+    end
+
     function mockWindow:title()
         return name
+    end
+
+    function mockWindow:frame()
+        return self._frame
     end
 
     return mockWindow
@@ -128,9 +143,9 @@ function testSetLayout()
         }
     }, true)
 
-    lu.assertEquals(fooWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
-    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
-    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(fooWindow._frame, mockGeometry.new(60, 0, 60, 100))
+    lu.assertEquals(barWindow._frame, mockGeometry.new(0, 0, 60, 100))
+    lu.assertEquals(bazWindow._frame, mockGeometry.new(0, 0, 60, 100))
 end
 
 function testMoveTo()
