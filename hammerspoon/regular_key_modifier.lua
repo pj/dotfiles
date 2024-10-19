@@ -11,7 +11,7 @@ obj._hs = nil
 
 obj._pressed = false
 
-function obj.new(wm, debug, _logger, _hs)
+function obj.new(debug, onStart, onStop, _logger, _hs)
     local self = setmetatable({}, obj)
     if _hs then
         obj._hs = _hs
@@ -31,6 +31,14 @@ function obj.new(wm, debug, _logger, _hs)
         self._logger.d("initializing...")
     end
 
+    self._pressed = false
+
+    if onStart then
+        self._onStart = onStart
+    end
+    if onStop then
+        self._onStop = onStop
+    end
     return self
 end
 
@@ -40,30 +48,41 @@ function obj:start(key, func)
             local eventType = event:getType()
             if eventType == self._hs.eventtap.event.types.keyDown then
                 local keycode = self._hs.keycodes.map[event:getKeyCode()]
-                -- self._hs.printf("keycode: %s", keycode)
-                if keycode == key then
-                    self._pressed = true
-                    -- self._hs.printf("control pressed down")
-                    return true
-                elseif self._pressed then
+                if self._pressed then
+                    -- self._hs.printf("key pressed")
                     local shouldUnpress = func(event)
 
                     if shouldUnpress then
+                        if self._onStop then
+                            self._onStop(event)
+                        end
                         self._pressed = false
                     end
+                    return false
+                elseif not self._pressed and keycode == key then
+                    self._pressed = true
+                    if self._onStart then
+                        self._onStart(event)
+                    end
+                    -- self._hs.printf("control pressed down")
+                    return true
                 end
-            elseif eventType == self._hs.eventtap.event.types.keyUp then
-                local keycode = self._hs.keycodes.map[event:getKeyCode()]
-                if keycode == key then
-                    self._pressed = false
-                    -- self._hs.printf("control pressed up")
-                end
+            -- elseif eventType == self._hs.eventtap.event.types.keyUp then
+            --     local keycode = self._hs.keycodes.map[event:getKeyCode()]
+            --     if keycode == key then
+            --         self._pressed = false
+            --         -- self._hs.printf("control pressed up")
+            --     end
             end
 
             -- self._hs.printf("ControlPressed: %s", ControlPressed)
         end)
 
     self._eventTapper:start()
+end
+
+function obj:stop()
+    self._eventTapper:stop()
 end
 
 return obj

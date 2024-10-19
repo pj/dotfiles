@@ -64,7 +64,7 @@ end
 function obj:_updateBlockList(block)
     if block then
         local status, err = pcall(function()
-            local closerScript = string.format("/usr/bin/osascript %s", self._close_tab_script_filename)
+            local closerScript = string.format("/usr/bin/osascript %s", self._closeTabScriptFilename)
             local handle = self._io.popen(closerScript)
             if handle == nil then
                 error('handle is nil')
@@ -74,6 +74,22 @@ function obj:_updateBlockList(block)
         self._logger.e(string.format("status: %s err: %s", status, self._hs.inspect(err)))
     end
 
+    local tmpname = self:_generateHostsFile(block)
+
+    local command = string.format(
+        "/usr/bin/osascript -e 'do shell script \"sudo cp %s %s\" with administrator privileges'",
+        tmpname,
+        self._hostsFilePath
+    )
+    local handle = self._io.popen(command)
+    if handle == nil then
+        error('handle is nil')
+    end
+    handle:close()
+    self._os.remove(tmpname)
+end
+
+function obj:_generateHostsFile(block)
     local blocklist_file = self._io.open(self._blocklistFilename, 'r')
     if blocklist_file == nil then
         error('blocklist_file is nil')
@@ -105,21 +121,13 @@ function obj:_updateBlockList(block)
     for item in permanent_blocklist_file:lines() do
         dest:write(string.format('0.0.0.0    %s\n', item))
     end
-    local command = string.format(
-        "/usr/bin/osascript -e 'do shell script \"sudo cp %s %s\" with administrator privileges'",
-        tmpname,
-        self._hostsFilePath
-    )
-    local handle = self._io.popen(command)
-    if handle == nil then
-        error('handle is nil')
-    end
-    handle:close()
-    dest:close()
-    self._os.remove(tmpname)
+
     template:close()
     blocklist_file:close()
     permanent_blocklist_file:close()
+    dest:close()
+
+    return tmpname
 end
 
 function obj:resetState()
@@ -168,10 +176,37 @@ function obj:_checkTime(now)
 
     -- if currentDay.wday > 1 and currentDay.wday < 7 and now.hour >= 8 and now.hour < 17 then
     if now.hour >= 1 and now.hour < 18 then
-        return "Go back too work."
+        return "Go back to work."
     end
 
     return nil
+end
+
+function obj:_hostsFileChanged()
+    local tmpname = self:_generateHostsFile(true)
+
+    local generatedContentFile = self._io.open(tmpname, "r")
+    if not generatedContentFile then
+        return nil
+    end
+
+    local generatedContent = generatedContentFile:read("*all")
+    generatedContentFile:close()
+
+    local file = io.open(self._hostsFilePath, "r")
+    if not file then
+        return nil
+    end
+
+    local content = file:read("*all")
+    file:close()
+
+    if generatedContent ~= content then
+        return true
+    end
+
+    self._os.remove(tmpname)
+    return false
 end
 
 function obj:toggleSiteBlocking()
@@ -192,18 +227,18 @@ function obj:toggleSiteBlocking()
     if self._currentTimer ~= nil then
         self._currentTimer:stop()
         self._currentTimer = nil
-        -- write block list
         self:_updateBlockList(true)
         self._hs.alert('Starting Blocking...')
     else
         local message = self:_checkTime(now)
         if message ~= nil then
+            if self:_hostsFileChanged() then
+                self:_updateBlockList(true)
+            end
             self._hs.alert(message)
-            self:_updateBlockList(true)
             return
         end
 
-        -- remove block list
         self:_updateBlockList(false)
 
         self._currentTimer = self._hs.timer.doEvery(

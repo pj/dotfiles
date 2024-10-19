@@ -22,7 +22,7 @@ function mockGeometry.new(x, y, w, h)
 end
 
 function mockGeometry:equals(t2)
-    return self.x==t2.x and self.y==t2.y and self.w==t2.w and self.h==t2.h
+    return self.x == t2.x and self.y == t2.y and self.w == t2.w and self.h == t2.h
 end
 
 function mockGeometry.copy(frame)
@@ -74,7 +74,12 @@ function mockHs(windows)
             end
         },
         geometry = mockGeometry,
-        window = mockWindowModule(windows)
+        window = mockWindowModule(windows),
+        application = {
+            find = function(name)
+                return nil
+            end
+        }
     }
 end
 
@@ -86,6 +91,9 @@ function mockLogger()
     end
     testLogger.d = function(message)
         table.insert(testLogger.messages, message)
+    end
+    testLogger.ef = function(format, ...)
+        table.insert(testLogger.messages, string.format(format, ...))
     end
     return testLogger
 end
@@ -883,6 +891,49 @@ function testSetLayoutNormalRefresh()
     lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
     lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
     lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 120, h = 100 })
+end
+
+function testApplicationNotFound()
+    local fooWindow = mockWindow(1, "Foo")
+    local barWindow = mockWindow(2, "Bar")
+    local bazWindow = mockWindow(3, "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__WINDOW,
+                span = 1,
+                application = "Unknown",
+            },
+        }
+    }, true)
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+            windows = {
+                [fooWindow:id()] = fooWindow,
+                [barWindow:id()] = barWindow,
+                [bazWindow:id()] = bazWindow
+            }
+        },
+        {
+            type = new_wm.__WINDOW,
+            span = 1,
+            application = "Unknown",
+        },
+    })
+
+    lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
 end
 
 os.exit(lu.LuaUnit.run())

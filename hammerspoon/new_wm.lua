@@ -275,7 +275,7 @@ function obj:_rerender()
     -- list of pinned windows
     local pinned_windows = {}
     for _, column in ipairs(current_layout.columns) do
-        if column.type == obj.__WINDOW then
+        if column.type == obj.__WINDOW and column.window then
             pinned_windows[column.window:id()] = true
         end
     end
@@ -286,6 +286,9 @@ function obj:_rerender()
     local left_offset = 0
     for _, column in pairs(current_layout.columns) do
         local new_frame = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
+        if column.type == obj.__WINDOW and not column.window then
+            goto continue_rerender
+        end
         if column.type == obj.__STACK then
             for _, window in pairs(column.windows) do
                 local win_id = window:id()
@@ -315,6 +318,7 @@ function obj:_rerender()
             end
         end
 
+        ::continue_rerender::
         left_offset = left_offset + (column.span * window_width)
     end
 
