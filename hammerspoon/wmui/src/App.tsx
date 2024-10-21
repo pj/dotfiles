@@ -1,24 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
-import './App.css'
+import './index.css'
 import { FromMessageSchema, ToMessage } from './messages'
-// import { Widget } from './command_interpreter'
 
-type AppProps = { sendMessage: (message: ToMessage) => void }
+type AppProps = {
+    sendMessage: (message: ToMessage) => void,
+    setEventListener: (listener: (event: MessageEvent) => void) => void,
+    removeEventListener: (listener: (event: MessageEvent) => void) => void,
+    RootCommand: React.ComponentType<any>,
+    RootCommandProps: any
+}
 
-function App({ sendMessage }: AppProps) {
+function App({ sendMessage, setEventListener, removeEventListener, RootCommand, RootCommandProps }: AppProps) {
     const [hammerspoonReady, setHammerspoonReady] = useState(false)
-
-    // const [commandInterpreter, setCommandInterpreter] = useState(
-    //     new CommandInterpreter(
-    //         {
-    //             action: (_: string) => {
-    //                 return [null, [], false]
-    //             }
-    //         }
-    //     )
-    // )
-
-    // const [widgets, setWidgets] = useState<Widget[]>([])
 
     const handleMessage = useCallback((event: MessageEvent) => {
         const message = FromMessageSchema.parse(event.data)
@@ -27,63 +20,28 @@ function App({ sendMessage }: AppProps) {
 
         if (message.type === 'hammerspoonReady') {
             setHammerspoonReady(true)
-        } else if (message.type === 'resetCommandInterpreter') {
-            // setCommandInterpreter(
-            //     new CommandInterpreter(
-            //         {
-            //             action: (_: string) => {
-            //                 return [null, [], false]
-            //             }
-            //         }
-            //     )
-            // )
         }
     }, [])
 
     useEffect(() => {
-        window.addEventListener("message", handleMessage)
+        setEventListener(handleMessage)
         // Send message to hammerspoon to let it know the UI is ready
         sendMessage({
             type: 'uiReady'
         })
 
         return () => {
-            window.removeEventListener("message", handleMessage);
+            removeEventListener(handleMessage)
         }
     }, [handleMessage])
 
-    function handleKeyUp(event: React.KeyboardEvent<HTMLDivElement>): void {
-        sendMessage({
-            type: 'log',
-            log: `key up: ${event.key}`
-        })
-        event.stopPropagation()
-        // const [widgets, completed] = commandInterpreter.key(event.key)
-        // setWidgets(widgets)
-        // if (completed) {
-        //     setCommandInterpreter(
-        //         new CommandInterpreter(
-        //             {
-        //                 action: (_: string) => {
-        //                     return [null, [], false]
-        //                 }
-        //             }
-        //         )
-        //     )
-        // }
-    }
-
     return (
         hammerspoonReady ? (
-            <div className="box" onKeyUp={handleKeyUp}>
-                <div className="card">
-                    {/* {widgets.map((Widget, index) => (
-                        <Widget key={index} />
-                    ))} */}
-                </div>
+            <div className="flex flex-row border border-gray-200 rounded-lg p-3 shadow-lg bg-gray-100">
+                <RootCommand index={0} {...RootCommandProps} />
             </div>
         ) : (
-            <div>Loading...</div>
+            <div data-testid="app-loading">Loading...</div>
         )
     )
 }

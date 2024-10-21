@@ -1,13 +1,31 @@
 // import { ActionReturn, Command } from "./command_interpreter"
-import { sendMessage } from "./messages"
+import { useState } from "react"
+// import { sendMessage } from "./messages"
 
-export function CommandWrapper() {
-
+export type VolumeCommandProps = {
+  prefixes: Map<string, [React.ComponentType<any>, string]>
+  index: number
 }
 
-export function PrefixSelectCommand() {
+export function VolumeCommand({ prefixes, index }: VolumeCommandProps) {
+  const [selectedPrefix, setSelectedPrefix] = useState<string | null>(null)
 
-  return 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    setSelectedPrefix(event.key)
+  }
+
+  const prefixList = []
+
+  for (const [prefix, [_, description]] of prefixes.entries()) {
+    prefixList.push(<div key={prefix}>{prefix}: {description}</div>)
+  }
+
+  return <>
+    <div key={index} onKeyDown={handleKeyDown}>
+      {prefixList}
+    </div>
+    {selectedPrefix && prefixes.get(selectedPrefix)?.[0]}
+  </>;
 }
 
 // export class PrefixCommand {

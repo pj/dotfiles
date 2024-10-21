@@ -20,7 +20,7 @@ local window_manager_watcher = require("window_manager_watcher")
 
 WMWatcher = window_manager_watcher.new(WM, true)
 
-local Layouts = {
+Layouts = {
     default = {
         columns = {
             {
@@ -78,7 +78,7 @@ local Layouts = {
 }
 
 -- WM:setLayout(Layouts["f"], true)
-WM:setLayout(Layouts["p"], true)
+WM:setLayout(Layouts["s"], true)
 
 local regular_key_modifier = require("regular_key_modifier")
 
