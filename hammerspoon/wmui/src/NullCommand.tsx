@@ -4,9 +4,9 @@ export type NullCommandProps = {
   index: number
 }
 
-export function NullCommand({ index }: NullCommandProps) {
+export function NullCommand() {
   return (
-    <CommandWrapper index={index}>
+    <CommandWrapper index={1} testId="null-command">
         <div>
             Null
         </div>

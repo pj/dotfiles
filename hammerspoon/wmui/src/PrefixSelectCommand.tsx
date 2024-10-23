@@ -1,31 +1,47 @@
 import { useState } from "react"
 import { CommandWrapper } from "./CommandWrapper"
 import { ToMessage } from "./messages"
+import React from "react"
 
 export type PrefixSelectCommandProps = {
-  prefixes: Map<string, [React.ComponentType<any>, string]>
-  index: number
-  sendMessage: (message: ToMessage) => void
+    prefixes: Map<string, [React.ComponentType<any>, string]>
+    index: number
+    sendMessage: (message: ToMessage) => void
 }
 
 export function PrefixSelectCommand({ prefixes, index }: PrefixSelectCommandProps) {
-  const [selectedPrefix, setSelectedPrefix] = useState<string | null>(null)
+    const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    console.log("here")
-    setSelectedPrefix(event.key)
-  }
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const prefix = prefixes.get(event.key)
+        if (prefix) {
+            setSelectedKey(event.key)
+        }
+    }
 
-  const prefixList = []
+    const prefixList = []
 
-  for (const [prefix, [_, description]] of prefixes.entries()) {
-    prefixList.push(<div key={prefix}>{prefix}: {description}</div>)
-  }
+    for (const [prefix, [_, description]] of prefixes.entries()) {
+        prefixList.push(<div key={prefix}>{prefix}: {description}</div>)
+    }
 
-  return <>
-    <CommandWrapper index={index} onKeyDown={handleKeyDown} testId="prefix-select-command">
-      {prefixList}
-    </CommandWrapper>
-    {selectedPrefix && prefixes.get(selectedPrefix)}
-  </>;
+    let selectedComponent = null
+    if (selectedKey) {
+        const prefix = prefixes.get(selectedKey)
+        if (prefix) {
+            selectedComponent = prefix[0]
+        }
+    }
+
+    return <>
+        <CommandWrapper 
+            index={index} 
+            onKeyDown={handleKeyDown} 
+            testId="prefix-select-command" 
+            onBackspace={() => setSelectedKey(null)} 
+        >
+            {prefixList}
+        </CommandWrapper>
+        {selectedComponent ? React.createElement(selectedComponent, { index: index + 1 }) : <></>}
+    </>;
 }
