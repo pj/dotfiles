@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 
-import { NullCommand } from '../NullCommand';
+import { TextCommand } from '../NullCommand';
 import { PrefixSelectCommand } from '../PrefixSelectCommand';
 import App from '../App';
 import { FromMessage, ToMessage } from '../messages';
@@ -78,7 +78,7 @@ export const Selected: Story = {
     args: {
         prefixes: new Map(
             [
-                ['n', [NullCommand, 'Null'] as [React.ComponentType<any>, string]],
+                ['n', {component: TextCommand, props: {text: "Hello World!"}, description: 'Null'} ]
             ]
         ),
         index: 0,
@@ -145,7 +145,7 @@ export const Backspaced: Story = {
     args: {
         prefixes: new Map(
             [
-                ['n', [NullCommand, 'Null'] as [React.ComponentType<any>, string]],
+                ['n', {component: TextCommand, props: {text: "Hello World!"}, description: 'Null'} ]
             ]
         ),
         index: 0,

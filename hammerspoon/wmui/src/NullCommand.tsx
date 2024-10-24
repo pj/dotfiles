@@ -2,14 +2,25 @@ import { CommandWrapper } from "./CommandWrapper";
 
 export type NullCommandProps = {
   index: number
+  text: string
 }
 
-export function NullCommand() {
+type InnerNullCommandProps = {
+  text: string
+}
+
+function InnerNullCommand({ text }: InnerNullCommandProps) {
+    return <div>{text}</div>
+}
+
+export function TextCommand({ index, text }: NullCommandProps) {
   return (
-    <CommandWrapper index={1} testId="null-command">
-        <div>
-            Null
-        </div>
-    </CommandWrapper>
+    <CommandWrapper 
+        index={index} 
+        testId="null-command" 
+        component={InnerNullCommand} 
+        additionalProps={{ text }} 
+        nextCommand={null} 
+    />
   );
 }
