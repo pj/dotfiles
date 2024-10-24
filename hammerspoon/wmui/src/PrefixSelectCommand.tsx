@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { CommandWrapper, DefaultCommandProps, WrappedCommandGenerateProps } from "./CommandWrapper"
+import { defaultCommandProps, DefaultCommandProps, useFocus } from "./CommandWrapper"
 import { ToMessage } from "./messages"
 import React from "react"
 
@@ -16,11 +16,8 @@ export type PrefixSelectCommandProps = DefaultCommandProps & {
     sendMessage: (message: ToMessage) => void
 }
 
-type prefixCommandGenerateProps = WrappedCommandGenerateProps & {
-    prefixes: PrefixMap
-}
-
-function prefixCommandGenerate( props: prefixCommandGenerateProps) {
+export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
+    const { wrapperElement, setFocus } = useFocus()
     const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
     const prefixList = []
@@ -39,36 +36,27 @@ function prefixCommandGenerate( props: prefixCommandGenerateProps) {
         }
     }
 
+    function handleKey(event: React.KeyboardEvent<HTMLDivElement>) {
+        event.preventDefault()
+        if (event.key === 'Backspace') {
+            props.handleDelete()
+            return;
+        }
+        setSelectedKey(event.key)
+    }
+
     function handleDelete() {
         setSelectedKey(null)
-        props.handleDelete()
+        setFocus(true)
     }
 
-    return {
-        inner: <>{prefixList}</>,
-        next: selectedComponent ? React.createElement(selectedComponent, { index: props.index, handleDelete,...selectedProps }) : null,
-        keyHandler: (event: React.KeyboardEvent<HTMLDivElement>) => {
-            event.preventDefault()
-            if (event.key === 'Backspace') {
-                setSelectedKey(null)
-                return;
-            }
-            setSelectedKey(event.key)
-        }
-    }
-}
-
-export function PrefixSelectCommand({ prefixes, index, handleDelete }: PrefixSelectCommandProps) {
-
-    return <>
-        <CommandWrapper 
-            index={index} 
-            testId="prefix-select-command" 
-            generate={prefixCommandGenerate}
-            additionalProps={{
-                prefixes,
-            }}
-            handleDelete={handleDelete}
-        />
-    </>;
+    return (<>
+        <div
+            onKeyDown={handleKey}
+            {...defaultCommandProps(props.index, "prefix-select-command", wrapperElement, setFocus)}
+        >
+            {prefixList}
+        </div>
+        {selectedComponent ? React.createElement(selectedComponent, { index: props.index + 1, handleDelete, ...selectedProps }) : null}
+    </>)
 }

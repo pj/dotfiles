@@ -12,6 +12,7 @@ type AppProps = {
 
 function App({ sendMessage, setEventListener, removeEventListener, RootCommand, RootCommandProps }: AppProps) {
     const [hammerspoonReady, setHammerspoonReady] = useState(false)
+    // const [eventListenerReady, setEventListenerReady] = useState(false)
 
     const handleMessage = useCallback((event: MessageEvent) => {
         const message = FromMessageSchema.parse(event.data)
@@ -24,11 +25,13 @@ function App({ sendMessage, setEventListener, removeEventListener, RootCommand, 
     }, [])
 
     useEffect(() => {
+        console.log('setting event listener')
         setEventListener(handleMessage)
         // Send message to hammerspoon to let it know the UI is ready
         sendMessage({
             type: 'uiReady'
         })
+        // setEventListenerReady(true)
 
         return () => {
             removeEventListener(handleMessage)
@@ -37,7 +40,7 @@ function App({ sendMessage, setEventListener, removeEventListener, RootCommand, 
 
     return (
         hammerspoonReady ? (
-            <div className="flex flex-row flex-nowrap justify-start space-x-2.5 items-start  border border-gray-200 rounded-lg p-2.5 shadow-lg bg-gray-100">
+            <div className="bg-gray-300 shadow-xl flex flex-row flex-nowrap justify-start space-x-2.5 items-start border border-gray-400 rounded-lg p-2.5 ">
                 <RootCommand index={0} {...RootCommandProps} />
             </div>
         ) : (
