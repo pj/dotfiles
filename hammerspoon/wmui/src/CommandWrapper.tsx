@@ -1,52 +1,57 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-export type WrappedCommandResult = {
+export type WrappedCommandGenerateResult = {
     inner: React.ReactNode
     next: React.ReactNode | null
     keyHandler: (event: React.KeyboardEvent<HTMLDivElement>) => void
 }
 
-export type WrappedCommandGenerate = (additionalProps: AdditionalProps) => WrappedCommandResult
-
-export type WrappedCommandProps = {
-    keyPressed: string | null
+export type WrappedCommandGenerateProps = {
     focus: boolean
+    index: number
+    handleDelete: () => void
 }
 
-export type CommandWrapperProps<AdditionalProps> = {
+export type WrappedCommandGenerate<AdditionalProps> =
+    (additionalProps: WrappedCommandGenerateProps & AdditionalProps) => WrappedCommandGenerateResult
+
+export type DefaultCommandProps = {
     index: number,
-    testId: string
+    testId: string,
+    handleDelete: () => void
+}
 
-    generate: WrappedCommandGenerate
-
-    // component: React.ComponentType<WrappedCommandProps & AdditionalProps>
-    // additionalProps: AdditionalProps
+export type CommandWrapperProps<AdditionalProps> = DefaultCommandProps & {
+    generate: WrappedCommandGenerate<AdditionalProps>
+    additionalProps: AdditionalProps
 }
 
 export function CommandWrapper<AdditionalProps>(props: CommandWrapperProps<AdditionalProps>) {
     const wrapperElement = useRef<HTMLDivElement>(null);
-    const [keyPressed, setKeyPressed] = useState<string | null>(null)
-    const [focus, setFocus] = useState(false)
+    const [focus, setFocus] = useState(true)
 
     useLayoutEffect(() => {
-        setFocus(true)
-        wrapperElement.current?.focus();
-    }, []);
-
-    function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-        if (event.key === 'Backspace') {
-            event.preventDefault()
-            return;
+        console.log(`${props.testId}-${props.index} focus: ${focus}`)
+        if (focus) {
+            wrapperElement.current?.focus();
+        } else {
+            wrapperElement.current?.blur();
         }
-        setKeyPressed(event.key)
+    }, [focus]);
+
+    function handleDelete() {
+        props.handleDelete()
+        setFocus(true)
     }
 
+    const { inner, next, keyHandler } = props.generate({ focus, handleDelete, ...props.additionalProps, index: props.index + 1 })
+
     return (
+        <>
             <div
                 tabIndex={props.index}
                 onClick={() => {
                     setFocus(true)
-                    wrapperElement.current?.focus()
                 }}
                 onBlur={() => {
                     setFocus(false)
@@ -55,9 +60,11 @@ export function CommandWrapper<AdditionalProps>(props: CommandWrapperProps<Addit
                 data-testid={props.testId + '-' + props.index}
                 key={props.index}
                 className="bg-white rounded-lg p-10 border border-gray-300 shadow-md focus:outline-none focus:ring focus:ring-light-blue-200"
-                onKeyDown={handleKeyDown}
+                onKeyDown={keyHandler}
             >
-                {props.component ? React.createElement(props.component, { keyPressed, focus, ...props.additionalProps }) : <></>}
+                {inner}
             </div>
+            {next}
+        </>
     );
 }

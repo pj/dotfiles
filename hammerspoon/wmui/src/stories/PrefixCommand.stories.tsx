@@ -78,11 +78,22 @@ export const Selected: Story = {
     args: {
         prefixes: new Map(
             [
-                ['n', {component: TextCommand, props: {text: "Hello World!"}, description: 'Null'} ]
+                [
+                    'n', 
+                    {
+                        component: TextCommand, 
+                        props: {
+                            text: "Hello World!", 
+                        }, 
+                        description: 'Null'
+                    }
+                ]
             ]
         ),
         index: 0,
-        sendMessage: (msg: ToMessage) => { }
+        testId: 'prefix-select-command',
+        sendMessage: (msg: ToMessage) => { },
+        handleDelete: () => { console.log('top level handleDelete')}
     },
 };
 export const Backspaced: Story = {
@@ -111,7 +122,9 @@ export const Backspaced: Story = {
                     RootCommand={Command}
                     RootCommandProps={{
                         prefixes: args.prefixes,
-                        index: args.index
+                        index: args.index,
+                        testId: args.testId,
+                        handleDelete: args.handleDelete
                     }}
                     sendMessage={receiveMessage}
                     setEventListener={onMessage => parameters.commandMessaging.onMessage = onMessage}
@@ -145,11 +158,22 @@ export const Backspaced: Story = {
     args: {
         prefixes: new Map(
             [
-                ['n', {component: TextCommand, props: {text: "Hello World!"}, description: 'Null'} ]
+                [
+                    'n', 
+                    {
+                        component: TextCommand, 
+                        props: {
+                            text: "Hello World!", 
+                        }, 
+                        description: 'Null'
+                    }
+                ]
             ]
         ),
         index: 0,
-        sendMessage: (msg: ToMessage) => { }
+        testId: 'prefix-select-command',
+        sendMessage: (msg: ToMessage) => { },
+        handleDelete: () => { console.log('top level handleDelete')}
     },
 };
 

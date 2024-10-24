@@ -37,7 +37,7 @@ function App({ sendMessage, setEventListener, removeEventListener, RootCommand, 
 
     return (
         hammerspoonReady ? (
-            <div className="flex flex-row border border-gray-200 rounded-lg p-3 shadow-lg bg-gray-100">
+            <div className="flex flex-row flex-nowrap justify-start space-x-2.5 items-start  border border-gray-200 rounded-lg p-2.5 shadow-lg bg-gray-100">
                 <RootCommand index={0} {...RootCommandProps} />
             </div>
         ) : (
