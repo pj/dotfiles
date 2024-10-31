@@ -164,7 +164,9 @@ settings = {
 experimental-features = [ "nix-command" "flakes" ];
 };
 nixPath = [
-  "nixos-config=/home/paul/dotfiles/nixos/flake.nix"
+      "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
+            "nixos-config=/home/paul/dotfiles/nixos"
+            "/nix/var/nix/profiles/per-user/root/channels"
 ];
 };	
 }
