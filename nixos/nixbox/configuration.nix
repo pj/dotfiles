@@ -93,6 +93,17 @@
 
   home-manager.users.paul = {
     programs.home-manager.enable = true;
+    programs.alacritty = {
+      enable = true;
+      settings = {
+        shell.program = "zsh";
+
+        font.normal = {
+          family = "Monaco Nerd Font Mono";
+          style = "Regular";
+        };
+      };
+    };
     programs.git = {
       enable = true;
       userEmail = "paul@johnson.kiwi.nz";
@@ -100,7 +111,7 @@
       aliases = {
         gcb = "checkout -b";
       };
-
+      extraConfig.init.defaultBranch = "main";
     };
     programs.zsh = {
       enable = true;
@@ -247,7 +258,7 @@
     };
   };
 
-  fonts.packages = with pkgs; [
-  (nerdfonts.override { fonts = [ "Monaco" ]; })
-];  
+  #   fonts.packages = with pkgs; [
+  #   (nerdfonts.override { fonts = [ "Monaco" ]; })
+  # ];  
 }
