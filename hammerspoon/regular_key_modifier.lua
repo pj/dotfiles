@@ -10,6 +10,7 @@ obj._logger = nil
 obj._hs = nil
 
 obj._pressed = false
+obj._started = nil
 
 function obj.new(debug, onStart, onStop, _logger, _hs)
     local self = setmetatable({}, obj)
@@ -49,7 +50,6 @@ function obj:start(key, func)
             if eventType == self._hs.eventtap.event.types.keyDown then
                 local keycode = self._hs.keycodes.map[event:getKeyCode()]
                 if self._pressed then
-                    -- self._hs.printf("key pressed")
                     local shouldUnpress = func(event)
 
                     if shouldUnpress then
@@ -58,24 +58,20 @@ function obj:start(key, func)
                         end
                         self._pressed = false
                     end
-                    return false
+                    return true
                 elseif not self._pressed and keycode == key then
                     self._pressed = true
-                    if self._onStart then
-                        self._onStart(event)
+                    if not self._started then
+                        self._started = true
+                        if self._onStart then
+                            self._onStart(event)
+                        end
                     end
-                    -- self._hs.printf("control pressed down")
                     return true
                 end
-            -- elseif eventType == self._hs.eventtap.event.types.keyUp then
-            --     local keycode = self._hs.keycodes.map[event:getKeyCode()]
-            --     if keycode == key then
-            --         self._pressed = false
-            --         -- self._hs.printf("control pressed up")
-            --     end
+            elseif eventType == self._hs.eventtap.event.types.keyUp then
+                self._pressed = false
             end
-
-            -- self._hs.printf("ControlPressed: %s", ControlPressed)
         end)
 
     self._eventTapper:start()

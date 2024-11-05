@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { defaultCommandProps, DefaultCommandProps, useFocus } from "./CommandWrapper"
-import { ToMessage } from "./messages"
 import React from "react"
+import { AppExitContext, AppSendMessageContext } from "./App"
+import { Key } from "./Key"
 
 type Prefix = {
     component: React.ComponentType<any>
@@ -13,17 +14,19 @@ type PrefixMap = Map<string, Prefix>
 
 export type PrefixSelectCommandProps = DefaultCommandProps & {
     prefixes: PrefixMap
-    sendMessage: (message: ToMessage) => void
 }
 
 export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
+    const handleExit = useContext(AppExitContext)
     const { wrapperElement, setFocus } = useFocus()
     const [selectedKey, setSelectedKey] = useState<string | null>(null)
 
     const prefixList = []
 
     for (const [prefix, { description }] of props.prefixes.entries()) {
-        prefixList.push(<div key={prefix}>{prefix}: {description}</div>)
+        prefixList.push(<div key={prefix} className="flex flex-row items-center gap-2">
+            <Key key={prefix} text={prefix}/> <span className="text-md text-gray-600">{description}</span>
+        </div>)
     }
 
     let selectedComponent = null
@@ -38,6 +41,10 @@ export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
 
     function handleKey(event: React.KeyboardEvent<HTMLDivElement>) {
         event.preventDefault()
+        if (event.key === 'Escape') {
+            handleExit()
+            return;
+        }
         if (event.key === 'Backspace') {
             props.handleDelete()
             return;
@@ -52,11 +59,16 @@ export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
 
     return (<>
         <div
-            onKeyDown={handleKey}
+            key={props.index}
             {...defaultCommandProps(props.index, "prefix-select-command", wrapperElement, setFocus)}
+            onKeyDown={handleKey}
         >
-            {prefixList}
+            <div className="text-xs text-center text-gray-600">Select</div>
+            <hr className="border-gray-300"/>
+            <div className="card-body">
+                {prefixList}
+            </div>
         </div>
         {selectedComponent ? React.createElement(selectedComponent, { index: props.index + 1, handleDelete, ...selectedProps }) : null}
-    </>)
+    </>);
 }

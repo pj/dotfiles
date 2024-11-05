@@ -209,20 +209,23 @@ function obj:_hostsFileChanged()
     return false
 end
 
-function obj:toggleSiteBlocking()
+function obj:_resetState()
     local now = self._os.date('*t')
     local currentDay = self._store.get('currentDay')
     local timeSpent = self._store.get('timeSpent')
     if currentDay == nil or currentDay.day ~= now.day then
-        currentDay = now
-        self._store.set('currentDay', currentDay)
+        self._store.set('currentDay', now)
         if self._currentTimer ~= nil then
             self._currentTimer:stop()
         end
         self._currentTimer = nil
-        timeSpent = 0
-        self._store.set('timeSpent', timeSpent)
+        self._store.set('timeSpent', 0)
     end
+end
+
+function obj:toggleSiteBlocking()
+    self:_resetState()
+    local now = self._os.date('*t')
 
     if self._currentTimer ~= nil then
         self._currentTimer:stop()
@@ -273,8 +276,27 @@ function obj:start()
     )
 end
 
-return obj
+function obj:getState()
+    self:_resetState()
+    local now = self._os.date('*t')
+    local weekday = now.wday > 1 and now.wday < 7
+    local timeSpent = self._store.get('timeSpent')
+    local actualTimeLimit = nil
+    if weekday then
+        actualTimeLimit = self._timeLimit
+    else
+        actualTimeLimit = self._weekendTimeLimit
+    end
 
+    return {
+        timeSpent = self._store.get('timeSpent'),
+        isBlocked = self._currentTimer ~= nil,
+        totalSeconds = actualTimeLimit * 60,
+        validTime = not (now.hour >= 1 and now.hour < 18)
+    }
+end
+
+return obj
 --permablockTimer = hs.timer.doEvery(
 --  15,
 --  function()

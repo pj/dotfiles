@@ -12,12 +12,17 @@ export function TextCommand(props: NullCommandProps) {
         }
     }
 
-    return (<>
-        <div
-            onKeyDown={keyHandler}
-            {...defaultCommandProps(props.index, "text-command", wrapperElement, setFocus)}
-        >
-            <div>{props.text}</div>
-        </div>
-    </>)
+return (<>
+    <div
+        key={props.index}
+        {...defaultCommandProps(props.index, "text-command", wrapperElement, setFocus)}
+        onKeyDown={keyHandler}
+    >
+        <div className="text-xs text-center text-gray-600">Text</div>
+            <hr className="border-gray-300"/>
+            <div className="card-body">
+                {props.text}
+            </div>
+    </div>
+</>);
 }

@@ -1,36 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 
 import { TextCommand } from '../TextCommand';
 import { PrefixSelectCommand } from '../PrefixSelectCommand';
-import App from '../App';
-import { FromMessage, ToMessage } from '../messages';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
-function CommandDecorator(Command: React.ComponentType<any>, { args, parameters }) {
-    let receiveMessage = (msg: ToMessage) => {
-        parameters.commandMessaging.lastReceivedMessage = msg
-        parameters.commandMessaging.lastReceivedMessages.push(msg)
-    }
-
-    parameters.commandMessaging.sendMessage = (msg: FromMessage) => {
-        parameters.commandMessaging.onMessage(
-            new MessageEvent('message', { data: msg })
-        )
-    }
-
-    return (
-        <App
-            RootCommand={Command}
-            RootCommandProps={{
-                prefixes: args.prefixes,
-                index: args.index
-            }}
-            sendMessage={receiveMessage}
-            setEventListener={onMessage => { parameters.commandMessaging.onMessage = onMessage }}
-            removeEventListener={_ => parameters.commandMessaging.onMessage = null}
-        />
-    )
-}
+import { CommandDecorator } from './CommandDecorator';
+import { hammerspoonReady } from './utils';
 
 const meta = {
     title: 'PrefixCommand',
@@ -60,19 +34,18 @@ const meta = {
         prefixes: new Map(
             [
                 [
-                    'n',
+                    'H',
                     {
                         component: TextCommand,
                         props: {
                             text: "Hello World!",
                         },
-                        description: 'Null'
+                        description: 'Hello World'
                     }
                 ]
             ]
         ),
         index: 0,
-        sendMessage: (msg: ToMessage) => { },
         handleDelete: () => { },
     },
 } satisfies Meta<typeof PrefixSelectCommand>;
@@ -82,20 +55,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Setup: Story = {
     play: async ({ canvasElement, parameters }) => {
-        const canvas = within(canvasElement)
-        await waitFor(() => {
-            expect(parameters.commandMessaging.onMessage).not.toBeNull()
-        })
-
-
-        parameters.commandMessaging.sendMessage({ type: 'hammerspoonReady' })
-
-        expect(parameters.commandMessaging.lastReceivedMessages[0]).toEqual({ type: 'uiReady' })
-        expect(parameters.commandMessaging.lastReceivedMessages[1]).toEqual({ type: 'log', log: 'received message: {"type":"hammerspoonReady"}' })
-
-        await waitFor(() => {
-            expect(canvas.queryByTestId('app-loading')).not.toBeInTheDocument()
-        })
+        const canvas = await hammerspoonReady(canvasElement, parameters)
 
         const prefixSelectCommand = canvas.getByTestId('prefix-select-command-0')
         expect(prefixSelectCommand).toBeInTheDocument()

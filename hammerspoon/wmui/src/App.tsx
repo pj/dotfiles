@@ -1,51 +1,109 @@
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useEffect, useReducer, useState } from 'react'
 import './index.css'
-import { FromMessageSchema, ToMessage } from './messages'
+import React from 'react';
 
-type AppProps = {
-    sendMessage: (message: ToMessage) => void,
-    setEventListener: (listener: (event: MessageEvent) => void) => void,
-    removeEventListener: (listener: (event: MessageEvent) => void) => void,
-    RootCommand: React.ComponentType<any>,
-    RootCommandProps: any
+type AppProps<RootCommandProps> = {
+    sendMessage: (message: any) => void,
+    setMessageListener: (listener: (event: MessageEvent) => void) => void,
+    removeMessageListener: (listener: (event: MessageEvent) => void) => void,
+    RootCommand: React.ComponentType<RootCommandProps>,
+    RootCommandProps: RootCommandProps,
+    debug: boolean,
 }
 
-function App({ sendMessage, setEventListener, removeEventListener, RootCommand, RootCommandProps }: AppProps) {
-    const [hammerspoonReady, setHammerspoonReady] = useState(false)
-    // const [eventListenerReady, setEventListenerReady] = useState(false)
+export const AppStateContext = createContext<any>(null);
+export const AppSendMessageContext = createContext<any>(null);
+export const AppExitContext = createContext<any>(null);
 
-    const handleMessage = useCallback((event: MessageEvent) => {
-        const message = FromMessageSchema.parse(event.data)
 
-        sendMessage({ type: 'log', log: `received message: ${JSON.stringify(message)}` })
+class AppErrorBoundary extends React.Component<any, any> {
+    constructor(props: any) {
+        super(props);
+        this.state = { error: null };
+    }
 
-        if (message.type === 'hammerspoonReady') {
-            setHammerspoonReady(true)
+    static getDerivedStateFromError(error: any) {
+        return { error };
+    }
+
+    componentDidCatch(error: any, errorInfo: any) {
+        this.props.sendMessage({ type: 'log', log: `error: ${error}, errorInfo: ${errorInfo}` })
+    }
+
+    render() {
+        if (this.state.error) {
+            return <div>Something went wrong: {this.state.error}</div>;
         }
-    }, [])
+
+        return this.props.children;
+    }
+}
+
+function App<RootCommandProps>(
+    {
+        sendMessage,
+        setMessageListener,
+        removeMessageListener,
+        RootCommand,
+        RootCommandProps,
+        debug
+    }: AppProps<RootCommandProps>) {
+    const [appState, dispatchAppState] = useReducer((state: any, action: any) => {
+        if (action.type === 'resetState') {
+            return { hammerspoonReady: true, cacheBusterKey: Math.random() }
+        } else if (action.type === 'updateState') {
+            return { ...state, ...action.data }
+        }
+    }, {hammerspoonReady: false, cacheBusterKey: Math.random()});
+
+    const [lastMessage, setLastMessage] = useState<any>(null);
+
+    const handleMessage = useCallback((event: any) => {
+        sendMessage({ type: 'log', log: `received message: ${JSON.stringify(event.data)}` })
+        if (event.data.type === 'resetState') {
+            dispatchAppState({type: 'resetState'});
+        } else{
+            dispatchAppState({ type: 'updateState', data:  {[event.data.type]: event.data }});
+        }         
+        setLastMessage(event.data)
+    }, []);
 
     useEffect(() => {
-        console.log('setting event listener')
-        setEventListener(handleMessage)
-        // Send message to hammerspoon to let it know the UI is ready
+        setMessageListener(handleMessage)
+
         sendMessage({
             type: 'uiReady'
-        })
-        // setEventListenerReady(true)
+        });
 
         return () => {
-            removeEventListener(handleMessage)
+            removeMessageListener(handleMessage)
         }
     }, [handleMessage])
 
+    const handleExit = useCallback(() => {
+        console.log('handleExit')
+        sendMessage({ type: 'exit' })
+    }, [sendMessage]);
+
     return (
-        hammerspoonReady ? (
-            <div className="bg-gray-300 shadow-xl flex flex-row flex-nowrap justify-start space-x-2.5 items-start border border-gray-400 rounded-lg p-2.5 ">
-                <RootCommand index={0} {...RootCommandProps} />
-            </div>
-        ) : (
-            <div data-testid="app-loading">Loading...</div>
-        )
+        <AppErrorBoundary sendMessage={sendMessage}>
+            <AppStateContext.Provider value={appState}>
+                <AppSendMessageContext.Provider value={sendMessage}>
+                    <AppExitContext.Provider value={handleExit}>
+                        {
+                            appState.hammerspoonReady ? (
+                                <div key={appState.cacheBusterKey} className="bg-gray-300 shadow-xl flex flex-row flex-nowrap justify-start space-x-2.5 items-stretch border border-gray-400 rounded-lg p-2.5 h-full">
+                                    <RootCommand index={0} {...RootCommandProps} />
+                                </div>
+                            ) : (
+                                <div data-testid="app-loading">Loading...</div>
+                            )
+                        }
+                        {debug && <div data-testid="last-message">LastMessage: {JSON.stringify(lastMessage, null, 4)}</div>}
+                    </AppExitContext.Provider>
+                </AppSendMessageContext.Provider>
+            </AppStateContext.Provider>
+        </AppErrorBoundary>
     )
 }
 
