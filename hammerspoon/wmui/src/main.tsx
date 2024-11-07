@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { PrefixSelectCommand } from './PrefixSelectCommand.tsx'
 import { SiteBlockerCommand } from './SiteBlocker.tsx'
-
+import { WindowManagementLayoutCommand } from './window_management/LayoutCommand.tsx'
 export function sendMessage(message: any) {
   // @ts-ignore
   webkit.messageHandlers.wmui.postMessage(message)
@@ -17,7 +17,9 @@ createRoot(document.getElementById('root')!).render(
             RootCommand={PrefixSelectCommand}
             RootCommandProps={{
                 prefixes: new Map([
-                    ['b', {component: SiteBlockerCommand, props: {}, description: 'Site Blocker'}]
+                    ['b', {component: SiteBlockerCommand, props: {}, description: 'Site Blocker'}],
+                    ['w', {component: PrefixSelectCommand, props: {}, description: 'Window Management'}],
+                    ['l', {component: WindowManagementLayoutCommand, props: {}, description: 'Window Management Layout'}],
                 ]),
                 index: 0,
                 handleDelete: () => {}

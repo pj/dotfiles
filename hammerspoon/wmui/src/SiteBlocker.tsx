@@ -39,7 +39,7 @@ export function SiteBlockerCommand({ index, handleDelete }: SiteBlockerCommandPr
         secondsLeft = appState.siteBlocker.totalSeconds - appState.siteBlocker.timeSpent;
     }
 
-    console.log(appState.siteBlocker)
+    sendMessage({ type: 'log', message: JSON.stringify(appState.siteBlocker) })
 
     return (
         <div

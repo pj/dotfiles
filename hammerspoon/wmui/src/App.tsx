@@ -81,7 +81,6 @@ function App<RootCommandProps>(
     }, [handleMessage])
 
     const handleExit = useCallback(() => {
-        console.log('handleExit')
         sendMessage({ type: 'exit' })
     }, [sendMessage]);
 
@@ -92,7 +91,7 @@ function App<RootCommandProps>(
                     <AppExitContext.Provider value={handleExit}>
                         {
                             appState.hammerspoonReady ? (
-                                <div key={appState.cacheBusterKey} className="bg-gray-300 shadow-xl flex flex-row flex-nowrap justify-start space-x-2.5 items-stretch border border-gray-400 rounded-lg p-2.5 h-full">
+                                <div key={appState.cacheBusterKey} className="bg-gray-100 shadow-xl flex flex-row flex-nowrap justify-start space-x-2.5 items-stretch border border-gray-200 rounded-lg p-2.5 h-full">
                                     <RootCommand index={0} {...RootCommandProps} />
                                 </div>
                             ) : (
