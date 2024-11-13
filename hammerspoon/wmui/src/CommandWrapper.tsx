@@ -39,7 +39,12 @@ export function defaultCommandProps(index: number, testId: string, wrapperElemen
         ref: wrapperElement,
         "data-testid": testId + '-' + index,
         className: "card card-bordered bg-white shadow-md border-gray-300 focus:outline-none focus:ring focus:ring-light-blue-200",
-        onClick: () => setFocus(true),
+        onClick: (event: React.MouseEvent<HTMLDivElement>) => {
+            if (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) {
+                return; // Let the input handle the event naturally
+            }
+            setFocus(true)
+        },
         onBlur: () => setFocus(false)
     }
 }

@@ -59,7 +59,7 @@ function App<RootCommandProps>(
     const [lastMessage, setLastMessage] = useState<any>(null);
 
     const handleMessage = useCallback((event: any) => {
-        sendMessage({ type: 'log', log: `received message: ${JSON.stringify(event.data)}` })
+        // sendMessage({ type: 'log', log: `received message: ${JSON.stringify(event.data)}` })
         if (event.data.type === 'resetState') {
             dispatchAppState({type: 'resetState'});
         } else{

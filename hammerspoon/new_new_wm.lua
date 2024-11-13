@@ -1,9 +1,9 @@
 local inspect = require("inspect")
 local obj = {}
-obj.__STACK = {}
-obj.__EMPTY = {}
-obj.__PINNED = {}
-obj.__VSPLIT = {}
+obj.__STACK = "stack"
+obj.__EMPTY = "empty"
+obj.__PINNED = "pinned"
+obj.__VSPLIT = "vsplit"
 
 obj.__index = obj
 
@@ -146,6 +146,10 @@ function obj:start()
     for _, window in pairs(windows) do
         self._window_cache[window:id()] = window
         local application = window:application()
+        if application == nil then
+            self._logger.e("Window has no application: %s", window:title())
+            goto continue
+        end
 
         if self._application_cache[application:name()] == nil then
             self._application_cache[application:name()] = { [window:title()] = window }
@@ -154,6 +158,7 @@ function obj:start()
         end
 
         self:_watcherForApplication(application)
+        ::continue::
     end
     self:_startApplicationWatcher()
 
@@ -213,6 +218,10 @@ end
 
 function obj:setLayout(layout)
     self:_reconcile(layout)
+end
+
+function obj:getLayout()
+    return self._current_layout[self._hs.spaces.focusedSpace()]
 end
 
 function obj:incrementSplit()
@@ -390,6 +399,25 @@ function obj:moveFocusedTo(destIndex)
     self:_reconcile(new_layout)
 end
 
+function obj:_positionWindow(window, new_frame)
+    self._logger.d("Moving window: %s, to: %s", window:id(), new_frame)
+    local current_frame = window:frame()
+    self._logger.d("Current frame: %s", current_frame)
+    if not current_frame:equals(new_frame) then
+        self._logger.d("Current frame is not equal to new frame")
+        if current_frame.x ~= new_frame.x then
+            self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.x)
+            window:setTopLeft(self._hs.geometry.point(new_frame.x, new_frame.y))
+        end
+        if current_frame.w ~= new_frame.w then
+            self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.w)
+            window:setSize(self._hs.geometry.size(new_frame.w, new_frame.h))
+        end
+    else
+        self._logger.d("Current frame is equal to new frame")
+    end
+end
+
 function obj:_reconcile(new_layout)
     local current_space = self._hs.spaces.focusedSpace()
     local current_screen = self._hs.screen.mainScreen()
@@ -405,8 +433,7 @@ function obj:_reconcile(new_layout)
 
     local left_offset = 0
     local pinned_windows = {}
-    local stack_offset = nil
-    local stack_span = nil
+    local stack_position = nil
     for _, column in pairs(new_layout.columns) do
         if column.type == obj.__PINNED then
             local application = self._application_cache[column.application]
@@ -419,43 +446,61 @@ function obj:_reconcile(new_layout)
                 if column.title == nil or window:title() == column.title then
                     pinned_windows[window:id()] = window
                     local new_frame = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
-                    self._logger.d("Moving window: %s, to: %s", window:id(), new_frame)
-                    local current_frame = window:frame()
-                    self._logger.d("Current frame: %s", current_frame)
-                    if not current_frame:equals(new_frame) then
-                        self._logger.d("Current frame is not equal to new frame")
-                        if current_frame.x ~= new_frame.x then
-                            self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.x)
-                            window:setTopLeft(self._hs.geometry.point(new_frame.x, new_frame.y))
-                        end
-                        if current_frame.w ~= new_frame.w then
-                            self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.w)
-                            window:setSize(self._hs.geometry.size(new_frame.w, new_frame.h))
-                        end
-                    else
-                        self._logger.d("Current frame is equal to new frame")
-                    end
+                    self:_positionWindow(window, new_frame)
                 end
             end
-
         elseif column.type == obj.__STACK then
-            stack_offset = left_offset
-            stack_span = column.span
+            stack_position = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
+        elseif column.type == obj.__VSPLIT then
+            local top_offset = 0
+            local total_row_span = 0
+            for _, row in pairs(column.rows) do
+                total_row_span = total_row_span + row.span
+            end
+            local row_height = window_height / total_row_span
+            for _, row in pairs(column.rows) do
+                if row.type == obj.__PINNED then
+                    local application = self._application_cache[row.application]
+                    if application == nil then
+                        error("Application not found: " .. row.application)
+                    end
+
+                    for _, window in pairs(application) do
+                        self._logger.d("Split Window: %s, Title: %s, Row Title: %s", window:id(), window:title(), row.title)
+                        if row.title == nil or window:title() == row.title then
+                            pinned_windows[window:id()] = window
+                            local new_frame = self._hs.geometry.new(
+                                left_offset,
+                                top_offset,
+                                window_width * column.span,
+                                row_height * row.span
+                            )
+                            self:_positionWindow(window, new_frame)
+                        end
+                    end
+                elseif row.type == obj.__STACK then
+                    stack_position = self._hs.geometry.new(left_offset, top_offset, window_width * column.span, row_height * row.span)
+                end
+                top_offset = top_offset + (row.span * row_height)
+            end
         end
 
         left_offset = left_offset + (column.span * window_width)
     end
 
+    if stack_position == nil then
+        error("Stack not found")
+    end
+
     for _, stack_window in pairs(self._window_cache) do
         if pinned_windows[stack_window:id()] == nil then
-            local new_frame = self._hs.geometry.new(stack_offset, 0, window_width * stack_span, window_height)
             local current_frame = stack_window:frame()
-            if not current_frame:equals(new_frame) then
-                if current_frame.x ~= new_frame.x then
-                    stack_window:setTopLeft(self._hs.geometry.point(new_frame.x, new_frame.y))
+            if not current_frame:equals(stack_position) then
+                if current_frame.x ~= stack_position.x then
+                    stack_window:setTopLeft(self._hs.geometry.point(stack_position.x, stack_position.y))
                 end
-                if current_frame.w ~= new_frame.w then
-                    stack_window:setSize(self._hs.geometry.size(new_frame.w, new_frame.h))
+                if current_frame.w ~= stack_position.w then
+                    stack_window:setSize(self._hs.geometry.size(stack_position.w, stack_position.h))
                 end
             end
         end

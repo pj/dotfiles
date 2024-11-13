@@ -9,7 +9,6 @@ export async function hammerspoonReady(canvasElement: HTMLElement, parameters: a
   parameters.commandMessaging.sendMessage({ type: 'hammerspoonReady' })
 
   expect(parameters.commandMessaging.lastReceivedMessages[0]).toEqual({ type: 'uiReady' })
-  expect(parameters.commandMessaging.lastReceivedMessages[1]).toEqual({ type: 'log', log: 'received message: {"type":"hammerspoonReady"}' })
 
   await waitFor(() => {
     expect(canvas.queryByTestId('app-loading')).not.toBeInTheDocument()

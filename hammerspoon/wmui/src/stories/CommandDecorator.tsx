@@ -22,6 +22,7 @@ export function CommandDecorator(Command: React.ComponentType<any>, { args, para
             sendMessage={receiveMessage}
             setMessageListener={onMessage => { parameters.commandMessaging.onMessage = onMessage }}
             removeMessageListener={_ => parameters.commandMessaging.onMessage = null}
+            debug={args.debug}
         />
     )
 }

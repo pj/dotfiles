@@ -64,11 +64,11 @@ function obj:postMessageToWebview(message)
         window.postMessage(]] .. self._hs.json.encode(message) .. [[, ']] .. self._appAddress .. [[');
     ]]
 
-    ,
-    function(result, error)
-        self._hs.printf("Evaluated JavaScript: %s", self._hs.inspect(result))
-        self._hs.printf("Evaluated JavaScript error: %s", self._hs.inspect(error))
-    end
+    -- ,
+    -- function(result, error)
+    --     self._hs.printf("Evaluated JavaScript: %s", self._hs.inspect(result))
+    --     self._hs.printf("Evaluated JavaScript error: %s", self._hs.inspect(error))
+    -- end
     )
 end
 
@@ -82,7 +82,7 @@ function obj:start()
             local eventType = event:getType()
             if eventType == self._hs.eventtap.event.types.keyDown then
                 local keycode = self._hs.keycodes.map[event:getKeyCode()]
-                if keycode == 'f15' then
+                if keycode == 'f16' then
                     if self._browserVisible then
                         self:hideBrowser()
                     else
@@ -121,7 +121,6 @@ function obj:_receiveMessageFromWebview(event)
     if event.body.type == "uiReady" then
         self._browserReady = true
         self:postMessageToWebview({ type = "hammerspoonReady" })
-        -- UpdateBrowserState()
     elseif event.body.type == "exit" then
         if self._browser ~= nil then
             self._browser:hide()

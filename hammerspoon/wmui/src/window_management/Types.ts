@@ -12,12 +12,15 @@ export type Screen = {
 }
 
 export type Column = {
-  type: "split" | "stack" | "window" | "empty"
+  type: "vsplit" | "stack" | "window" | "empty"
   span: number
+  application?: string
+  title?: string
 }
 
 export type Layout = {
     name: string
+    quickKey: string
     columns: Column[]
 }
 
