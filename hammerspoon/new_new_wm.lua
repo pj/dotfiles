@@ -21,7 +21,7 @@ obj._logger = nil
 
 obj._hs = nil
 
-function obj.new(loglevel, _logger, _hs)
+function obj.new(loglevel, _logger, _hs, _disable_application_watcher)
     local self = setmetatable({}, obj)
     if _hs then
         obj._hs = _hs
@@ -36,10 +36,14 @@ function obj.new(loglevel, _logger, _hs)
         self._logger = self._hs.logger.new('new_wm', loglevel)
         self._logger.d("initializing...")
     end
+    self._disable_application_watcher = _disable_application_watcher
     return self
 end
 
 function obj:_watcherForApplication(application)
+    if self._disable_application_watcher then
+        return
+    end
     local function onEvent(application, element, event)
         if element:role() ~= "AXWindow" then
             return
@@ -90,6 +94,9 @@ function obj:_watcherForApplication(application)
 end
 
 function obj:_startApplicationWatcher()
+    if self._disable_application_watcher then
+        return
+    end
     self._applicationWatchers = {}
     self._applicationWatcher = self._hs.application.watcher.new(
         function(name, event, application)
@@ -375,23 +382,51 @@ function obj:moveFocusedTo(destIndex)
     local pinnedAt, stackAt = self:_findPinnedAndStack(new_layout, focusedWindow)
 
     -- Moving pinned window to stack
-    if stackAt == destIndex then
+    if pinnedAt ~= nil and stackAt == destIndex then
         if pinnedAt == nil then
             error("Unable to find window to move to stack")
         end
         new_layout.columns[pinnedAt] = { type = obj.__EMPTY, span = new_layout.columns[pinnedAt].span }
         self:_reconcile(new_layout)
         return
-    end
+    elseif pinnedAt ~= nil then
+        -- Moving from pinned to a column
+        local sourceColumn = new_layout.columns[pinnedAt]
+        new_layout.columns[pinnedAt] = { type = obj.__EMPTY, span = new_layout.columns[pinnedAt].span }
+        if destIndex > #new_layout.columns then
+            for _ = 1, destIndex - #new_layout.columns do
+                table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+            end
+        end
 
-    local pinnedOrStackAt = pinnedAt or stackAt
-
-    if pinnedOrStackAt ~= nil then
-        local sourceColumn = new_layout.columns[pinnedOrStackAt]
-        table.remove(new_layout.columns, pinnedOrStackAt)
-        local destColumn = new_layout.columns[destIndex]
         new_layout.columns[destIndex] = sourceColumn
-        table.insert(new_layout.columns, destIndex + 1, destColumn)
+        local destColumn = new_layout.columns[destIndex]
+        new_layout.columns[destIndex] = {
+            type = obj.__PINNED,
+            span = destColumn.span,
+            title = sourceColumn.title,
+            application = sourceColumn.application
+        }
+    elseif stackAt ~= nil then
+        -- Moving from stack to a column
+        if destIndex == stackAt then
+            return
+        end
+
+        if destIndex > #new_layout.columns then
+            for _ = 1, destIndex - #new_layout.columns do
+                table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+            end
+        end
+
+        local destColumn = new_layout.columns[destIndex]
+
+        new_layout.columns[destIndex] = {
+            type = obj.__PINNED,
+            span = destColumn.span,
+            application = focusedWindow:application():name(),
+            title = focusedWindow:title()
+        }
     else
         error("No pinned or stack column found")
     end
@@ -405,11 +440,11 @@ function obj:_positionWindow(window, new_frame)
     self._logger.d("Current frame: %s", current_frame)
     if not current_frame:equals(new_frame) then
         self._logger.d("Current frame is not equal to new frame")
-        if current_frame.x ~= new_frame.x then
+        if current_frame.x ~= new_frame.x or current_frame.y ~= new_frame.y then
             self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.x)
             window:setTopLeft(self._hs.geometry.point(new_frame.x, new_frame.y))
         end
-        if current_frame.w ~= new_frame.w then
+        if current_frame.w ~= new_frame.w or current_frame.h ~= new_frame.h then
             self._logger.d("Moving window: %s, to: %s", window:id(), new_frame.w)
             window:setSize(self._hs.geometry.size(new_frame.w, new_frame.h))
         end
@@ -438,7 +473,8 @@ function obj:_reconcile(new_layout)
         if column.type == obj.__PINNED then
             local application = self._application_cache[column.application]
             if application == nil then
-                error("Application not found: " .. column.application)
+                self._logger.e("Application not found: " .. column.application)
+                goto continue
             end
 
             for _, window in pairs(application) do
@@ -449,6 +485,7 @@ function obj:_reconcile(new_layout)
                     self:_positionWindow(window, new_frame)
                 end
             end
+            ::continue::
         elseif column.type == obj.__STACK then
             stack_position = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
         elseif column.type == obj.__VSPLIT then
@@ -462,7 +499,8 @@ function obj:_reconcile(new_layout)
                 if row.type == obj.__PINNED then
                     local application = self._application_cache[row.application]
                     if application == nil then
-                        error("Application not found: " .. row.application)
+                        self._logger.e("Application not found: " .. row.application)
+                        goto continue
                     end
 
                     for _, window in pairs(application) do
@@ -481,6 +519,7 @@ function obj:_reconcile(new_layout)
                 elseif row.type == obj.__STACK then
                     stack_position = self._hs.geometry.new(left_offset, top_offset, window_width * column.span, row_height * row.span)
                 end
+                ::continue::
                 top_offset = top_offset + (row.span * row_height)
             end
         end

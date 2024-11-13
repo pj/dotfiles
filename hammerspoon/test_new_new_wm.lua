@@ -94,7 +94,6 @@ function mockApplication(name)
     return mockApplication
 end
 
-
 function mockLogger()
     local testLogger = {}
     testLogger.messages = {}
@@ -102,6 +101,9 @@ function mockLogger()
         table.insert(testLogger.messages, string.format(format, ...))
     end
     testLogger.d = function(message)
+        table.insert(testLogger.messages, message)
+    end
+    testLogger.e = function(message)
         table.insert(testLogger.messages, message)
     end
     testLogger.ef = function(format, ...)
@@ -150,7 +152,8 @@ function testSetLayout()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
 
     wm:setLayout({
         columns = {
@@ -177,7 +180,8 @@ function testMoveTo()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
 
     hs.window._focusedWindow = bazWindow
 
@@ -206,7 +210,7 @@ end
 --     local barWindow = mockWindow(2, "Bar", "Bar")
 --     local bazWindow = mockWindow(3, "Baz", "Baz")
 --     local hs = mockHs({ fooWindow, barWindow, bazWindow })
---     local wm = new_wm.new(true, mockLogger(), hs)
+--     local wm = new_wm.new(true, mockLogger(), hs, true)
 
 --     hs.window._focusedWindow = bazWindow
 
@@ -239,8 +243,8 @@ function testMoveToExistingPosition()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
-
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
     hs.window._focusedWindow = bazWindow
 
     wm:setLayout({
@@ -291,8 +295,8 @@ function testMoveToSamePosition()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
-
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
     hs.window._focusedWindow = bazWindow
 
     wm:setLayout({
@@ -335,8 +339,8 @@ function testMoveToStack()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
-
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
     hs.window._focusedWindow = bazWindow
 
     wm:setLayout({
@@ -372,13 +376,76 @@ function testMoveToStack()
     lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
 end
 
+function testMoveVSplitToStack()
+    local fooWindow = mockWindow(1, "Foo", "Foo")
+    local barWindow = mockWindow(2, "Bar", "Bar")
+    local bazWindow = mockWindow(3, "Baz", "Baz")
+    local hs = mockHs({ fooWindow, barWindow, bazWindow })
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
+    hs.window._focusedWindow = bazWindow
+
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__VSPLIT,
+                span = 1,
+                rows = {
+                    {
+                        type = new_wm.__PINNED,
+                        span = 1,
+                        title = bazWindow:title(),
+                        application = bazWindow:application():name()
+                    },
+                    {
+                        type = new_wm.__EMPTY,
+                        span = 1
+                    },
+                }
+            }
+        }
+    })
+
+    wm:moveFocusedTo(1)
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1
+        },
+        {
+            type = new_wm.__VSPLIT,
+            span = 1,
+            rows = {
+                {
+                    type = new_wm.__EMPTY,
+                    span = 1
+                },
+                {
+                    type = new_wm.__EMPTY,
+                    span = 1
+                },
+            }
+        }
+    }
+    )
+
+    lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
 function testSetSpanOnPositionedWindow()
     local fooWindow = mockWindow(1, "Foo", "Foo")
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
-
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
     hs.window._focusedWindow = bazWindow
 
     wm:setLayout({
@@ -421,7 +488,8 @@ function testSetSpanOnStackWindow()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
     local hs = mockHs({ fooWindow, barWindow, bazWindow })
-    local wm = new_wm.new(true, mockLogger(), hs)
+    local wm = new_wm.new(true, mockLogger(), hs, true)
+    wm:start()
 
     hs.window._focusedWindow = bazWindow
 
@@ -465,8 +533,8 @@ function testSplit()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setSplits(2)
 
     lu.assertEquals(wm._current_layout[1].columns, {
@@ -509,24 +577,24 @@ function testSplitMultiple()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setSplits(3)
     lu.assertEquals(
         wm._current_layout[1].columns, {
-        {
-            type = new_wm.__STACK,
-            span = 1,
-        },
-        {
-            type = new_wm.__EMPTY,
-            span = 1
-        },
-        {
-            type = new_wm.__EMPTY,
-            span = 1
-        }
-    })
+            {
+                type = new_wm.__STACK,
+                span = 1,
+            },
+            {
+                type = new_wm.__EMPTY,
+                span = 1
+            },
+            {
+                type = new_wm.__EMPTY,
+                span = 1
+            }
+        })
     lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 40, h = 100 })
     lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 40, h = 100 })
     lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 40, h = 100 })
@@ -537,8 +605,8 @@ function testReduceSplit()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -585,8 +653,8 @@ function testReduceSplitMultiple()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -629,8 +697,8 @@ function testReduceSplitRepositionStack()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -665,8 +733,8 @@ function testAddNewWindow()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -707,8 +775,8 @@ function testRemoveWindow()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -749,8 +817,8 @@ function testRemovePinnedWindow()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -792,7 +860,7 @@ end
 --     local bazWindow = mockWindow(3, "Baz", "Baz")
 
 --     local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+--     wm:start()
 --     wm:setLayout({
 --         columns = {
 --             {
@@ -839,8 +907,8 @@ function testApplicationNotFound()
     local barWindow = mockWindow(2, "Bar", "Bar")
     local bazWindow = mockWindow(3, "Baz", "Baz")
 
-    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }))
-
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
     wm:setLayout({
         columns = {
             {
@@ -872,6 +940,130 @@ function testApplicationNotFound()
     lu.assertEquals(fooWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
     lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
     lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
+function testVSplit()
+    local fooWindow = mockWindow(1, "Foo", "Foo")
+    local barWindow = mockWindow(2, "Bar", "Bar")
+    local bazWindow = mockWindow(3, "Baz", "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__STACK,
+                span = 1
+            },
+            {
+                type = new_wm.__VSPLIT,
+                span = 1,
+                rows = {
+                    {
+                        type = new_wm.__EMPTY,
+                        span = 3
+                    },
+                    {
+                        type = new_wm.__PINNED,
+                        span = 1,
+                        title = fooWindow:title(),
+                        application = fooWindow:application():name()
+                    },
+                }
+            },
+        }
+    })
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__STACK,
+            span = 1,
+        },
+        {
+            type = new_wm.__VSPLIT,
+            span = 1,
+            rows = {
+                {
+                    type = new_wm.__EMPTY,
+                    span = 3
+                },
+                {
+                    type = new_wm.__PINNED,
+                    span = 1,
+                    title = fooWindow:title(),
+                    application = fooWindow:application():name()
+                },
+            }
+        },
+    })
+
+    lu.assertEquals(fooWindow._frame, { x = 60, y = 75, w = 60, h = 25 })
+    lu.assertEquals(barWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 100 })
+end
+
+function testStackInsideVSplit()
+    local fooWindow = mockWindow(1, "Foo", "Foo")
+    local barWindow = mockWindow(2, "Bar", "Bar")
+    local bazWindow = mockWindow(3, "Baz", "Baz")
+
+    local wm = new_wm.new(true, mockLogger(), mockHs({ fooWindow, barWindow, bazWindow }), true)
+    wm:start()
+    wm:setLayout({
+        columns = {
+            {
+                type = new_wm.__VSPLIT,
+                span = 1,
+                rows = {
+                    {
+                        type = new_wm.__STACK,
+                        span = 1
+                    },
+                    {
+                        type = new_wm.__PINNED,
+                        span = 1,
+                        title = fooWindow:title(),
+                        application = fooWindow:application():name()
+                    },
+                }
+            },
+            {
+                type = new_wm.__PINNED,
+                span = 1,
+                title = barWindow:title(),
+                application = barWindow:application():name()
+            },
+        }
+    })
+
+    lu.assertEquals(wm._current_layout[1].columns, {
+        {
+            type = new_wm.__VSPLIT,
+            span = 1,
+            rows = {
+                {
+                    type = new_wm.__STACK,
+                    span = 1
+                },
+                {
+                    type = new_wm.__PINNED,
+                    span = 1,
+                    title = fooWindow:title(),
+                    application = fooWindow:application():name()
+                },
+            }
+        },
+        {
+            type = new_wm.__PINNED,
+            span = 1,
+            title = barWindow:title(),
+            application = barWindow:application():name()
+        },
+    })
+
+    lu.assertEquals(fooWindow._frame, { x = 0, y = 50, w = 60, h = 50 })
+    lu.assertEquals(barWindow._frame, { x = 60, y = 0, w = 60, h = 100 })
+    lu.assertEquals(bazWindow._frame, { x = 0, y = 0, w = 60, h = 50 })
 end
 
 os.exit(lu.LuaUnit.run())
