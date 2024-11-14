@@ -49,46 +49,58 @@ local new_wm = require("new_new_wm")
 
 DefaultLayouts = {
     {
+        type = new_wm.__ROOT,
         name = "VLC",
         quickKey = "v",
-        columns = {
-            {
-                type = new_wm.__STACK,
-                span = 3
-            },
-            {
-                type = new_wm.__PINNED,
-                span = 1,
-                application = "VLC"
+        child = {
+            type = new_wm.__COLUMNS,
+            columns = {
+                {
+                    type = new_wm.__STACK,
+                    span = 3
+                },
+                {
+                    type = new_wm.__PINNED,
+                    span = 1,
+                    application = "VLC"
+                }
             }
         }
     },
     {
+        type = new_wm.__ROOT,
         name = "Plex",
         quickKey = "p",
-        columns = {
-            {
-                type = new_wm.__STACK,
-                span = 3
-            },
-            {
-                type = new_wm.__PINNED,
-                span = 1,
-                application = "Plex"
+        child = {
+            type = new_wm.__COLUMNS,
+            columns = {
+                {
+                    type = new_wm.__STACK,
+                    span = 3
+                },
+                {
+                    type = new_wm.__PINNED,
+                    span = 1,
+                    application = "Plex"
+                }
             }
         }
     },
     {
+        type = new_wm.__ROOT,
         name = "Split",
         quickKey = "s",
-        columns = {
-            {
-                type = new_wm.__STACK,
-                span = 1
-            },
-            {
-                type = new_wm.__EMPTY,
-                span = 1
+        child = {
+            type = new_wm.__COLUMNS,
+            columns = {
+                {
+                    type = new_wm.__STACK,
+                    span = 1
+                },
+                {
+                    type = new_wm.__EMPTY,
+                    span = 1
+                }
             }
         }
     }
@@ -128,7 +140,8 @@ ModalCommander = modal_commander.new({
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
         modalCommander:postMessageToWebview(siteBlockerState)
-        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts, currentLayout = WM:getLayout() })
+        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts, currentLayout = WM
+        :getLayout() })
     end
 })
 
@@ -137,16 +150,4 @@ ModalCommander:start()
 WM = new_wm.new("info")
 WM:start()
 
-WM:setLayout({
-    columns = {
-        {
-            type = new_wm.__STACK,
-            span = 3
-        },
-        {
-            type = new_wm.__PINNED,
-            span = 1,
-            application = "VLC"
-        }
-    }
-})
+WM:setLayout(DefaultLayouts[1])

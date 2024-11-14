@@ -1,24 +1,20 @@
 local inspect = require("inspect")
+require("utils")
 local obj = {}
+obj.__index = obj
 obj.__STACK = "stack"
 obj.__EMPTY = "empty"
 obj.__PINNED = "pinned"
-obj.__VSPLIT = "vsplit"
-
-obj.__index = obj
+obj.__ROWS = "rows"
+obj.__COLUMNS = "columns"
+obj.__ROOT = "root"
 
 -- Metadata
 obj.name = "PaulsTilingWM"
 
 -- log a bunch of debugging information
 obj._debug = false
-
-obj._initialized = false
-
--- map of letters to specific layouts
-
 obj._logger = nil
-
 obj._hs = nil
 
 function obj.new(loglevel, _logger, _hs, _disable_application_watcher)
@@ -65,13 +61,14 @@ function obj:_watcherForApplication(application)
                 self._debounceResize = {}
             end
             if self._debounceResize[element:id()] == nil then
-                self._hs.timer.doAfter(0.4, function(   )
+                self._hs.timer.doAfter(0.4, function()
                     self._logger.d("Starting resize for window: %s, id: %s", element:title(), element:id())
                     self:_reconcile(self._current_layout[self._hs.spaces.focusedSpace()])
                 end)
                 self._debounceResize[element:id()] = self._hs.timer.secondsSinceEpoch()
             else
-                self._logger.d("Debouncing resize for window: %s, id: %s, time: %s", element:title(), element:id(), self._debounceResize[element:id()])
+                self._logger.d("Debouncing resize for window: %s, id: %s, time: %s", element:title(), element:id(),
+                    self._debounceResize[element:id()])
                 local current_time = self._hs.timer.secondsSinceEpoch()
                 local time_diff = current_time - self._debounceResize[element:id()]
                 if time_diff > 0.6 then
@@ -120,7 +117,7 @@ function obj:_startApplicationWatcher()
             end
         end
     )
-    self._applicationWatcher:start({self._hs.application.watcher.launching, self._hs.application.watcher.terminated})
+    self._applicationWatcher:start({ self._hs.application.watcher.launching, self._hs.application.watcher.terminated })
 end
 
 -- Functions to update the window cache
@@ -131,7 +128,19 @@ function obj:start()
     end
 
     if self._current_layout[current_space] == nil then
-        self._current_layout[current_space] = { columns = { { type = obj.__STACK, span = 1 } } }
+        self._current_layout[current_space] =
+        {
+            type = obj.__ROOT,
+            child = {
+                columns = {
+                    {
+                        type = obj.__STACK,
+                        span = 1
+                    }
+                },
+                type = obj.__COLUMNS
+            }
+        }
     end
 
     if self._window_cache == nil then
@@ -201,6 +210,7 @@ function obj:_windowIsPinned(column, window)
         error("column has no application")
     end
 
+    print(inspect(window))
     if column.application ~= window:application():name() then
         return false
     end
@@ -214,15 +224,6 @@ end
 
 -- Functions to change the layout
 
-function obj:_copyExistingLayout()
-    local current_space = self._hs.spaces.focusedSpace()
-    local new_layout = { columns = {} }
-    for _, column in pairs(self._current_layout[current_space].columns) do
-        table.insert(new_layout.columns, column)
-    end
-    return new_layout
-end
-
 function obj:setLayout(layout)
     self:_reconcile(layout)
 end
@@ -232,83 +233,216 @@ function obj:getLayout()
 end
 
 function obj:incrementSplit()
-    local new_layout = self:_copyExistingLayout()
-    table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
+
+    local sublayout = new_layout
+    if new_layout.type == obj.__ROOT then
+        sublayout = new_layout.child
+    end
+
+    if sublayout.type == obj.__COLUMNS then
+        table.insert(sublayout.columns, { type = obj.__EMPTY, span = 1 })
+    elseif sublayout.type == obj.__ROWS then
+        table.insert(sublayout.rows, { type = obj.__EMPTY, span = 1 })
+    else
+        error("Unknown layout type: " .. sublayout.type)
+    end
 
     self:_reconcile(new_layout)
 end
 
 function obj:decrementSplit()
-    local new_layout = self:_copyExistingLayout()
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
 
-    if #new_layout.columns > 1 then
-        local last_column = new_layout.columns[#new_layout.columns]
-        -- Reposition the stack to the previous column and remove the last column
-        if last_column.type == obj.__STACK then
-            new_layout.columns[#new_layout.columns - 1] = last_column
+    local sublayout = new_layout
+    if new_layout.type == obj.__ROOT then
+        sublayout = new_layout.child
+    end
+
+    if sublayout.type == obj.__COLUMNS then
+        if #sublayout.columns > 1 then
+            local last_column = sublayout.columns[#sublayout.columns]
+            -- Reposition the stack to the previous column and remove the last column
+            if last_column.type == obj.__STACK then
+                new_layout.columns[#new_layout.columns - 1] = last_column
+            end
+            table.remove(sublayout.columns, #sublayout.columns)
         end
-        table.remove(new_layout.columns, #new_layout.columns)
+    elseif sublayout.type == obj.__ROWS then
+        if #sublayout.rows > 1 then
+            local last_row = sublayout.rows[#sublayout.rows]
+            -- Reposition the stack to the previous column and remove the last column
+            if last_row.type == obj.__STACK then
+                new_layout.rows[#new_layout.rows - 1] = last_row
+            end
+            table.remove(sublayout.rows, #sublayout.rows)
+        end
+    else
+        error("Unknown layout type: " .. sublayout.type)
     end
 
     self:_reconcile(new_layout)
 end
 
 function obj:setSplits(number_of_splits)
-    local new_layout = self:_copyExistingLayout()
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
+
+    local sublayout = new_layout
+    if new_layout.type == obj.__ROOT then
+        sublayout = new_layout.child
+    end
+
+    local items = nil
+    if sublayout.type == obj.__COLUMNS then
+        items = sublayout.columns
+    elseif sublayout.type == obj.__ROWS then
+        items = sublayout.rows
+    else
+        error("Unknown layout type: " .. sublayout.type)
+    end
+    assert(items ~= nil)
 
     -- Decrease the number of splits
-    if #new_layout.columns > number_of_splits then
+    local updatedItems = {}
+    if #items > number_of_splits then
         local stack_column = nil
-        local updatedColumns = {}
-        for x, column in pairs(new_layout.columns) do
+        for x, item in pairs(items) do
             if x <= number_of_splits then
-                table.insert(updatedColumns, column)
-            elseif column.type == obj.__STACK then
-                stack_column = column
+                table.insert(updatedItems, item)
+            elseif item.type == obj.__STACK then
+                stack_column = item
             end
         end
-        new_layout.columns = updatedColumns
 
         if stack_column ~= nil then
-            table.remove(new_layout.columns, #new_layout.columns)
-            table.insert(new_layout.columns, stack_column)
+            table.remove(updatedItems, #updatedItems)
+            table.insert(updatedItems, stack_column)
         end
     else
-        for x = 1, number_of_splits - #new_layout.columns do
-            table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+        for _, item in pairs(items) do
+            table.insert(updatedItems, item)
         end
+        for x = 1, number_of_splits - #items do
+            table.insert(updatedItems, { type = obj.__EMPTY, span = 1 })
+        end
+    end
+
+    if sublayout.type == obj.__COLUMNS then
+        sublayout.columns = updatedItems
+    elseif sublayout.type == obj.__ROWS then
+        sublayout.rows = updatedItems
+    else
+        error("Unknown layout type: " .. sublayout.type)
     end
 
     self:_reconcile(new_layout)
 end
 
-function obj:_findPinnedAndStack(layout, window)
-    local pinnedAt = nil
-    local stackAt = nil
-    for x, column in pairs(layout.columns) do
-        if column.type == obj.__PINNED and self:_windowIsPinned(column, window) then
-            pinnedAt = x
+function obj:_findPinnedAndStack(window, layout, parent, parentIndex)
+    if layout.type == obj.__ROOT then
+        local pinned = nil
+        local pinnedIndex = nil
+        local stack = nil
+        local stackIndex = nil
+        local child_pinned, child_pinned_index, child_stack, child_stack_index = self:_findPinnedAndStack(
+            window,
+            layout.child,
+            layout,
+            1
+        )
+        if child_pinned ~= nil then
+            pinned = child_pinned
+            pinnedIndex = child_pinned_index
         end
-
-        if column.type == obj.__STACK then
-            stackAt = x
+        if child_stack ~= nil then
+            stack = child_stack
+            stackIndex = child_stack_index
         end
+        return pinned, pinnedIndex, stack, stackIndex
+    elseif layout.type == obj.__COLUMNS then
+        local pinned = nil
+        local pinnedIndex = nil
+        local stack = nil
+        local stackIndex = nil
+        for i, column in pairs(layout.columns) do
+            local child_pinned, child_pinned_index, child_stack, child_stack_index = self:_findPinnedAndStack(
+                window,
+                column,
+                layout,
+                i
+            )
+            if child_pinned ~= nil then
+                pinned = child_pinned
+                pinnedIndex = child_pinned_index
+            end
+            if child_stack ~= nil then
+                stack = child_stack
+                stackIndex = child_stack_index
+            end
+        end
+        return pinned, pinnedIndex, stack, stackIndex
+    elseif layout.type == obj.__ROWS then
+        local pinned = nil
+        local pinnedIndex = nil
+        local stack = nil
+        local stackIndex = nil
+        for i, row in pairs(layout.rows) do
+            local child_pinned, child_pinned_index, child_stack, child_stack_index = self:_findPinnedAndStack(
+                window,
+                row,
+                layout,
+                i
+            )
+            if child_pinned ~= nil then
+                pinned = child_pinned
+                pinnedIndex = child_pinned_index
+            end
+            if child_stack ~= nil then
+                stack = child_stack
+                stackIndex = child_stack_index
+            end
+        end
+        return pinned, pinnedIndex, stack, stackIndex
+    elseif layout.type == obj.__PINNED then
+        if self:_windowIsPinned(layout, window) then
+            return parent, parentIndex, nil, nil
+        end
+        return nil, nil, nil, nil
+    elseif layout.type == obj.__STACK then
+        return nil, nil, parent, parentIndex
+    elseif layout.type == obj.__EMPTY then
+        return nil, nil, nil, nil
+    else
+        error("Unknown layout type: " .. layout.type)
     end
-
-    return pinnedAt, stackAt
 end
 
 function obj:_updateFocusedSpan(setterFunc)
-    local new_layout = self:_copyExistingLayout()
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
     local focusedWindow = self._hs.window.focusedWindow()
 
     -- See if focused window is pinned in the layout
-    local pinnedAt, stackAt = self:_findPinnedAndStack(new_layout, focusedWindow)
+    local pinnedIn, pinnedIndex, stackedIn, stackIndex = self:_findPinnedAndStack(focusedWindow, new_layout, nil, nil)
 
-    if pinnedAt ~= nil then
-        new_layout.columns[pinnedAt].span = setterFunc(new_layout.columns[pinnedAt].span)
-    elseif stackAt ~= nil then
-        new_layout.columns[stackAt].span = setterFunc(new_layout.columns[stackAt].span)
+    if pinnedIn ~= nil then
+        if pinnedIn.type == obj.__COLUMNS then
+            pinnedIn.columns[pinnedIndex].span = setterFunc(pinnedIn.columns[pinnedIndex].span)
+        elseif pinnedIn.type == obj.__ROWS then
+            pinnedIn.rows[pinnedIndex].span = setterFunc(pinnedIn.rows[pinnedIndex].span)
+        else
+            error("Unknown layout type: " .. pinnedIn.type)
+        end
+    elseif stackedIn ~= nil then
+        if stackedIn.type == obj.__COLUMNS then
+            stackedIn.columns[stackIndex].span = setterFunc(stackedIn.columns[stackIndex].span)
+        elseif stackedIn.type == obj.__ROWS then
+            stackedIn.rows[stackIndex].span = setterFunc(stackedIn.rows[stackIndex].span)
+        else
+            error("Unknown layout type: " .. stackedIn.type)
+        end
     else
         error("No pinned or stack column found")
     end
@@ -328,105 +462,96 @@ function obj:setFocusedColumnSpan(span)
     self:_updateFocusedSpan(function(current) return span end)
 end
 
-function obj:moveLeft()
-    local new_layout = self:_copyExistingLayout()
+function obj:moveFocusedTo(destPosition)
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
     local focusedWindow = self._hs.window.focusedWindow()
 
-    local pinnedAt, stackAt = self:_findPinnedAndStack(new_layout, focusedWindow)
-
-    local pinnedOrStackAt = pinnedAt or stackAt
-
-    if pinnedOrStackAt ~= nil then
-        if pinnedAt == 1 then
-            return
-        end
-        local previousColumn = new_layout.columns[pinnedOrStackAt - 1]
-        table.insert(new_layout.columns, pinnedOrStackAt - 1, new_layout[pinnedOrStackAt])
-        table.insert(new_layout.columns, pinnedOrStackAt, previousColumn)
-    else
-        error("No pinned or stack column found")
-    end
-
-    self:_reconcile(new_layout)
-end
-
-function obj:moveRight()
-    local new_layout = self:_copyExistingLayout()
-    local focusedWindow = self._hs.window.focusedWindow()
-
-    local pinnedAt, stackAt = self:_findPinnedAndStack(new_layout, focusedWindow)
-
-    local pinnedOrStackAt = pinnedAt or stackAt
-
-    if pinnedOrStackAt ~= nil then
-        if pinnedOrStackAt == #new_layout.columns then
-            local currentColumn = new_layout.columns[pinnedOrStackAt]
-            table.insert(new_layout.columns, currentColumn)
-            table.insert(new_layout.columns, pinnedOrStackAt, { type = obj.__EMPTY, span = 1 })
-        else
-            local nextColumn = new_layout.columns[pinnedOrStackAt + 1]
-            table.insert(new_layout.columns, pinnedOrStackAt + 1, new_layout[pinnedOrStackAt])
-            table.insert(new_layout.columns, pinnedOrStackAt, nextColumn)
-        end
-    else
-        error("No pinned or stack column found")
-    end
-
-    self:_reconcile(new_layout)
-end
-
-function obj:moveFocusedTo(destIndex)
-    local new_layout = self:_copyExistingLayout()
-    local focusedWindow = self._hs.window.focusedWindow()
-
-    local pinnedAt, stackAt = self:_findPinnedAndStack(new_layout, focusedWindow)
+    local pinnedIn, pinnedIndex, stackedIn, stackedIndex = self:_findPinnedAndStack(focusedWindow, new_layout, nil, nil)
 
     -- Moving pinned window to stack
-    if pinnedAt ~= nil and stackAt == destIndex then
-        if pinnedAt == nil then
-            error("Unable to find window to move to stack")
+    if pinnedIn ~= nil and stackedIn ~= nil and stackedIndex == destPosition then
+        assert(pinnedIndex ~= nil)
+        if pinnedIn.type == obj.__COLUMNS then
+            pinnedIn.columns[pinnedIndex] = { type = obj.__EMPTY, span = pinnedIn.columns[pinnedIndex].span }
+        elseif pinnedIn.type == obj.__ROWS then
+            pinnedIn.rows[pinnedIndex] = { type = obj.__EMPTY, span = pinnedIn.rows[pinnedIndex].span }
+        else
+            error("Unknown layout type: " .. pinnedIn.type)
         end
-        new_layout.columns[pinnedAt] = { type = obj.__EMPTY, span = new_layout.columns[pinnedAt].span }
-        self:_reconcile(new_layout)
-        return
-    elseif pinnedAt ~= nil then
+    elseif pinnedIn ~= nil then
         -- Moving from pinned to a column
-        local sourceColumn = new_layout.columns[pinnedAt]
-        new_layout.columns[pinnedAt] = { type = obj.__EMPTY, span = new_layout.columns[pinnedAt].span }
-        if destIndex > #new_layout.columns then
-            for _ = 1, destIndex - #new_layout.columns do
-                table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+        local items = nil
+        if pinnedIn.type == obj.__COLUMNS then
+            items = pinnedIn.columns
+        elseif pinnedIn.type == obj.__ROWS then
+            items = pinnedIn.rows
+        else
+            error("Unknown layout type: " .. pinnedIn.type)
+        end
+
+        assert(pinnedIndex ~= nil)
+        local sourceColumn = items[pinnedIndex]
+        items[pinnedIndex] = { type = obj.__EMPTY, span = sourceColumn.span }
+        if destPosition > #items then
+            for _ = 1, destPosition - #items do
+                table.insert(items, { type = obj.__EMPTY, span = 1 })
             end
         end
 
-        new_layout.columns[destIndex] = sourceColumn
-        local destColumn = new_layout.columns[destIndex]
-        new_layout.columns[destIndex] = {
+        items[destPosition] = sourceColumn
+        local destColumn = items[destPosition]
+    local newPinned = {
             type = obj.__PINNED,
             span = destColumn.span,
             title = sourceColumn.title,
             application = sourceColumn.application
         }
-    elseif stackAt ~= nil then
+
+        if pinnedIn.type == obj.__COLUMNS then
+            pinnedIn.columns[destPosition] = newPinned
+        elseif pinnedIn.type == obj.__ROWS then
+            pinnedIn.rows[destPosition] = newPinned
+        else
+            error("Unknown layout type: " .. pinnedIn.type)
+        end
+    elseif stackedIn ~= nil then
         -- Moving from stack to a column
-        if destIndex == stackAt then
+        if destPosition == stackedIndex then
             return
         end
 
-        if destIndex > #new_layout.columns then
-            for _ = 1, destIndex - #new_layout.columns do
-                table.insert(new_layout.columns, { type = obj.__EMPTY, span = 1 })
+        local items = nil
+        if stackedIn.type == obj.__COLUMNS then
+            items = stackedIn.columns
+        elseif stackedIn.type == obj.__ROWS then
+            items = stackedIn.rows
+        else
+            error("Unknown layout type: " .. stackedIn.type)
+        end
+
+        if destPosition > #items then
+            for _ = 1, destPosition - #items do
+                table.insert(items, { type = obj.__EMPTY, span = 1 })
             end
         end
 
-        local destColumn = new_layout.columns[destIndex]
+        local destColumn = items[destPosition]
 
-        new_layout.columns[destIndex] = {
+        local newPinned = {
             type = obj.__PINNED,
             span = destColumn.span,
             application = focusedWindow:application():name(),
             title = focusedWindow:title()
         }
+
+        if stackedIn.type == obj.__COLUMNS then
+            stackedIn.columns[destPosition] = newPinned
+        elseif stackedIn.type == obj.__ROWS then
+            stackedIn.rows[destPosition] = newPinned
+        else
+            error("Unknown layout type: " .. stackedIn.type)
+        end
     else
         error("No pinned or stack column found")
     end
@@ -453,79 +578,97 @@ function obj:_positionWindow(window, new_frame)
     end
 end
 
+function obj:_reconcileDirectional(items, bounding_frame, direction)
+    local offset = nil
+    local total_span_size = nil
+    if direction then
+        offset = bounding_frame.x
+        total_span_size = bounding_frame.w
+    else
+        offset = bounding_frame.y
+        total_span_size = bounding_frame.h
+    end
+
+    local total_span = 0
+    for _, item in pairs(items) do
+        total_span = total_span + item.span
+    end
+    local span_size = total_span_size / total_span
+    local stack_position = nil
+    local pinned_windows = {}
+    for _, item in pairs(items) do
+        local new_frame = nil
+        if direction then
+            new_frame = self._hs.geometry.new(
+                offset,
+                bounding_frame.y,
+                span_size * item.span,
+                bounding_frame.h
+            )
+        else
+            new_frame = self._hs.geometry.new(
+                bounding_frame.x,
+                offset,
+                bounding_frame.w,
+                span_size * item.span
+            )
+        end
+        local recursive_stack_position, recursive_pinned_windows = self:_reconcileRecursive(item, new_frame)
+        if recursive_stack_position ~= nil then
+            stack_position = recursive_stack_position
+        end
+        for _, window in pairs(recursive_pinned_windows) do
+            pinned_windows[window:id()] = window
+        end
+        offset = offset + (item.span * span_size)
+    end
+
+    return stack_position, pinned_windows
+end
+
+function obj:_reconcileRecursive(new_layout, current_frame)
+    -- print("--------------------------------")
+    -- print("Layout: \n", inspect(new_layout))
+    -- print("Frame: \n", inspect(current_frame))
+    if new_layout.type == obj.__ROOT then
+        return self:_reconcileRecursive(new_layout.child, current_frame)
+    elseif new_layout.type == obj.__COLUMNS then
+        return self:_reconcileDirectional(new_layout.columns, current_frame, true)
+    elseif new_layout.type == obj.__ROWS then
+        return self:_reconcileDirectional(new_layout.rows, current_frame, false)
+    elseif new_layout.type == obj.__PINNED then
+        local pinned_windows = {}
+        local application = self._application_cache[new_layout.application]
+        if application == nil then
+            self._logger.e("Application not found: " .. new_layout.application)
+            goto continue
+        end
+
+        for _, window in pairs(application) do
+            self._logger.d("Window: %s, Title: %s, Column Title: %s", window:id(), window:title(), new_layout.title)
+            if new_layout.title == nil or window:title() == new_layout.title then
+                pinned_windows[window:id()] = window
+                self:_positionWindow(window, current_frame)
+            end
+        end
+        ::continue::
+        return nil, pinned_windows
+    elseif new_layout.type == obj.__STACK then
+        return current_frame, {}
+    elseif new_layout.type == obj.__EMPTY then
+        return nil, {}
+    else
+        error("Unknown layout type: " .. new_layout.type)
+    end
+end
+
 function obj:_reconcile(new_layout)
+    print("================================================")
     local current_space = self._hs.spaces.focusedSpace()
     local current_screen = self._hs.screen.mainScreen()
     local current_frame = current_screen:frame()
 
-    local divisions = 0
-    for _, column in ipairs(new_layout.columns) do
-        divisions = column.span + divisions
-    end
-
-    local window_width = current_frame.w / divisions
-    local window_height = current_frame.h
-
-    local left_offset = 0
-    local pinned_windows = {}
-    local stack_position = nil
-    for _, column in pairs(new_layout.columns) do
-        if column.type == obj.__PINNED then
-            local application = self._application_cache[column.application]
-            if application == nil then
-                self._logger.e("Application not found: " .. column.application)
-                goto continue
-            end
-
-            for _, window in pairs(application) do
-                self._logger.d("Window: %s, Title: %s, Column Title: %s", window:id(), window:title(), column.title)
-                if column.title == nil or window:title() == column.title then
-                    pinned_windows[window:id()] = window
-                    local new_frame = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
-                    self:_positionWindow(window, new_frame)
-                end
-            end
-            ::continue::
-        elseif column.type == obj.__STACK then
-            stack_position = self._hs.geometry.new(left_offset, 0, window_width * column.span, window_height)
-        elseif column.type == obj.__VSPLIT then
-            local top_offset = 0
-            local total_row_span = 0
-            for _, row in pairs(column.rows) do
-                total_row_span = total_row_span + row.span
-            end
-            local row_height = window_height / total_row_span
-            for _, row in pairs(column.rows) do
-                if row.type == obj.__PINNED then
-                    local application = self._application_cache[row.application]
-                    if application == nil then
-                        self._logger.e("Application not found: " .. row.application)
-                        goto continue
-                    end
-
-                    for _, window in pairs(application) do
-                        self._logger.d("Split Window: %s, Title: %s, Row Title: %s", window:id(), window:title(), row.title)
-                        if row.title == nil or window:title() == row.title then
-                            pinned_windows[window:id()] = window
-                            local new_frame = self._hs.geometry.new(
-                                left_offset,
-                                top_offset,
-                                window_width * column.span,
-                                row_height * row.span
-                            )
-                            self:_positionWindow(window, new_frame)
-                        end
-                    end
-                elseif row.type == obj.__STACK then
-                    stack_position = self._hs.geometry.new(left_offset, top_offset, window_width * column.span, row_height * row.span)
-                end
-                ::continue::
-                top_offset = top_offset + (row.span * row_height)
-            end
-        end
-
-        left_offset = left_offset + (column.span * window_width)
-    end
+    local stack_position, pinned_windows = self:_reconcileRecursive(new_layout, current_frame)
 
     if stack_position == nil then
         error("Stack not found")
@@ -533,15 +676,8 @@ function obj:_reconcile(new_layout)
 
     for _, stack_window in pairs(self._window_cache) do
         if pinned_windows[stack_window:id()] == nil then
-            local current_frame = stack_window:frame()
-            if not current_frame:equals(stack_position) then
-                if current_frame.x ~= stack_position.x then
-                    stack_window:setTopLeft(self._hs.geometry.point(stack_position.x, stack_position.y))
-                end
-                if current_frame.w ~= stack_position.w then
-                    stack_window:setSize(self._hs.geometry.size(stack_position.w, stack_position.h))
-                end
-            end
+            self._logger.d("Stack window: %s, Position: %s", stack_window:id(), stack_position)
+            self:_positionWindow(stack_window, stack_position)
         end
     end
 

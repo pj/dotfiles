@@ -25,6 +25,29 @@ export function Column({ columnWidth, text }: { columnWidth: number, text: strin
     );
 }
 
+export function Layout({ layout }: { layout: Layout }) {
+    if (layout.type === "columns") {
+        
+        return <div></div>
+    }
+    else if (layout.type === "rows") {
+        return <div></div>
+    }
+    else if (layout.type === "stack") {
+        return <div></div>
+    }
+    else if (layout.type === "pinned") {
+        return <div></div>
+    }
+    else if (layout.type === "empty") {
+        return <div></div>
+    } else if (layout.type === "root") {
+        return <Layout layout={layout.child} />
+    }
+
+    return <div></div>
+}
+
 export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps) {
     const { wrapperElement, setFocus } = useFocus()
     const appState = useContext(AppStateContext)
