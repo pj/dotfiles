@@ -41,48 +41,93 @@ const defaultLayouts = {
     "type": 'windowManagement',
     "layouts": [
         {
+            "type": "root",
             "name": "VLC",
             "quickKey": "v",
-            "columns": [
-                {
-                    "type": "stack",
-                    "span": 3
-                },
-                {
-                    "type": "pinned",
-                    "span": 1,
-                    "application": "VLC"
-                }
-            ]
+            "span": 1,
+            "child": {
+                "type": "columns",
+                "columns": [
+                    {
+                        "type": "stack",
+                        "span": 3
+                    },
+                    {
+                        "type": "pinned",
+                        "span": 1,
+                        "application": "VLC"
+                    }
+                ]
+            }
         },
         {
+            "type": "root",
             "name": "Plex",
             "quickKey": "p",
-            "columns": [
-                {
-                    "type": "stack",
-                    "span": 3
-                },
-                {
-                    "type": "pinned",
-                    "span": 1,
-                    "application": "Plex"
-                }
-            ]
+            "span": 1,
+            "child": {
+                "type": "columns",
+                "columns": [
+                    {
+                        "type": "stack",
+                        "span": 3
+                    },
+                    {
+                        "type": "pinned",
+                        "span": 1,
+                        "application": "Plex"
+                    }
+                ]
+            }
         },
         {
+            "type": "root",
             "name": "Split",
             "quickKey": "s",
-            "columns": [
-                {
-                    "type": "stack",
-                    "span": 1
-                },
-                {
-                    "type": "empty",
-                    "span": 1
-                }
-            ]
+            "span": 1,
+            "child": {
+                "type": "columns",
+                "columns": [
+                    {
+                        "type": "stack",
+                        "span": 1
+                    },
+                    {
+                        "type": "empty",
+                        "span": 1
+                    }
+                ]
+            }
+        },
+        {
+            "type": "root",
+            "name": "VSplit",
+            "quickKey": "w",
+            "span": 1,
+            "child": {
+                "type": "columns",
+                "columns": [
+                    {
+                        "type": "stack",
+                        "span": 2
+                    },
+                    {
+                        "type": "rows",
+                        "span": 1,
+                        "rows": [
+                            {
+                                "type": "empty",
+                                "span": 1
+                            },
+                            {
+                                "type": "pinned",
+                                "span": 1,
+                                "application": "Plex"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
     ]
 };

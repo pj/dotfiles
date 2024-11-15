@@ -18,6 +18,7 @@ export type RootLayout = {
     child: Layout
     name: string
     quickKey: string
+    span: number
 }
 
 export type ColumnsLayout = {

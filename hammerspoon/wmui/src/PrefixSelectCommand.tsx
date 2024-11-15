@@ -1,13 +1,18 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { defaultCommandProps, DefaultCommandProps, useFocus } from "./CommandWrapper"
 import React from "react"
 import { AppExitContext, AppSendMessageContext } from "./App"
 import { Key } from "./Key"
 
-type Prefix = {
+export type Prefix = {
+    type: "command"
     component: React.ComponentType<any>
     props: any
     description: string
+} | {
+    type: "quickFunction"
+    description: string
+    quickFunction: () => void
 }
 
 type PrefixMap = Map<string, Prefix>
@@ -33,7 +38,7 @@ export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
     let selectedProps = null
     if (selectedKey) {
         const prefix = props.prefixes.get(selectedKey)
-        if (prefix) {
+        if (prefix && prefix.type === "command") {
             selectedComponent = prefix.component
             selectedProps = prefix.props
         }
@@ -51,6 +56,16 @@ export function PrefixSelectCommand(props: PrefixSelectCommandProps) {
         }
         setSelectedKey(event.key)
     }
+
+    useEffect(() => {
+        if (selectedKey) {
+            const prefix = props.prefixes.get(selectedKey)
+            if (prefix && prefix.type === "quickFunction") {
+                prefix.quickFunction()
+                handleExit();
+            }
+        }
+    }, [selectedKey])
 
     function handleDelete() {
         setSelectedKey(null)

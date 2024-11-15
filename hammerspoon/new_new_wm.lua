@@ -40,7 +40,8 @@ function obj:_watcherForApplication(application)
     if self._disable_application_watcher then
         return
     end
-    local function onEvent(application, element, event)
+    local function onEvent(element, event, watcher, application)
+        self._logger.d("Application: %s, Element: %s, Event: %s", application:title(), element, event)
         if element:role() ~= "AXWindow" then
             return
         end
@@ -56,7 +57,7 @@ function obj:_watcherForApplication(application)
             self:showWindow(element)
         elseif event == self._hs.uielement.watcher.elementDestroyed then
             self:removeWindow(element)
-        elseif event == self._hs.uielement.watcher.windowResized then
+        elseif event == self._hs.uielement.watcher.windowResized or event == self._hs.uielement.watcher.windowMoved then
             if self._debounceResize == nil then
                 self._debounceResize = {}
             end
@@ -78,15 +79,17 @@ function obj:_watcherForApplication(application)
         end
     end
     self._logger.d("Starting watcher for application: %s", application:name())
-    self._applicationWatchers[application:name()] = application:newWatcher(
-        function(element, event) onEvent(application, element, event) end
+    self._windowWatchers[application:name()] = application:newWatcher(
+        onEvent,
+        application
     )
-    self._applicationWatchers[application:name()]:start({
+    self._windowWatchers[application:name()]:start({
         self._hs.uielement.watcher.windowCreated,
         self._hs.uielement.watcher.windowMinimized,
         self._hs.uielement.watcher.windowUnminimized,
         self._hs.uielement.watcher.elementDestroyed,
-        self._hs.uielement.watcher.windowResized
+        self._hs.uielement.watcher.windowResized,
+        self._hs.uielement.watcher.windowMoved
     })
 end
 
@@ -94,30 +97,39 @@ function obj:_startApplicationWatcher()
     if self._disable_application_watcher then
         return
     end
-    self._applicationWatchers = {}
+    self._windowWatchers = {}
     self._applicationWatcher = self._hs.application.watcher.new(
         function(name, event, application)
             if event == self._hs.application.watcher.launched then
                 self._logger.i("Application launching: %s", name)
-                if self._applicationWatchers[name] == nil then
+                if self._windowWatchers[name] == nil then
                     self:_watcherForApplication(application)
                 end
 
                 for _, window in ipairs(application:visibleWindows()) do
                     self:addWindow(window)
                 end
-            end
-
-            if event == self._hs.application.watcher.terminated then
+            elseif event == self._hs.application.watcher.terminated then
                 self._logger.i("Application deactivated: %s", name)
-                if self._applicationWatchers[name] ~= nil then
-                    self._applicationWatchers[name]:stop()
-                    self._applicationWatchers[name] = nil
+                if self._windowWatchers[name] ~= nil then
+                    self._windowWatchers[name]:stop()
+                    self._windowWatchers[name] = nil
                 end
             end
         end
     )
-    self._applicationWatcher:start({ self._hs.application.watcher.launching, self._hs.application.watcher.terminated })
+    self._applicationWatcher:start({
+        self._hs.application.watcher.launching,
+        self._hs.application.watcher.terminated
+    })
+end
+
+function obj:_screenChanged()
+    local screens = self._hs.screen.allScreens()
+    for _, screen in pairs(screens) do
+        self._screen_cache[screen:name()] = screen
+    end
+
 end
 
 -- Functions to update the window cache
@@ -155,8 +167,8 @@ function obj:start()
 
     local windows = space_filter:getWindows()
 
-    if self._applicationWatchers == nil then
-        self._applicationWatchers = {}
+    if self._windowWatchers == nil then
+        self._windowWatchers = {}
     end
 
     for _, window in pairs(windows) do
@@ -177,6 +189,28 @@ function obj:start()
         ::continue::
     end
     self:_startApplicationWatcher()
+
+    self._hs.window.filter.default:subscribe(
+        self._hs.window.filter.windowFocused,
+        function(window)
+            -- Filter out the WMUI window
+            if not (window:title() == "WMUI" or window:title() == "Hammerspoon Console") then
+                self._logger.i("Focused window changed: %s", window:title())
+                self._lastFocusedWindow = window
+            else
+                self._logger.i("Not changing focused window: WMUI")
+            end
+        end
+    )
+
+    self:_screenChanged()
+
+    self._screenWatcher = self._hs.screen.watcher.new(function()
+        self:_screenChanged()
+        self:_reconcile(self._current_layout[current_space])
+    end)
+
+    self._screenWatcher:start()
 
     self:_reconcile(self._current_layout[current_space])
 end
@@ -210,7 +244,6 @@ function obj:_windowIsPinned(column, window)
         error("column has no application")
     end
 
-    print(inspect(window))
     if column.application ~= window:application():name() then
         return false
     end
@@ -501,7 +534,7 @@ function obj:moveFocusedTo(destPosition)
 
         items[destPosition] = sourceColumn
         local destColumn = items[destPosition]
-    local newPinned = {
+        local newPinned = {
             type = obj.__PINNED,
             span = destColumn.span,
             title = sourceColumn.title,
@@ -559,6 +592,65 @@ function obj:moveFocusedTo(destPosition)
     self:_reconcile(new_layout)
 end
 
+function obj:toggleZoomFocusedWindow()
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
+    if self._lastFocusedWindow == nil then
+        self._logger.w("No last focused window found")
+        return
+    end
+    local focusedWindow = self._lastFocusedWindow
+    new_layout.zoomed = new_layout.zoomed or {}
+    local new_zoomed = {}
+    local found = false
+    for _, window in pairs(new_layout.zoomed) do
+        if window.application == focusedWindow:application():name() and window.title == focusedWindow:title() then
+            found = true
+        else
+            table.insert(new_zoomed, window)
+        end
+    end
+    if not found then
+        table.insert(new_zoomed, {
+            type = obj.__PINNED,
+            application = focusedWindow:application():name(),
+            title = focusedWindow:title()
+        })
+    end
+    new_layout.zoomed = new_zoomed
+    self:setLayout(new_layout)
+end
+
+function obj:toggleFloatFocusedWindow()
+    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    assert(new_layout ~= nil)
+    if self._lastFocusedWindow == nil then
+        self._logger.w("No last focused window found")
+        return
+    end
+    local focusedWindow = self._lastFocusedWindow
+    new_layout.floats = new_layout.floats or {}
+    local new_floats = {}
+    local found = false
+    for _, window in pairs(new_layout.floats) do
+        if window.application == focusedWindow:application():name() and window.title == focusedWindow:title() then
+            found = true
+        else
+            table.insert(new_floats, window)
+        end
+    end
+    if not found then
+        table.insert(new_floats, {
+            type = obj.__PINNED,
+            application = focusedWindow:application():name(),
+            title = focusedWindow:title()
+        })
+    end
+    new_layout.floats = new_floats
+    self._logger.d("New layout: %s", inspect(new_layout))
+    self:setLayout(new_layout)
+end
+
 function obj:_positionWindow(window, new_frame)
     self._logger.d("Moving window: %s, to: %s", window:id(), new_frame)
     local current_frame = window:frame()
@@ -578,7 +670,7 @@ function obj:_positionWindow(window, new_frame)
     end
 end
 
-function obj:_reconcileDirectional(items, bounding_frame, direction)
+function obj:_reconcileDirectional(items, bounding_frame, direction, ignored_windows)
     local offset = nil
     local total_span_size = nil
     if direction then
@@ -613,7 +705,8 @@ function obj:_reconcileDirectional(items, bounding_frame, direction)
                 span_size * item.span
             )
         end
-        local recursive_stack_position, recursive_pinned_windows = self:_reconcileRecursive(item, new_frame)
+        local recursive_stack_position, recursive_pinned_windows = self:_reconcileRecursive(item, new_frame,
+            ignored_windows)
         if recursive_stack_position ~= nil then
             stack_position = recursive_stack_position
         end
@@ -626,16 +719,13 @@ function obj:_reconcileDirectional(items, bounding_frame, direction)
     return stack_position, pinned_windows
 end
 
-function obj:_reconcileRecursive(new_layout, current_frame)
-    -- print("--------------------------------")
-    -- print("Layout: \n", inspect(new_layout))
-    -- print("Frame: \n", inspect(current_frame))
+function obj:_reconcileRecursive(new_layout, current_frame, ignored_windows)
     if new_layout.type == obj.__ROOT then
-        return self:_reconcileRecursive(new_layout.child, current_frame)
+        return self:_reconcileRecursive(new_layout.child, current_frame, ignored_windows)
     elseif new_layout.type == obj.__COLUMNS then
-        return self:_reconcileDirectional(new_layout.columns, current_frame, true)
+        return self:_reconcileDirectional(new_layout.columns, current_frame, true, ignored_windows)
     elseif new_layout.type == obj.__ROWS then
-        return self:_reconcileDirectional(new_layout.rows, current_frame, false)
+        return self:_reconcileDirectional(new_layout.rows, current_frame, false, ignored_windows)
     elseif new_layout.type == obj.__PINNED then
         local pinned_windows = {}
         local application = self._application_cache[new_layout.application]
@@ -646,7 +736,7 @@ function obj:_reconcileRecursive(new_layout, current_frame)
 
         for _, window in pairs(application) do
             self._logger.d("Window: %s, Title: %s, Column Title: %s", window:id(), window:title(), new_layout.title)
-            if new_layout.title == nil or window:title() == new_layout.title then
+            if ignored_windows[window:id()] == nil and (new_layout.title == nil or window:title() == new_layout.title) then
                 pinned_windows[window:id()] = window
                 self:_positionWindow(window, current_frame)
             end
@@ -663,19 +753,57 @@ function obj:_reconcileRecursive(new_layout, current_frame)
 end
 
 function obj:_reconcile(new_layout)
-    print("================================================")
     local current_space = self._hs.spaces.focusedSpace()
     local current_screen = self._hs.screen.mainScreen()
     local current_frame = current_screen:frame()
 
-    local stack_position, pinned_windows = self:_reconcileRecursive(new_layout, current_frame)
+    local ignored_windows = {}
+
+    if new_layout.floats ~= nil then
+        for _, layout in pairs(new_layout.floats) do
+            local application = self._application_cache[layout.application]
+            if application == nil then
+                self._logger.w("Application not found: " .. layout.application)
+                goto continue
+            end
+
+            for _, window in pairs(application) do
+                if layout.title == nil or window:title() == layout.title then
+                    ignored_windows[window:id()] = window
+                end
+            end
+
+            ::continue::
+        end
+    end
+
+    if new_layout.zoomed ~= nil then
+        for _, layout in pairs(new_layout.zoomed) do
+            local application = self._application_cache[layout.application]
+            if application == nil then
+                self._logger.w("Application not found: " .. layout.application)
+                goto continue
+            end
+
+            for _, window in pairs(application) do
+                if layout.title == nil or window:title() == layout.title then
+                    ignored_windows[window:id()] = window
+                    self:_positionWindow(window, current_frame)
+                end
+            end
+
+            ::continue::
+        end
+    end
+
+    local stack_position, pinned_windows = self:_reconcileRecursive(new_layout, current_frame, ignored_windows)
 
     if stack_position == nil then
         error("Stack not found")
     end
 
     for _, stack_window in pairs(self._window_cache) do
-        if pinned_windows[stack_window:id()] == nil then
+        if ignored_windows[stack_window:id()] == nil and pinned_windows[stack_window:id()] == nil then
             self._logger.d("Stack window: %s, Position: %s", stack_window:id(), stack_position)
             self:_positionWindow(stack_window, stack_position)
         end

@@ -2,18 +2,31 @@ import { useContext, useEffect, useState } from "react"
 import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Key } from "../Key"
-import { Layout } from "./Types"
+import { Layout as LayoutType } from "./Types"
 import { CommandLoading } from "../CommandLoading"
 
 export type LayoutCommandProps = DefaultCommandProps
 
-const columnCss = "w-12 h-16 rounded-md text-xs bg-white flex flex-col"
+const columnCss = "rounded-md text-xs bg-white flex flex-col border border-gray-300"
 const columnStyle = { fontSize: "0.5rem" }
-const layoutWidth = 120;
+const layoutWidth = 160;
+const layoutHeight = 100;
 
-export function Column({ columnWidth, text }: { columnWidth: number, text: string }) {
+type Geometry = {
+    w: number
+    h: number
+    x: number
+    y: number
+}
+
+type LayoutProps = {
+    layout: LayoutType
+    frame: Geometry
+}
+
+function Window({ frame, text }: { frame: Geometry, text: string }) {
     return (
-        <div style={{ ...columnStyle, width: columnWidth }} className={columnCss}>
+        <div style={{ ...columnStyle, width: frame.w, height: frame.h }} className={columnCss}>
             <div style={{ height: "4px" }} className="bg-gray-200 rounded-t-md flex flex-row items-center justify-start pl-1">
                 <div style={{ height: "2px", width: "2px" }} className="bg-red-500 rounded-full"></div>
                 <div style={{ height: "2px", width: "2px" }} className="bg-yellow-500 rounded-full"></div>
@@ -25,24 +38,63 @@ export function Column({ columnWidth, text }: { columnWidth: number, text: strin
     );
 }
 
-export function Layout({ layout }: { layout: Layout }) {
+
+function Layout({ layout, frame }: LayoutProps) {
     if (layout.type === "columns") {
-        
-        return <div></div>
-    }
-    else if (layout.type === "rows") {
-        return <div></div>
+        let totalSpan = 0;
+        for (const column of layout.columns) {
+            totalSpan += column.span;
+        }
+
+        let columns = [];
+        for (const column of layout.columns) {
+            let columnWidth = (column.span / totalSpan) * frame.w;
+            columns.push(<Layout layout={column} frame={{ w: columnWidth, h: frame.h, x: frame.x, y: frame.y }} />)
+        }
+
+        return (
+            <div className="flex flex-row">
+                {columns}
+            </div>
+        );
+    } else if (layout.type === "rows") {
+        let totalSpan = 0;
+        for (const row of layout.rows) {
+            totalSpan += row.span;
+        }
+
+        let rows = [];
+        for (const row of layout.rows) {
+            let rowHeight = (row.span / totalSpan) * frame.h;
+            rows.push(<Layout layout={row} frame={{ w: frame.w, h: rowHeight, x: frame.x, y: frame.y }} />)
+        }
+
+        return (
+            <div className="flex flex-col">
+                {rows}
+            </div>
+        );
     }
     else if (layout.type === "stack") {
-        return <div></div>
+        return <Window frame={{ w: frame.w, h: frame.h, x: frame.x, y: frame.y }} text="Stack" />
     }
     else if (layout.type === "pinned") {
-        return <div></div>
+        return <Window frame={{ w: frame.w, h: frame.h, x: frame.x, y: frame.y }} text={layout.application || ""} />
     }
     else if (layout.type === "empty") {
-        return <div></div>
+        return <Window frame={{ w: frame.w, h: frame.h, x: frame.x, y: frame.y }} text="Empty" />
     } else if (layout.type === "root") {
-        return <Layout layout={layout.child} />
+        return (
+            <div key={layout.name}>
+                <div style={{ width: layoutWidth }} className="flex flex-row items-center justify-center p-1 gap-1">
+                    <Key text={layout.quickKey}></Key>
+                    <div className="text-xs">{layout.name}</div>
+                </div>
+                <div className="p-1 rounded-sm bg-black relative">
+                    <Layout layout={layout.child} frame={frame} />
+                </div>
+            </div>
+        )
     }
 
     return <div></div>
@@ -77,48 +129,7 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
         }
     }
 
-    const layouts = appState.windowManagement?.layouts || [] as Layout[]
-
-    let formattedLayouts = [];
-    for (let i = 0; i < layouts.length; i++) {
-        const layout = layouts[i];
-        let totalSpan = 0;
-        for (const column of layout.columns) {
-            totalSpan += column.span;
-        }
-        let columns = [];
-        for (const column of layout.columns) {
-            let columnWidth = (column.span / totalSpan) * layoutWidth;
-            if (column.type === "stack") {
-                columns.push(
-                    <>
-                        <Column columnWidth={columnWidth} text="Stack" />
-                    </>
-                )
-            } else if (column.type === "pinned") {
-                columns.push(<Column columnWidth={columnWidth} text={column.application} />);
-            } else if (column.type === "empty") {
-                columns.push(<Column columnWidth={columnWidth} text="Empty" />);
-            }
-        }
-        let layoutCss = "border-r border-gray-300 p-2"
-        if (i === layouts.length - 1) {
-            layoutCss = "p-2";
-        }
-        formattedLayouts.push(
-            <div key={layout.name} className={layoutCss}>
-                <div style={{ width: layoutWidth }} className="flex flex-row items-center justify-center p-1 gap-1">
-                    <Key text={layout.quickKey}></Key>
-                    <div className="text-xs">{layout.name}</div>
-                </div>
-                <div className="flex flex-row gap-1 p-1 rounded-sm bg-black relative">
-                    {columns}
-                </div>
-            </div>
-        );
-    }
-
-    console.log(appState.windowManagement)
+    const layouts = appState.windowManagement?.layouts || [] as LayoutType[]
 
     return (
         <div
@@ -132,8 +143,12 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
                 {
                     appState.windowManagement ? (
                         <>
-                            <div className="flex flex-row ">
-                                {formattedLayouts}
+                            <div className="flex flex-row divide-x *:px-2 first:*:pt-0 last:*:pb-0">
+                                {
+                                    layouts.map((layout: LayoutType) => (
+                                        <Layout layout={layout} frame={{ w: layoutWidth, h: layoutHeight, x: 0, y: 0 }} />
+                                    ))
+                                }
                             </div>
                             {
                                 errorMessage &&

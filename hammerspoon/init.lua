@@ -1,12 +1,9 @@
 -- TODO
 -- - Window Manager
+-- -- Multi screen/space support
+-- -- Actions - move, set columns, increase/decrease span
 -- -- Layout Editor
 -- -- Saving/Loading Layouts
--- -- Vertical splits
--- -- Multi space support
--- -- Multi screen support
--- -- Floats
--- -- Zoom
 
 package.path = package.path .. ";./?.lua"
 require("lock_screen")
@@ -60,10 +57,21 @@ DefaultLayouts = {
                     span = 3
                 },
                 {
+                    type = new_wm.__ROWS,
+                    span = 1,
+                    rows = {
+                {
                     type = new_wm.__PINNED,
                     span = 1,
                     application = "VLC"
-                }
+                },
+                        {
+                            type = new_wm.__PINNED,
+                            span = 1,
+                            application = "Podcasts"
+                        }
+                    }
+                },
             }
         }
     },
@@ -134,14 +142,17 @@ ModalCommander = modal_commander.new({
                     break
                 end
             end
+        elseif message.type == "windowManagementZoomToggle" then
+            WM:toggleZoomFocusedWindow()
+        elseif message.type == "windowManagementFloatToggle" then
+            WM:toggleFloatFocusedWindow()
         end
     end,
     onShow = function(modalCommander)
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
         modalCommander:postMessageToWebview(siteBlockerState)
-        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts, currentLayout = WM
-        :getLayout() })
+        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts, currentLayout = WM:getLayout() })
     end
 })
 

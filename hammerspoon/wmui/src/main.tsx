@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { PrefixSelectCommand } from './PrefixSelectCommand.tsx'
+import { Prefix, PrefixSelectCommand } from './PrefixSelectCommand.tsx'
 import { SiteBlockerCommand } from './SiteBlocker.tsx'
 import { EditLayoutCommand } from './window_management/EditLayoutCommand.tsx'
 import { SelectLayoutCommand } from './window_management/SelectLayoutCommand.tsx'
@@ -17,10 +17,39 @@ createRoot(document.getElementById('root')!).render(
             sendMessage={sendMessage}
             RootCommand={PrefixSelectCommand}
             RootCommandProps={{
-                prefixes: new Map([
-                    ['b', {component: SiteBlockerCommand, props: {}, description: 'Site Blocker'}],
-                    ['w', {component: EditLayoutCommand, props: {}, description: 'Window Management editor'}],
-                    ['l', {component: SelectLayoutCommand, props: {}, description: 'Select Layout'}],
+                prefixes: new Map<string, Prefix>([
+                    [
+                        'b', 
+                        {component: SiteBlockerCommand, props: {}, description: 'Site Blocker', type: "command"}
+                    ],
+                    [
+                        'w', 
+                        {component: EditLayoutCommand, props: {}, description: 'Window Management editor', type: "command"}
+                    ],
+                    [
+                        'l', 
+                        {component: SelectLayoutCommand, props: {}, description: 'Select Layout', type: "command"}
+                    ],
+                    [
+                        'z', 
+                        {
+                            quickFunction: () => {
+                                sendMessage({ type: "windowManagementZoomToggle" })
+                            }, 
+                            description: 'Toggle Zoom of focused window', 
+                            type: "quickFunction"
+                        }
+                    ],
+                    [
+                        'f', 
+                        {
+                            quickFunction: () => {
+                                sendMessage({ type: "windowManagementFloatToggle" })
+                            }, 
+                            description: 'Make focused window float', 
+                            type: "quickFunction"
+                        }
+                    ],
                 ]),
                 index: 0,
                 handleDelete: () => {}
