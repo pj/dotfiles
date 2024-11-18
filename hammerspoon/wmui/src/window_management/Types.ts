@@ -1,21 +1,25 @@
 
-export type Screen = {
-    id: string
-    name: string
-    isMain: boolean
-    currentVirtualDesktop: VirtualDesktop | null
-    layout: Layout | null
-    x: number
-    y: number
-    width: number
-    height: number
-}
+// export type Screen = {
+//     id: string
+//     name: string
+//     isMain: boolean
+//     currentVirtualDesktop: VirtualDesktop | null
+//     layout: Layout | null
+//     x: number
+//     y: number
+//     width: number
+//     height: number
+// }
 
-export type LayoutType = "root" | "columns" | "rows" | "stack" | "pinned" | "empty"
+export type ScreenLayout = {
+    type: "screen"
+    name: string
+    root: Layout
+}
 
 export type RootLayout = {
     type: "root"
-    child: Layout
+    screens: ScreenLayout[]
     name: string
     quickKey: string
     span: number
@@ -50,7 +54,7 @@ export type EmptyLayout = {
     span: number
 }
 
-export type Layout = RootLayout | ColumnsLayout | RowsLayout | StackLayout | PinnedLayout | EmptyLayout
+export type Layout = ColumnsLayout | RowsLayout | StackLayout | PinnedLayout | EmptyLayout
 
 export type Window = {
     id: string
@@ -65,5 +69,5 @@ export type VirtualDesktop = {
 }
 
 export type WindowManagementState = {
-    screens: Screen[]
+    layouts: RootLayout[]
 }

@@ -8,6 +8,7 @@ obj.__PINNED = "pinned"
 obj.__ROWS = "rows"
 obj.__COLUMNS = "columns"
 obj.__ROOT = "root"
+obj.__SCREEN = "screen"
 
 -- Metadata
 obj.name = "PaulsTilingWM"
@@ -64,7 +65,7 @@ function obj:_watcherForApplication(application)
             if self._debounceResize[element:id()] == nil then
                 self._hs.timer.doAfter(0.4, function()
                     self._logger.d("Starting resize for window: %s, id: %s", element:title(), element:id())
-                    self:_reconcile(self._current_layout[self._hs.spaces.focusedSpace()])
+                    self:_reconcile(self._current_layout)
                 end)
                 self._debounceResize[element:id()] = self._hs.timer.secondsSinceEpoch()
             else
@@ -134,13 +135,12 @@ end
 
 -- Functions to update the window cache
 function obj:start()
-    local current_space = self._hs.spaces.focusedSpace()
     if self._current_layout == nil then
         self._current_layout = {}
     end
 
-    if self._current_layout[current_space] == nil then
-        self._current_layout[current_space] =
+    if self._current_layout == nil then
+        self._current_layout =
         {
             type = obj.__ROOT,
             child = {
@@ -161,6 +161,9 @@ function obj:start()
 
     if self._application_cache == nil then
         self._application_cache = {}
+    end
+    if self._screen_cache == nil then
+        self._screen_cache = {}
     end
 
     local space_filter = self._hs.window.filter.new()
@@ -207,30 +210,28 @@ function obj:start()
 
     self._screenWatcher = self._hs.screen.watcher.new(function()
         self:_screenChanged()
-        self:_reconcile(self._current_layout[current_space])
+        self:_reconcile(self._current_layout)
     end)
 
     self._screenWatcher:start()
 
-    self:_reconcile(self._current_layout[current_space])
+    self:_reconcile(self._current_layout)
 end
 
 function obj:removeWindow(window)
-    local current_space = self._hs.spaces.focusedSpace()
     self._window_cache[window:id()] = nil
     self._application_cache[window:application():name()][window:title()] = nil
-    self:_reconcile(self._current_layout[current_space])
+    self:_reconcile(self._current_layout)
 end
 
 function obj:addWindow(window)
-    local current_space = self._hs.spaces.focusedSpace()
     self._window_cache[window:id()] = window
     if self._application_cache[window:application():name()] == nil then
         self._application_cache[window:application():name()] = { [window:title()] = window }
     else
         self._application_cache[window:application():name()][window:title()] = window
     end
-    self:_reconcile(self._current_layout[current_space])
+    self:_reconcile(self._current_layout)
 end
 
 function obj:hideWindow(window)
@@ -262,11 +263,11 @@ function obj:setLayout(layout)
 end
 
 function obj:getLayout()
-    return self._current_layout[self._hs.spaces.focusedSpace()]
+    return self._current_layout
 end
 
 function obj:incrementSplit()
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
 
     local sublayout = new_layout
@@ -286,7 +287,7 @@ function obj:incrementSplit()
 end
 
 function obj:decrementSplit()
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
 
     local sublayout = new_layout
@@ -320,7 +321,7 @@ function obj:decrementSplit()
 end
 
 function obj:setSplits(number_of_splits)
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
 
     local sublayout = new_layout
@@ -454,7 +455,7 @@ function obj:_findPinnedAndStack(window, layout, parent, parentIndex)
 end
 
 function obj:_updateFocusedSpan(setterFunc)
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     local focusedWindow = self._hs.window.focusedWindow()
 
     -- See if focused window is pinned in the layout
@@ -496,7 +497,7 @@ function obj:setFocusedColumnSpan(span)
 end
 
 function obj:moveFocusedTo(destPosition)
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
     local focusedWindow = self._hs.window.focusedWindow()
 
@@ -593,7 +594,7 @@ function obj:moveFocusedTo(destPosition)
 end
 
 function obj:toggleZoomFocusedWindow()
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
     if self._lastFocusedWindow == nil then
         self._logger.w("No last focused window found")
@@ -622,7 +623,7 @@ function obj:toggleZoomFocusedWindow()
 end
 
 function obj:toggleFloatFocusedWindow()
-    local new_layout = DeepCopy(self._current_layout[self._hs.spaces.focusedSpace()])
+    local new_layout = DeepCopy(self._current_layout)
     assert(new_layout ~= nil)
     if self._lastFocusedWindow == nil then
         self._logger.w("No last focused window found")
@@ -651,8 +652,12 @@ function obj:toggleFloatFocusedWindow()
     self:setLayout(new_layout)
 end
 
-function obj:_positionWindow(window, new_frame)
+function obj:_positionWindow(screen, window, new_frame)
     self._logger.d("Moving window: %s, to: %s", window:id(), new_frame)
+    if window:screen():id() ~= screen:id() then
+        self._logger.d("Window is on a different screen")
+        window:moveToScreen(screen)
+    end
     local current_frame = window:frame()
     self._logger.d("Current frame: %s", current_frame)
     if not current_frame:equals(new_frame) then
@@ -670,7 +675,7 @@ function obj:_positionWindow(window, new_frame)
     end
 end
 
-function obj:_reconcileDirectional(items, bounding_frame, direction, ignored_windows)
+function obj:_reconcileDirectional(current_screen, items, bounding_frame, direction, ignored_windows)
     local offset = nil
     local total_span_size = nil
     if direction then
@@ -687,7 +692,7 @@ function obj:_reconcileDirectional(items, bounding_frame, direction, ignored_win
     end
     local span_size = total_span_size / total_span
     local stack_position = nil
-    local pinned_windows = {}
+    -- local pinned_windows = {}
     for _, item in pairs(items) do
         local new_frame = nil
         if direction then
@@ -705,29 +710,28 @@ function obj:_reconcileDirectional(items, bounding_frame, direction, ignored_win
                 span_size * item.span
             )
         end
-        local recursive_stack_position, recursive_pinned_windows = self:_reconcileRecursive(item, new_frame,
+        local recursive_stack_position = self:_reconcileRecursive(current_screen, item, new_frame,
             ignored_windows)
         if recursive_stack_position ~= nil then
             stack_position = recursive_stack_position
         end
-        for _, window in pairs(recursive_pinned_windows) do
-            pinned_windows[window:id()] = window
-        end
+        -- for _, window in pairs(recursive_pinned_windows) do
+        --     pinned_windows[window:id()] = window
+        -- end
         offset = offset + (item.span * span_size)
     end
 
-    return stack_position, pinned_windows
+    return stack_position
 end
 
-function obj:_reconcileRecursive(new_layout, current_frame, ignored_windows)
-    if new_layout.type == obj.__ROOT then
-        return self:_reconcileRecursive(new_layout.child, current_frame, ignored_windows)
-    elseif new_layout.type == obj.__COLUMNS then
-        return self:_reconcileDirectional(new_layout.columns, current_frame, true, ignored_windows)
+function obj:_reconcileRecursive(current_screen, new_layout, current_frame, ignored_windows)
+    -- if new_layout.type == obj.__ROOT then
+    --     return self:_reconcileRecursive(current_screen, new_layout.child, current_frame, ignored_windows)
+    if new_layout.type == obj.__COLUMNS then
+        return self:_reconcileDirectional(current_screen, new_layout.columns, current_frame, true, ignored_windows)
     elseif new_layout.type == obj.__ROWS then
-        return self:_reconcileDirectional(new_layout.rows, current_frame, false, ignored_windows)
+        return self:_reconcileDirectional(current_screen, new_layout.rows, current_frame, false, ignored_windows)
     elseif new_layout.type == obj.__PINNED then
-        local pinned_windows = {}
         local application = self._application_cache[new_layout.application]
         if application == nil then
             self._logger.e("Application not found: " .. new_layout.application)
@@ -737,30 +741,29 @@ function obj:_reconcileRecursive(new_layout, current_frame, ignored_windows)
         for _, window in pairs(application) do
             self._logger.d("Window: %s, Title: %s, Column Title: %s", window:id(), window:title(), new_layout.title)
             if ignored_windows[window:id()] == nil and (new_layout.title == nil or window:title() == new_layout.title) then
-                pinned_windows[window:id()] = window
-                self:_positionWindow(window, current_frame)
+                ignored_windows[window:id()] = window
+                self:_positionWindow(current_screen, window, current_frame)
             end
         end
         ::continue::
-        return nil, pinned_windows
+        return nil
     elseif new_layout.type == obj.__STACK then
-        return current_frame, {}
+        return current_frame
     elseif new_layout.type == obj.__EMPTY then
-        return nil, {}
+        return nil
     else
         error("Unknown layout type: " .. new_layout.type)
     end
 end
 
-function obj:_reconcile(new_layout)
-    local current_space = self._hs.spaces.focusedSpace()
-    local current_screen = self._hs.screen.mainScreen()
+function obj:_reconcileScreen(screen)
+    local current_screen = self._screen_cache[screen.name]
     local current_frame = current_screen:frame()
 
     local ignored_windows = {}
 
-    if new_layout.floats ~= nil then
-        for _, layout in pairs(new_layout.floats) do
+    if screen.floats ~= nil then
+        for _, layout in pairs(screen.floats) do
             local application = self._application_cache[layout.application]
             if application == nil then
                 self._logger.w("Application not found: " .. layout.application)
@@ -777,8 +780,8 @@ function obj:_reconcile(new_layout)
         end
     end
 
-    if new_layout.zoomed ~= nil then
-        for _, layout in pairs(new_layout.zoomed) do
+    if screen.zoomed ~= nil then
+        for _, layout in pairs(screen.zoomed) do
             local application = self._application_cache[layout.application]
             if application == nil then
                 self._logger.w("Application not found: " .. layout.application)
@@ -788,7 +791,7 @@ function obj:_reconcile(new_layout)
             for _, window in pairs(application) do
                 if layout.title == nil or window:title() == layout.title then
                     ignored_windows[window:id()] = window
-                    self:_positionWindow(window, current_frame)
+                    self:_positionWindow(current_screen, window, current_frame)
                 end
             end
 
@@ -796,20 +799,30 @@ function obj:_reconcile(new_layout)
         end
     end
 
-    local stack_position, pinned_windows = self:_reconcileRecursive(new_layout, current_frame, ignored_windows)
+    local stack_position = self:_reconcileRecursive(current_screen, screen.root, current_frame, ignored_windows)
 
     if stack_position == nil then
-        error("Stack not found")
+        self._logger.e("Stack not found for screen: %s", screen.name)
     end
 
     for _, stack_window in pairs(self._window_cache) do
-        if ignored_windows[stack_window:id()] == nil and pinned_windows[stack_window:id()] == nil then
+        if ignored_windows[stack_window:id()] == nil and stack_window:screen():id() == current_screen:id() then
             self._logger.d("Stack window: %s, Position: %s", stack_window:id(), stack_position)
-            self:_positionWindow(stack_window, stack_position)
+            self:_positionWindow(current_screen, stack_window, stack_position)
         end
     end
 
-    self._current_layout[current_space] = new_layout
+end
+
+function obj:_reconcile(new_layout)
+    if new_layout.screens ~= nil then
+        for _, screen in pairs(new_layout.screens) do
+            self._logger.d("Screen: %s", screen)
+            self:_reconcileScreen(screen)
+        end
+    end
+
+    self._current_layout = new_layout
 end
 
 return obj

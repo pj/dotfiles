@@ -1,6 +1,6 @@
 -- TODO
 -- - Window Manager
--- -- Multi screen/space support
+-- -- Multi screen support
 -- -- Actions - move, set columns, increase/decrease span
 -- -- Layout Editor
 -- -- Saving/Loading Layouts
@@ -49,29 +49,44 @@ DefaultLayouts = {
         type = new_wm.__ROOT,
         name = "VLC",
         quickKey = "v",
-        child = {
-            type = new_wm.__COLUMNS,
-            columns = {
-                {
-                    type = new_wm.__STACK,
-                    span = 3
-                },
-                {
-                    type = new_wm.__ROWS,
-                    span = 1,
-                    rows = {
-                {
-                    type = new_wm.__PINNED,
-                    span = 1,
-                    application = "VLC"
-                },
+        screens = {
+            {
+                type = new_wm.__SCREEN,
+                name = "MSI PS341WU",
+                root = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
                         {
-                            type = new_wm.__PINNED,
+                            type = new_wm.__STACK,
+                            span = 3
+                        },
+                        {
+                            type = new_wm.__ROWS,
                             span = 1,
-                            application = "Podcasts"
+                            rows = {
+                                {
+                                    type = new_wm.__PINNED,
+                                    span = 1,
+                                    application = "VLC"
+                                },
+                                {
+                                    type = new_wm.__PINNED,
+                                    span = 1,
+                                    application = "Podcasts"
+                                }
+                            }
                         }
                     }
-                },
+                }
+            },
+            {
+                type = new_wm.__SCREEN,
+                name = "CX101",
+                root = {
+                    type = new_wm.__PINNED,
+                    span = 1,
+                    application = "Amazon Music"
+                }
             }
         }
     },
@@ -79,17 +94,23 @@ DefaultLayouts = {
         type = new_wm.__ROOT,
         name = "Plex",
         quickKey = "p",
-        child = {
-            type = new_wm.__COLUMNS,
-            columns = {
-                {
-                    type = new_wm.__STACK,
-                    span = 3
-                },
-                {
-                    type = new_wm.__PINNED,
-                    span = 1,
-                    application = "Plex"
+        screens = {
+            {
+                type = new_wm.__SCREEN,
+                name = "MSI PS341WU",
+                root = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            span = 3
+                        },
+                        {
+                            type = new_wm.__PINNED,
+                            span = 1,
+                            application = "Plex"
+                        }
+                    }
                 }
             }
         }
@@ -98,16 +119,22 @@ DefaultLayouts = {
         type = new_wm.__ROOT,
         name = "Split",
         quickKey = "s",
-        child = {
-            type = new_wm.__COLUMNS,
-            columns = {
-                {
-                    type = new_wm.__STACK,
-                    span = 1
-                },
-                {
-                    type = new_wm.__EMPTY,
-                    span = 1
+        screens = {
+            {
+                type = new_wm.__SCREEN,
+                name = "MSI PS341WU",
+                root = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            span = 1
+                        },
+                        {
+                            type = new_wm.__EMPTY,
+                            span = 1
+                        }
+                    }
                 }
             }
         }
@@ -152,7 +179,12 @@ ModalCommander = modal_commander.new({
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
         modalCommander:postMessageToWebview(siteBlockerState)
-        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts, currentLayout = WM:getLayout() })
+        modalCommander:postMessageToWebview({
+            type = "windowManagement",
+            layouts = DefaultLayouts,
+            currentLayout = WM
+                :getLayout()
+        })
     end
 })
 

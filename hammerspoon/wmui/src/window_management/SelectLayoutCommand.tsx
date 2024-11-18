@@ -1,8 +1,8 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Key } from "../Key"
-import { Layout as LayoutType } from "./Types"
+import { Layout as LayoutType, RootLayout as RootLayoutType } from "./Types"
 import { CommandLoading } from "../CommandLoading"
 
 export type LayoutCommandProps = DefaultCommandProps
@@ -83,21 +83,29 @@ function Layout({ layout, frame }: LayoutProps) {
     }
     else if (layout.type === "empty") {
         return <Window frame={{ w: frame.w, h: frame.h, x: frame.x, y: frame.y }} text="Empty" />
-    } else if (layout.type === "root") {
-        return (
-            <div key={layout.name}>
-                <div style={{ width: layoutWidth }} className="flex flex-row items-center justify-center p-1 gap-1">
-                    <Key text={layout.quickKey}></Key>
-                    <div className="text-xs">{layout.name}</div>
-                </div>
-                <div className="p-1 rounded-sm bg-black relative">
-                    <Layout layout={layout.child} frame={frame} />
-                </div>
-            </div>
-        )
     }
 
     return <div></div>
+}
+
+type RootLayoutProps = {
+    layout: RootLayoutType
+    frame: Geometry
+}
+
+function RootLayout({ layout, frame }: RootLayoutProps) {
+    const screenLayout = layout.screens[0]
+    return (
+        <div key={layout.name}>
+            <div style={{ width: layoutWidth }} className="flex flex-row items-center justify-center p-1 gap-1">
+                <Key text={layout.quickKey}></Key>
+                <div className="text-xs">{layout.name}</div>
+            </div>
+            <div className="p-1 rounded-sm bg-black relative">
+                <Layout layout={screenLayout.root} frame={frame} />
+            </div>
+        </div>
+    )
 }
 
 export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps) {
@@ -129,7 +137,7 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
         }
     }
 
-    const layouts = appState.windowManagement?.layouts || [] as LayoutType[]
+    const layouts = appState.windowManagement?.layouts || [] as RootLayoutType[]
 
     return (
         <div
@@ -145,8 +153,8 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
                         <>
                             <div className="flex flex-row divide-x *:px-2 first:*:pt-0 last:*:pb-0">
                                 {
-                                    layouts.map((layout: LayoutType) => (
-                                        <Layout layout={layout} frame={{ w: layoutWidth, h: layoutHeight, x: 0, y: 0 }} />
+                                    layouts.map((layout: RootLayoutType) => (
+                                        <RootLayout layout={layout} frame={{ w: layoutWidth, h: layoutHeight, x: 0, y: 0 }} />
                                     ))
                                 }
                             </div>
