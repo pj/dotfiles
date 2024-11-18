@@ -100,7 +100,7 @@
 
         font.normal = {
           family = "Monaco Nerd Font Mono";
-          style = "Regular";
+          style = "Book";
         };
       };
     };
@@ -169,10 +169,17 @@
       enable = true;
       enableZshIntegration = true;
     };
+    programs.tmux = {
+      enable = true;
+      shell = "${pkgs.zsh}/bin/zsh";
+    };
     home.stateVersion = "24.05";
-    # home.file.".oh-my-zsh/themes".source = ../../zsh_themes;
-    # home.file.".oh-my-zsh/themes".recursive = true;
-    home.file.".local/share/fonts/MonacoNerdFontMono-Regular.ttf".source = ./../../MonacoNerdFontMono-Regular.ttf;
+    home.file.".local/share/fonts/Monaco Nerd Font Complete Mono.ttf".source = ./../../${"Monaco Nerd Font Complete Mono.ttf"};
+    home.file.".tmux.conf".source = ./../../tmux.conf;
+    home.file.".config/commandline_thing/config.yaml".source = ./../../commandline_thing.yaml;
+    home.packages = [
+      inputs.commandline_thing.packages.${pkgs.system}.default
+    ];
   };
 
   # Install firefox.
@@ -199,7 +206,6 @@
     python312
     _1password-gui
     _1password
-    tmux
     # Needed for nix vscode extension to format properly
     nixpkgs-fmt
     zsh
