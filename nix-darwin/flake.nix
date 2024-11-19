@@ -5,10 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    commandline_thing.url = github:pj/commandline_thing?ref=1.0.3;
   };
 
-  outputs = inputs@{ self, determinate, nix-darwin, nixpkgs }:
+  outputs = { self, nix-darwin, nixpkgs, home-manager, ... }@inputs:
   let
     configuration = { pkgs, ... }: {
       # List packages installed in system profile. To search by name, run:
@@ -21,7 +23,7 @@
       nix.settings.experimental-features = "nix-command flakes";
 
       # Enable alternative shell support in nix-darwin.
-      # programs.fish.enable = true;
+      programs.zsh.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -38,7 +40,15 @@
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#laptop
     darwinConfigurations."laptop" = nix-darwin.lib.darwinSystem {
-      modules = [ configuration, determinate.darwinModules.default ];
+      modules = [ 
+        configuration 
+        home-manager.darwinModules.home-manager {
+          nixpkgs.config.allowUnfree = true;
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.pauljohnson = import ./../home-manager/home.nix;
+        }
+      ];
     };
 
     # Expose the package set, including overlays, for convenience.
