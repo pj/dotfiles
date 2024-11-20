@@ -129,10 +129,14 @@ DefaultLayouts = {
     }
 }
 
+local webServer = hs.httpserver.hsminweb.new(os.getenv("HOME").."/dotfiles/hammerspoon/wmui/dist") 
+webServer:start()
+
 local modal_commander = require("modal_commander")
 ModalCommander = modal_commander.new({
     debug = true,
-    appAddress = "http://127.0.0.1:5173",
+    -- appAddress = "http://127.0.0.1:5173",
+    appAddress = "http://127.0.0.1:"..webServer:port(),
     periodicUpdateInterval = 60,
     onPeriodicUpdate = function(modalCommander)
         local siteBlockerState = SiteBlocker:getState()

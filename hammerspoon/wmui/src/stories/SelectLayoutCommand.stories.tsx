@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { SelectLayoutCommand } from '../window_management/SelectLayoutCommand';
-import { expect, userEvent, waitFor, within } from '@storybook/test';
+import { expect, waitFor } from '@storybook/test';
 import { CommandDecorator } from './CommandDecorator';
 import { hammerspoonReady } from './utils';
 

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext } from "react"
 import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Key } from "../Key"
@@ -115,7 +115,7 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
     const sendMessage = useContext(AppSendMessageContext)
     const handleExit = useContext(AppExitContext)
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    // const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -159,10 +159,10 @@ export function SelectLayoutCommand({ index, handleDelete }: LayoutCommandProps)
                                 }
                             </div>
                             {
-                                errorMessage &&
-                                <div className="text-xs text-center text-red-500">
-                                    {errorMessage}
-                                </div>
+                                // errorMessage &&
+                                // <div className="text-xs text-center text-red-500">
+                                //     {errorMessage}
+                                // </div>
                             }
                         </>
                     ) : <CommandLoading testId="layout-loading" />

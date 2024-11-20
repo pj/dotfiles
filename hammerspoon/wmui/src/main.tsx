@@ -4,7 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { Prefix, PrefixSelectCommand } from './PrefixSelectCommand.tsx'
 import { SiteBlockerCommand } from './SiteBlocker.tsx'
-import { EditLayoutCommand } from './window_management/EditLayoutCommand.tsx'
+// import { EditLayoutCommand } from './window_management/EditLayoutCommand.tsx'
 import { SelectLayoutCommand } from './window_management/SelectLayoutCommand.tsx'
 export function sendMessage(message: any) {
   // @ts-ignore
@@ -22,10 +22,10 @@ createRoot(document.getElementById('root')!).render(
                         'b', 
                         {component: SiteBlockerCommand, props: {}, description: 'Site Blocker', type: "command"}
                     ],
-                    [
-                        'w', 
-                        {component: EditLayoutCommand, props: {}, description: 'Window Management editor', type: "command"}
-                    ],
+                    // [
+                    //     'w', 
+                    //     {component: EditLayoutCommand, props: {}, description: 'Window Management editor', type: "command"}
+                    // ],
                     [
                         'l', 
                         {component: SelectLayoutCommand, props: {}, description: 'Select Layout', type: "command"}

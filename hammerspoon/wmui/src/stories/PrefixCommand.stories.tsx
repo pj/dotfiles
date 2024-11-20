@@ -36,6 +36,7 @@ const meta = {
                 [
                     'H',
                     {
+                        type: "command",
                         component: TextCommand,
                         props: {
                             text: "Hello World!",
