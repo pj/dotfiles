@@ -3,7 +3,6 @@ package.path = package.path ..
 
 local lu = require('luaunit')
 local new_wm = require("new_new_wm")
-local inspect = require("inspect")
 
 local mockGeometry = {}
 mockGeometry.__index = mockGeometry

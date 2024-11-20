@@ -1,7 +1,6 @@
+{ commandline_thing }:
 { config, pkgs, lib, ... }:
 {
-  home.stateVersion = "22.05";
-
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
 
@@ -70,23 +69,20 @@
       enable = true;
       enableZshIntegration = true;
     };
-    programs.tmux = {
-      enable = true;
-      shell = "${pkgs.zsh}/bin/zsh";
-    };
+
     home.stateVersion = "24.05";
     # home.file.".local/share/fonts/Monaco Nerd Font Complete Mono.ttf".source = ./../../${"Monaco Nerd Font Complete Mono.ttf"};
-    home.file.".tmux.conf".source = ./../../tmux.conf;
-    home.file.".config/commandline_thing/config.yaml".source = ./../../commandline_thing.yaml;
-    home.packages = [
-      inputs.commandline_thing.packages.${pkgs.system}.default
-    ];
+    home.file.".tmux.conf".source = ./../tmux.conf;
+    home.file.".config/commandline_thing/config.yaml".source = ./../commandline_thing.yaml;
+    # home.file.".hammerspoon".source = ./../hammerspoon;
 
   home.packages = with pkgs; [
     curl
     wget
     jq
-
+    commandline_thing.packages.${pkgs.system}.default
+    git
+    tmux
   ] ++ lib.optionals stdenv.isDarwin [
   ];
 }

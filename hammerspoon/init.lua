@@ -1,23 +1,11 @@
 -- TODO
 -- - Window Manager
--- -- Multi screen support
 -- -- Actions - move, set columns, increase/decrease span
 -- -- Layout Editor
 -- -- Saving/Loading Layouts
 
 package.path = package.path .. ";./?.lua"
 require("lock_screen")
-
-NUMBER_CODES = {
-}
-for i = 1, 9 do
-    NUMBER_CODES[tostring(i)] = true
-end
-
-local function isAlphabetChar(char)
-    local byte = string.byte(char)
-    return (byte >= 65 and byte <= 90) or (byte >= 97 and byte <= 122)
-end
 
 local site_blocker = require("site_blocker")
 
@@ -182,8 +170,7 @@ ModalCommander = modal_commander.new({
         modalCommander:postMessageToWebview({
             type = "windowManagement",
             layouts = DefaultLayouts,
-            currentLayout = WM
-                :getLayout()
+            currentLayout = WM:getLayout()
         })
     end
 })
@@ -194,3 +181,7 @@ WM = new_wm.new("info")
 WM:start()
 
 WM:setLayout(DefaultLayouts[1])
+
+hs.hotkey.bind({"cmd", "ctrl"}, "t", nil, function()
+    ModalCommander:focusBrowser()
+end)

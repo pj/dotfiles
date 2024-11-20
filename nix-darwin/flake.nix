@@ -10,7 +10,7 @@
     commandline_thing.url = github:pj/commandline_thing?ref=1.0.3;
   };
 
-  outputs = { self, nix-darwin, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nix-darwin, nixpkgs, home-manager, commandline_thing, ... }@inputs:
   let
     configuration = { pkgs, ... }: {
       # List packages installed in system profile. To search by name, run:
@@ -23,7 +23,7 @@
       nix.settings.experimental-features = "nix-command flakes";
 
       # Enable alternative shell support in nix-darwin.
-      programs.zsh.enable = true;
+      # programs.zsh.enable = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
@@ -34,6 +34,9 @@
 
       # The platform the configuration will be used on.
       nixpkgs.hostPlatform = "x86_64-darwin";
+      users.users.pauljohnson.home = "/Users/pauljohnson";
+
+      fonts.packages = [ ./../${"Monaco Nerd Font Complete Mono.ttf"} ];
     };
   in
   {
@@ -46,7 +49,7 @@
           nixpkgs.config.allowUnfree = true;
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.users.pauljohnson = import ./../home-manager/home.nix;
+          home-manager.users.pauljohnson = import ./../home-manager/home.nix {commandline_thing = commandline_thing; };
         }
       ];
     };

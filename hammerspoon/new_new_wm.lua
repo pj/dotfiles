@@ -1,4 +1,3 @@
-local inspect = require("inspect")
 require("utils")
 local obj = {}
 obj.__index = obj
@@ -648,7 +647,7 @@ function obj:toggleFloatFocusedWindow()
         })
     end
     new_layout.floats = new_floats
-    self._logger.d("New layout: %s", inspect(new_layout))
+    self._logger.d("New layout: %s", self._hs.inspect(new_layout))
     self:setLayout(new_layout)
 end
 
@@ -758,6 +757,10 @@ end
 
 function obj:_reconcileScreen(screen)
     local current_screen = self._screen_cache[screen.name]
+    if current_screen == nil then
+        self._logger.w("Screen not found: " .. screen.name)
+        return
+    end
     local current_frame = current_screen:frame()
 
     local ignored_windows = {}
