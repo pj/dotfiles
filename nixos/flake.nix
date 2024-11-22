@@ -15,7 +15,7 @@
 
   outputs = { self, nixpkgs, home-manager, plasma-manager, ... }@inputs: {
     nixosConfigurations.nixbox = nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit inputs; };
+      # specialArgs = { inherit inputs; };
       modules = [
         ./nixbox/configuration.nix
         home-manager.nixosModules.home-manager
@@ -25,6 +25,7 @@
           home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];
 
           home-manager.users.paul = import ./nixbox/home.nix;
+          # home-manager.extraSpecialArgs = { inherit inputs; };
         }
       ];
     };
