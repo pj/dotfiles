@@ -39,95 +39,110 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 const defaultLayouts = {
     "type": 'windowManagement',
+    "currentLayoutName": "VLC",
+    "currentScreens": [
+        {
+            "name": "Primary",
+            "primary": true
+        }
+    ],
     "layouts": [
         {
-            "type": "root",
             "name": "VLC",
             "quickKey": "v",
-            "span": 1,
-            "child": {
-                "type": "columns",
-                "columns": [
-                    {
-                        "type": "stack",
-                        "span": 3
-                    },
-                    {
-                        "type": "pinned",
-                        "span": 1,
-                        "application": "VLC"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "root",
-            "name": "Plex",
-            "quickKey": "p",
-            "span": 1,
-            "child": {
-                "type": "columns",
-                "columns": [
-                    {
-                        "type": "stack",
-                        "span": 3
-                    },
-                    {
-                        "type": "pinned",
-                        "span": 1,
-                        "application": "Plex"
-                    }
-                ]
-            }
-        },
-        {
-            "type": "root",
-            "name": "Split",
-            "quickKey": "s",
-            "span": 1,
-            "child": {
-                "type": "columns",
-                "columns": [
-                    {
-                        "type": "stack",
-                        "span": 1
-                    },
-                    {
-                        "type": "empty",
-                        "span": 1
-                    }
-                ]
-            }
-        },
-        {
-            "type": "root",
-            "name": "VSplit",
-            "quickKey": "w",
-            "span": 1,
-            "child": {
-                "type": "columns",
-                "columns": [
-                    {
-                        "type": "stack",
-                        "span": 2
-                    },
-                    {
-                        "type": "rows",
-                        "span": 1,
-                        "rows": [
+            "screens": [
+                {
+                    "primary": {
+                        "type": "columns",
+                        "columns": [
                             {
-                                "type": "empty",
-                                "span": 1
+                                "type": "stack",
+                                "percentage": 75
                             },
                             {
                                 "type": "pinned",
-                                "span": 1,
-                                "application": "Plex"
+                                "percentage": 25,
+                                "application": "VLC"
                             }
                         ]
                     }
-                ]
-            }
+                }
+            ]
+        },
+        {
+            "name": "Plex",
+            "quickKey": "p",
+            "screens": [
+                {
+                    "primary": {
+                        "type": "columns",
+                        "columns": [
+                        {
+                            "type": "stack",
+                            "percentage": 75
+                        },
+                        {
+                            "type": "pinned",
+                            "percentage": 25,
+                            "application": "Plex"
+                        }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Split",
+            "quickKey": "s",
+            "screens": [
+                {
+                    "primary": {
+                        "type": "columns",
+                        "columns": [
+                            {
+                                "type": "stack",
+                                "percentage": 50
+                            },
+                            {
+                                "type": "empty",
+                                "percentage": 50
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "VSplit",
+            "quickKey": "w",
+            "screens": [
+                {
+                    "primary": {
+                        "type": "columns",
+                        "columns": [
+                            {
+                                "type": "stack",
+                                "percentage": 50
+                            },
+                            {
+                                "type": "rows",
+                                "percentage": 50,
+                                "rows": [
+                                    {
+                                        "type": "empty",
+                                        "percentage": 50
+                                    },
+                                    {
+                                        "type": "pinned",
+                                        "percentage": 50,
+                                        "application": "Plex"
+                                    }
+                            ]
+                        }
+                        ]
+                    }
+                }
+            ]
         }
     ]
 };

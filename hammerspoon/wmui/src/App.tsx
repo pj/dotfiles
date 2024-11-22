@@ -32,7 +32,7 @@ class AppErrorBoundary extends React.Component<any, any> {
 
     render() {
         if (this.state.error) {
-            return <div>Something went wrong: {this.state.error}</div>;
+            return <div>Something went wrong: {this.state.error.toString()}</div>;
         }
 
         return this.props.children;

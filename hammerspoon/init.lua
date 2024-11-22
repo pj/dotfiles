@@ -34,32 +34,61 @@ local new_wm = require("new_new_wm")
 
 DefaultLayouts = {
     {
-        type = new_wm.__ROOT,
         name = "VLC",
         quickKey = "v",
         screens = {
             {
-                type = new_wm.__SCREEN,
-                name = "MSI PS341WU",
-                root = {
+                ["MSI PS341WU"] = {
                     type = new_wm.__COLUMNS,
                     columns = {
                         {
                             type = new_wm.__STACK,
-                            span = 3
+                            percentage = 75
                         },
                         {
                             type = new_wm.__ROWS,
-                            span = 1,
+                            percentage = 25,
                             rows = {
                                 {
                                     type = new_wm.__PINNED,
-                                    span = 1,
+                                    percentage = 50,
                                     application = "VLC"
                                 },
                                 {
                                     type = new_wm.__PINNED,
-                                    span = 1,
+                                    percentage = 50,
+                                    application = "Podcasts"
+                                }
+                            }
+                        }
+                    }
+                },
+                ["CX101"] = {
+                    type = new_wm.__PINNED,
+                    percentage = 100,
+                    application = "Amazon Music"
+                },
+            },
+            {
+                ["MSI PS341WU"] = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            percentage = 75
+                        },
+                        {
+                            type = new_wm.__ROWS,
+                            percentage = 25,
+                            rows = {
+                                {
+                                    type = new_wm.__PINNED,
+                                    percentage = 50,
+                                    application = "VLC"
+                                },
+                                {
+                                    type = new_wm.__PINNED,
+                                    percentage = 50,
                                     application = "Podcasts"
                                 }
                             }
@@ -68,34 +97,33 @@ DefaultLayouts = {
                 }
             },
             {
-                type = new_wm.__SCREEN,
-                name = "CX101",
-                root = {
-                    type = new_wm.__PINNED,
-                    span = 1,
-                    application = "Amazon Music"
-                }
-            },
-            {
-                type = new_wm.__SCREEN,
-                name = "Built-in Retina Display",
-                root = {
+                ["Built-in Retina Display"] = {
                     type = new_wm.__COLUMNS,
                     columns = {
                         {
                             type = new_wm.__STACK,
-                            span = 3
+                            percentage = 60
                         },
                         {
-                            type = new_wm.__ROWS,
-                            span = 2,
-                            rows = {
-                                {
-                                    type = new_wm.__PINNED,
-                                    span = 1,
-                                    application = "VLC"
-                                },
-                            }
+                            type = new_wm.__PINNED,
+                            percentage = 40,
+                            application = "VLC"
+                        }
+                    }
+                }
+            },
+            {
+                [new_wm.__SCREEN_PRIMARY] = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            percentage = 75
+                        },
+                        {
+                            type = new_wm.__PINNED,
+                            percentage = 25,
+                            application = "VLC"
                         }
                     }
                 }
@@ -103,23 +131,20 @@ DefaultLayouts = {
         }
     },
     {
-        type = new_wm.__ROOT,
         name = "Plex",
         quickKey = "p",
         screens = {
             {
-                type = new_wm.__SCREEN,
-                name = "MSI PS341WU",
-                root = {
+                [new_wm.__SCREEN_PRIMARY] = {
                     type = new_wm.__COLUMNS,
                     columns = {
                         {
                             type = new_wm.__STACK,
-                            span = 3
+                            percentage = 75
                         },
                         {
                             type = new_wm.__PINNED,
-                            span = 1,
+                            percentage = 25,
                             application = "Plex"
                         }
                     }
@@ -128,23 +153,20 @@ DefaultLayouts = {
         }
     },
     {
-        type = new_wm.__ROOT,
         name = "Split",
         quickKey = "s",
         screens = {
             {
-                type = new_wm.__SCREEN,
-                name = "MSI PS341WU",
-                root = {
+                [new_wm.__SCREEN_PRIMARY] = {
                     type = new_wm.__COLUMNS,
                     columns = {
                         {
                             type = new_wm.__STACK,
-                            span = 1
+                            percentage = 50
                         },
                         {
                             type = new_wm.__EMPTY,
-                            span = 1
+                            percentage = 50
                         }
                     }
                 }
@@ -152,38 +174,54 @@ DefaultLayouts = {
         }
     },
     {
-        type = new_wm.__ROOT,
         name = "Full Screen",
         quickKey = "f",
         screens = {
             {
-                type = new_wm.__SCREEN,
-                name = "Built-in Retina Display",
-                root = {
+                [new_wm.__SCREEN_PRIMARY] = {
                     type = new_wm.__COLUMNS,
                     columns = {
                         {
                             type = new_wm.__STACK,
-                            span = 1
+                            percentage = 100
                         },
                     }
-                }
-            },
+                },
+            }
         }
     },
 }
 
-hs.printf("Starting web server in directory %s", os.getenv("HOME").."/dotfiles/hammerspoon/wmui/dist")
-local webServer = hs.httpserver.hsminweb.new(os.getenv("HOME").."/dotfiles/hammerspoon/wmui/dist") 
+WM = new_wm.new("info")
+WM:start()
+
+WM:setLayout(DefaultLayouts[1])
+
+hs.printf("Starting web server in directory %s", os.getenv("HOME") .. "/dotfiles/hammerspoon/wmui/dist")
+local webServer = hs.httpserver.hsminweb.new(os.getenv("HOME") .. "/dotfiles/hammerspoon/wmui/dist")
 webServer:start()
 
 hs.printf("Web server started on port %d", webServer:port())
 
 local modal_commander = require("modal_commander")
+function UpdateLayouts(modalCommander)
+    local currentScreens = {}
+    for _, screen in ipairs(hs.screen.allScreens()) do
+        table.insert(currentScreens, { name = screen:name(), primary = screen:id() == hs.screen.primaryScreen():id() })
+    end
+    modalCommander:postMessageToWebview({
+        type = "windowManagement",
+        layouts = DefaultLayouts,
+        currentLayout = WM:getLayout(),
+        currentLayoutName = WM:getLayout().name,
+        currentScreens = currentScreens
+    })
+end
+
 ModalCommander = modal_commander.new({
     debug = true,
     -- appAddress = "http://127.0.0.1:5173",
-    appAddress = "http://127.0.0.1:"..webServer:port(),
+    appAddress = "http://127.0.0.1:" .. webServer:port(),
     periodicUpdateInterval = 60,
     onPeriodicUpdate = function(modalCommander)
         local siteBlockerState = SiteBlocker:getState()
@@ -194,7 +232,7 @@ ModalCommander = modal_commander.new({
     onStart = function(modalCommander)
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
-        modalCommander:postMessageToWebview({ type = "windowManagement", layouts = DefaultLayouts })
+        UpdateLayouts(modalCommander)
         modalCommander:postMessageToWebview(siteBlockerState)
     end,
     onMessage = function(modalCommander, message)
@@ -218,21 +256,12 @@ ModalCommander = modal_commander.new({
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
         modalCommander:postMessageToWebview(siteBlockerState)
-        modalCommander:postMessageToWebview({
-            type = "windowManagement",
-            layouts = DefaultLayouts,
-            currentLayout = WM:getLayout()
-        })
+        UpdateLayouts(modalCommander)
     end
 })
 
 ModalCommander:start()
 
-WM = new_wm.new("info")
-WM:start()
-
-WM:setLayout(DefaultLayouts[1])
-
-hs.hotkey.bind({"cmd", "ctrl"}, "t", nil, function()
+hs.hotkey.bind({ "cmd", "ctrl" }, "t", nil, function()
     ModalCommander:focusBrowser()
 end)

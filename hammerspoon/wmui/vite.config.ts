@@ -10,4 +10,11 @@ test: {
   environment: "jsdom",
   // setupFiles: "./setupTests.ts",
 },
+build: {
+  minify: false,
+  terserOptions: {
+    compress: false,
+    mangle: false,
+  },
+},
 });

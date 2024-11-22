@@ -6,8 +6,13 @@ obj.__EMPTY = "empty"
 obj.__PINNED = "pinned"
 obj.__ROWS = "rows"
 obj.__COLUMNS = "columns"
-obj.__ROOT = "root"
-obj.__SCREEN = "screen"
+-- obj.__ROOT = "root"
+obj.__FLOAT_ZOOMED = "float_zoomed"
+
+-- Constants for defining screens
+obj.__SCREEN_PRIMARY = "primary"
+
+obj.__PERCENTAGE_INCREMENT = 10
 
 -- Metadata
 obj.name = "PaulsTilingWM"
@@ -146,7 +151,7 @@ function obj:start()
                 columns = {
                     {
                         type = obj.__STACK,
-                        span = 1
+                        percentage = 100
                     }
                 },
                 type = obj.__COLUMNS
@@ -275,9 +280,9 @@ function obj:incrementSplit()
     end
 
     if sublayout.type == obj.__COLUMNS then
-        table.insert(sublayout.columns, { type = obj.__EMPTY, span = 1 })
+        table.insert(sublayout.columns, { type = obj.__EMPTY, percentage = 100 })
     elseif sublayout.type == obj.__ROWS then
-        table.insert(sublayout.rows, { type = obj.__EMPTY, span = 1 })
+        table.insert(sublayout.rows, { type = obj.__EMPTY, percentage = 100 })
     else
         error("Unknown layout type: " .. sublayout.type)
     end
@@ -359,7 +364,7 @@ function obj:setSplits(number_of_splits)
             table.insert(updatedItems, item)
         end
         for x = 1, number_of_splits - #items do
-            table.insert(updatedItems, { type = obj.__EMPTY, span = 1 })
+            table.insert(updatedItems, { type = obj.__EMPTY, percentage = 100 })
         end
     end
 
@@ -375,27 +380,28 @@ function obj:setSplits(number_of_splits)
 end
 
 function obj:_findPinnedAndStack(window, layout, parent, parentIndex)
-    if layout.type == obj.__ROOT then
-        local pinned = nil
-        local pinnedIndex = nil
-        local stack = nil
-        local stackIndex = nil
-        local child_pinned, child_pinned_index, child_stack, child_stack_index = self:_findPinnedAndStack(
-            window,
-            layout.child,
-            layout,
-            1
-        )
-        if child_pinned ~= nil then
-            pinned = child_pinned
-            pinnedIndex = child_pinned_index
-        end
-        if child_stack ~= nil then
-            stack = child_stack
-            stackIndex = child_stack_index
-        end
-        return pinned, pinnedIndex, stack, stackIndex
-    elseif layout.type == obj.__COLUMNS then
+    -- if layout.type == obj.__ROOT then
+    --     local pinned = nil
+    --     local pinnedIndex = nil
+    --     local stack = nil
+    --     local stackIndex = nil
+    --     local child_pinned, child_pinned_index, child_stack, child_stack_index = self:_findPinnedAndStack(
+    --         window,
+    --         layout.child,
+    --         layout,
+    --         1
+    --     )
+    --     if child_pinned ~= nil then
+    --         pinned = child_pinned
+    --         pinnedIndex = child_pinned_index
+    --     end
+    --     if child_stack ~= nil then
+    --         stack = child_stack
+    --         stackIndex = child_stack_index
+    --     end
+    --     return pinned, pinnedIndex, stack, stackIndex
+    -- else
+    if layout.type == obj.__COLUMNS then
         local pinned = nil
         local pinnedIndex = nil
         local stack = nil
@@ -453,7 +459,7 @@ function obj:_findPinnedAndStack(window, layout, parent, parentIndex)
     end
 end
 
-function obj:_updateFocusedSpan(setterFunc)
+function obj:_updateFocusedPercentage(setterFunc)
     local new_layout = DeepCopy(self._current_layout)
     local focusedWindow = self._hs.window.focusedWindow()
 
@@ -462,17 +468,17 @@ function obj:_updateFocusedSpan(setterFunc)
 
     if pinnedIn ~= nil then
         if pinnedIn.type == obj.__COLUMNS then
-            pinnedIn.columns[pinnedIndex].span = setterFunc(pinnedIn.columns[pinnedIndex].span)
+            pinnedIn.columns[pinnedIndex].percentage = setterFunc(pinnedIn.columns[pinnedIndex].percentage)
         elseif pinnedIn.type == obj.__ROWS then
-            pinnedIn.rows[pinnedIndex].span = setterFunc(pinnedIn.rows[pinnedIndex].span)
+            pinnedIn.rows[pinnedIndex].percentage = setterFunc(pinnedIn.rows[pinnedIndex].percentage)
         else
             error("Unknown layout type: " .. pinnedIn.type)
         end
     elseif stackedIn ~= nil then
         if stackedIn.type == obj.__COLUMNS then
-            stackedIn.columns[stackIndex].span = setterFunc(stackedIn.columns[stackIndex].span)
+            stackedIn.columns[stackIndex].percentage = setterFunc(stackedIn.columns[stackIndex].percentage)
         elseif stackedIn.type == obj.__ROWS then
-            stackedIn.rows[stackIndex].span = setterFunc(stackedIn.rows[stackIndex].span)
+            stackedIn.rows[stackIndex].percentage = setterFunc(stackedIn.rows[stackIndex].percentage)
         else
             error("Unknown layout type: " .. stackedIn.type)
         end
@@ -483,16 +489,16 @@ function obj:_updateFocusedSpan(setterFunc)
     self:_reconcile(new_layout)
 end
 
-function obj:incrementFocusedSpan()
-    self:_updateFocusedSpan(function(current) return current + 1 end)
+function obj:incrementFocusedPercentage(amount)
+    self:_updateFocusedPercentage(function(current) return current + amount end)
 end
 
-function obj:decrementFocusedSpan()
-    self:_updateFocusedSpan(function(current) return current - 1 end)
+function obj:decrementFocusedPercentage(amount)
+    self:_updateFocusedPercentage(function(current) return current - amount end)
 end
 
-function obj:setFocusedColumnSpan(span)
-    self:_updateFocusedSpan(function(current) return span end)
+function obj:setFocusedColumnPercentage(percentage)
+    self:_updateFocusedPercentage(function(current) return percentage end)
 end
 
 function obj:moveFocusedTo(destPosition)
@@ -506,9 +512,9 @@ function obj:moveFocusedTo(destPosition)
     if pinnedIn ~= nil and stackedIn ~= nil and stackedIndex == destPosition then
         assert(pinnedIndex ~= nil)
         if pinnedIn.type == obj.__COLUMNS then
-            pinnedIn.columns[pinnedIndex] = { type = obj.__EMPTY, span = pinnedIn.columns[pinnedIndex].span }
+            pinnedIn.columns[pinnedIndex] = { type = obj.__EMPTY, percentage = pinnedIn.columns[pinnedIndex].percentage }
         elseif pinnedIn.type == obj.__ROWS then
-            pinnedIn.rows[pinnedIndex] = { type = obj.__EMPTY, span = pinnedIn.rows[pinnedIndex].span }
+            pinnedIn.rows[pinnedIndex] = { type = obj.__EMPTY, percentage = pinnedIn.rows[pinnedIndex].percentage }
         else
             error("Unknown layout type: " .. pinnedIn.type)
         end
@@ -525,10 +531,10 @@ function obj:moveFocusedTo(destPosition)
 
         assert(pinnedIndex ~= nil)
         local sourceColumn = items[pinnedIndex]
-        items[pinnedIndex] = { type = obj.__EMPTY, span = sourceColumn.span }
+        items[pinnedIndex] = { type = obj.__EMPTY, percentage = sourceColumn.percentage }
         if destPosition > #items then
             for _ = 1, destPosition - #items do
-                table.insert(items, { type = obj.__EMPTY, span = 1 })
+                table.insert(items, { type = obj.__EMPTY, percentage = 100 })
             end
         end
 
@@ -536,7 +542,7 @@ function obj:moveFocusedTo(destPosition)
         local destColumn = items[destPosition]
         local newPinned = {
             type = obj.__PINNED,
-            span = destColumn.span,
+            percentage = destColumn.percentage,
             title = sourceColumn.title,
             application = sourceColumn.application
         }
@@ -565,7 +571,7 @@ function obj:moveFocusedTo(destPosition)
 
         if destPosition > #items then
             for _ = 1, destPosition - #items do
-                table.insert(items, { type = obj.__EMPTY, span = 1 })
+                table.insert(items, { type = obj.__EMPTY, percentage = 100 })
             end
         end
 
@@ -573,7 +579,7 @@ function obj:moveFocusedTo(destPosition)
 
         local newPinned = {
             type = obj.__PINNED,
-            span = destColumn.span,
+            percentage = destColumn.percentage,
             application = focusedWindow:application():name(),
             title = focusedWindow:title()
         }
@@ -685,20 +691,15 @@ function obj:_reconcileDirectional(current_screen, items, bounding_frame, direct
         total_span_size = bounding_frame.h
     end
 
-    local total_span = 0
-    for _, item in pairs(items) do
-        total_span = total_span + item.span
-    end
-    local span_size = total_span_size / total_span
     local stack_position = nil
-    -- local pinned_windows = {}
     for _, item in pairs(items) do
         local new_frame = nil
+        local span_size = total_span_size * (item.percentage / 100)
         if direction then
             new_frame = self._hs.geometry.new(
                 offset,
                 bounding_frame.y,
-                span_size * item.span,
+                span_size,
                 bounding_frame.h
             )
         else
@@ -706,26 +707,25 @@ function obj:_reconcileDirectional(current_screen, items, bounding_frame, direct
                 bounding_frame.x,
                 offset,
                 bounding_frame.w,
-                span_size * item.span
+                span_size
             )
         end
-        local recursive_stack_position = self:_reconcileRecursive(current_screen, item, new_frame,
-            ignored_windows)
+        local recursive_stack_position = self:_reconcileRecursive(
+            current_screen,
+            item,
+            new_frame,
+            ignored_windows
+        )
         if recursive_stack_position ~= nil then
             stack_position = recursive_stack_position
         end
-        -- for _, window in pairs(recursive_pinned_windows) do
-        --     pinned_windows[window:id()] = window
-        -- end
-        offset = offset + (item.span * span_size)
+        offset = offset + span_size
     end
 
     return stack_position
 end
 
 function obj:_reconcileRecursive(current_screen, new_layout, current_frame, ignored_windows)
-    -- if new_layout.type == obj.__ROOT then
-    --     return self:_reconcileRecursive(current_screen, new_layout.child, current_frame, ignored_windows)
     if new_layout.type == obj.__COLUMNS then
         return self:_reconcileDirectional(current_screen, new_layout.columns, current_frame, true, ignored_windows)
     elseif new_layout.type == obj.__ROWS then
@@ -755,18 +755,13 @@ function obj:_reconcileRecursive(current_screen, new_layout, current_frame, igno
     end
 end
 
-function obj:_reconcileScreen(screen)
-    local current_screen = self._screen_cache[screen.name]
-    if current_screen == nil then
-        self._logger.w("Screen not found: " .. screen.name)
-        return
-    end
-    local current_frame = current_screen:frame()
+function obj:_reconcileScreen(screenSetup)
+    local current_frame = screenSetup.screen:frame()
 
     local ignored_windows = {}
 
-    if screen.floats ~= nil then
-        for _, layout in pairs(screen.floats) do
+    if screenSetup.config.floats ~= nil then
+        for _, layout in pairs(screenSetup.config.floats) do
             local application = self._application_cache[layout.application]
             if application == nil then
                 self._logger.w("Application not found: " .. layout.application)
@@ -783,8 +778,8 @@ function obj:_reconcileScreen(screen)
         end
     end
 
-    if screen.zoomed ~= nil then
-        for _, layout in pairs(screen.zoomed) do
+    if screenSetup.config.zoomed ~= nil then
+        for _, layout in pairs(screenSetup.config.zoomed) do
             local application = self._application_cache[layout.application]
             if application == nil then
                 self._logger.w("Application not found: " .. layout.application)
@@ -794,7 +789,7 @@ function obj:_reconcileScreen(screen)
             for _, window in pairs(application) do
                 if layout.title == nil or window:title() == layout.title then
                     ignored_windows[window:id()] = window
-                    self:_positionWindow(current_screen, window, current_frame)
+                    self:_positionWindow(screenSetup.screen, window, current_frame)
                 end
             end
 
@@ -802,26 +797,57 @@ function obj:_reconcileScreen(screen)
         end
     end
 
-    local stack_position = self:_reconcileRecursive(current_screen, screen.root, current_frame, ignored_windows)
+    local stack_position = self:_reconcileRecursive(screenSetup.screen, screenSetup.config, current_frame, ignored_windows)
 
     if stack_position == nil then
-        self._logger.e("Stack not found for screen: %s", screen.name)
+        self._logger.e("Stack not found for screen: %s", screenSetup.name)
     end
 
     for _, stack_window in pairs(self._window_cache) do
-        if ignored_windows[stack_window:id()] == nil and stack_window:screen():id() == current_screen:id() then
+        if ignored_windows[stack_window:id()] == nil and stack_window:screen():id() == screenSetup.screen:id() then
             self._logger.d("Stack window: %s, Position: %s", stack_window:id(), stack_position)
-            self:_positionWindow(current_screen, stack_window, stack_position)
+            self:_positionWindow(screenSetup.screen, stack_window, stack_position)
         end
     end
-
 end
 
 function obj:_reconcile(new_layout)
     if new_layout.screens ~= nil then
-        for _, screen in pairs(new_layout.screens) do
-            self._logger.d("Screen: %s", screen)
-            self:_reconcileScreen(screen)
+        for _, screenSet in pairs(new_layout.screens) do
+            self._logger.d("ScreenSet: %s", screenSet)
+
+            local foundAllScreens = true
+            local screensToReconcile = {}
+            for screenName, screenConfig in pairs(screenSet) do
+                local foundScreen = nil
+                if screenName == obj.__SCREEN_PRIMARY then
+                    foundScreen = self._hs.screen.primaryScreen()
+                else
+                    foundScreen = self._screen_cache[screenName]
+                end
+                if foundScreen == nil then
+                    self._logger.w("Screen not found: " .. screenName)
+                    foundAllScreens = false
+                    break
+                else
+                    table.insert(screensToReconcile, {
+                        name = screenName,
+                        screen = foundScreen,
+                        config = screenConfig
+                    })
+                end
+            end
+            if foundAllScreens then
+                local screenNames = {}
+                for _, screenSetup in pairs(screensToReconcile) do
+                    table.insert(screenNames, screenSetup.name)
+                end
+                self._logger.i("Reconciling screens: ", self._hs.inspect(screenNames))
+                for _, screenSetup in pairs(screensToReconcile) do
+                    self:_reconcileScreen(screenSetup)
+                end
+                break
+            end
         end
     end
 
