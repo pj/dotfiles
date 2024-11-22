@@ -75,7 +75,31 @@ DefaultLayouts = {
                     span = 1,
                     application = "Amazon Music"
                 }
-            }
+            },
+            {
+                type = new_wm.__SCREEN,
+                name = "Built-in Retina Display",
+                root = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            span = 3
+                        },
+                        {
+                            type = new_wm.__ROWS,
+                            span = 2,
+                            rows = {
+                                {
+                                    type = new_wm.__PINNED,
+                                    span = 1,
+                                    application = "VLC"
+                                },
+                            }
+                        }
+                    }
+                }
+            },
         }
     },
     {
@@ -126,11 +150,34 @@ DefaultLayouts = {
                 }
             }
         }
-    }
+    },
+    {
+        type = new_wm.__ROOT,
+        name = "Full Screen",
+        quickKey = "f",
+        screens = {
+            {
+                type = new_wm.__SCREEN,
+                name = "Built-in Retina Display",
+                root = {
+                    type = new_wm.__COLUMNS,
+                    columns = {
+                        {
+                            type = new_wm.__STACK,
+                            span = 1
+                        },
+                    }
+                }
+            },
+        }
+    },
 }
 
+hs.printf("Starting web server in directory %s", os.getenv("HOME").."/dotfiles/hammerspoon/wmui/dist")
 local webServer = hs.httpserver.hsminweb.new(os.getenv("HOME").."/dotfiles/hammerspoon/wmui/dist") 
 webServer:start()
+
+hs.printf("Web server started on port %d", webServer:port())
 
 local modal_commander = require("modal_commander")
 ModalCommander = modal_commander.new({

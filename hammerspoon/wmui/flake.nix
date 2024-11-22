@@ -7,7 +7,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
-    # flake-utils.lib.eachDefaultSystem (system:
+    flake-utils.lib.eachDefaultSystem (system:
         # let
         #     pkgs = nixpkgs.legacyPackages.${system};
         #     deps = with pkgs; [
@@ -28,7 +28,7 @@
         # }
 
         let 
-          pkgs = nixpkgs.legacyPackages.aarch64-darwin;
+          pkgs = nixpkgs.legacyPackages.${system};
           deps = rec {
             jq = pkgs.jq;
             nodejs_20 = pkgs.nodejs_20;
@@ -37,8 +37,8 @@
 
         in
         {
-          packages.aarch64-darwin = deps;
-          devShells.aarch64-darwin.default = pkgs.mkShell { packages = pkgs.lib.attrsets.attrValues deps; };
-        };
-    # );
+          packages = deps;
+          devShell = pkgs.mkShell { packages = pkgs.lib.attrsets.attrValues deps; };
+        }
+    );
 }

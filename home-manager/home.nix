@@ -83,6 +83,7 @@
     commandline_thing.packages.${pkgs.system}.default
     git
     tmux
+    inetutils
   ] ++ lib.optionals stdenv.isDarwin [
   ];
 }
