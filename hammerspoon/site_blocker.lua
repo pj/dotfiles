@@ -289,9 +289,9 @@ function obj:getState()
     end
 
     return {
-        timeSpent = self._store.get('timeSpent'),
-        isBlocked = self._currentTimer ~= nil,
-        totalSeconds = actualTimeLimit * 60,
+        timeSpent = timeSpent,
+        blocked = self._currentTimer == nil,
+        timeLimit = actualTimeLimit,
         validTime = not (now.hour >= 1 and now.hour < 18)
     }
 end

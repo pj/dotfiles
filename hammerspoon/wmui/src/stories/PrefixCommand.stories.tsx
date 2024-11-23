@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { TextCommand } from '../TextCommand';
-import { PrefixSelectCommand } from '../PrefixSelectCommand';
+import { TextCommand } from '../commands/TextCommand';
+import { PrefixSelectCommand } from '../commands/PrefixSelectCommand';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
 import { CommandDecorator } from './CommandDecorator';
 import { hammerspoonReady } from './utils';

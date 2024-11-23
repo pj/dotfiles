@@ -2,7 +2,7 @@ import { useContext } from "react"
 import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Key } from "../Key"
-import { Layout as LayoutType, RootLayout as RootLayoutType, WindowManagementState } from "./Types"
+import { Geometry, Layout as LayoutType, RootLayout as RootLayoutType, WindowManagementState } from "./Types"
 import { CommandLoading } from "../CommandLoading"
 
 export type LayoutCommandProps = DefaultCommandProps
@@ -11,13 +11,6 @@ const columnCss = "rounded-md text-xs bg-white flex flex-col border border-gray-
 const columnStyle = { fontSize: "0.5rem" }
 const layoutWidth = 160;
 const layoutHeight = 100;
-
-type Geometry = {
-    w: number
-    h: number
-    x: number
-    y: number
-}
 
 type LayoutProps = {
     layout: LayoutType
@@ -75,7 +68,7 @@ function Layout({ layout, frame }: LayoutProps) {
         return <Window frame={{ w: frame.w, h: frame.h, x: frame.x, y: frame.y }} text="Empty" />
     }
 
-    return <div></div>
+    return (<div>Unknown layout type {JSON.stringify(layout)}</div>);
 }
 
 type RootLayoutProps = {

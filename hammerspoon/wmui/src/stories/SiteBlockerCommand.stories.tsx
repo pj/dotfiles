@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SiteBlockerCommand } from '../SiteBlocker';
+import { SiteBlockerCommand } from '../commands/SiteBlocker';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
 import { CommandDecorator } from './CommandDecorator';
 import { hammerspoonReady } from './utils';
@@ -60,7 +60,7 @@ export const InvalidTime: Story = {
 
         await Loading.play?.(playContext)
 
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: false, timeSpent: 0, totalSeconds: 3600, validTime: false })
+        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', blocked: false, timeSpent: 0, timeLimit: 60, validTime: false })
         const siteBlockerCommand = canvas.getByTestId('site-blocker-command-0')
 
         await waitFor(() => {
@@ -75,7 +75,7 @@ export const InvalidTimeErrorMessage: Story = {
 
         await Loading.play?.(playContext)
 
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: false, timeSpent: 0, totalSeconds: 3600, validTime: false })
+        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', blocked: false, timeSpent: 0, timeLimit: 60, validTime: false })
 
         const siteBlockerCommand = canvas.getByTestId('site-blocker-command-0')
         await userEvent.type(siteBlockerCommand, 'b')
@@ -93,7 +93,7 @@ export const ViewTimeLeft: Story = {
 
         await Loading.play?.(playContext)
 
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: false, timeSpent: 1, totalSeconds: 3600, validTime: true })
+        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', blocked: false, timeSpent: 1, timeLimit: 60, validTime: true })
 
         const siteBlockerCommand = canvas.getByTestId('site-blocker-command-0')
 
@@ -103,18 +103,32 @@ export const ViewTimeLeft: Story = {
     },
 };
 
-export const StartBlock: Story = {
+export const StartAvailable: Story = {
     play: async (playContext) => {
         const canvas = within(playContext.canvasElement)
 
         await ViewTimeLeft.play?.(playContext)
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: false, timeSpent: 0, totalSeconds: 3600, validTime: true })
+        playContext.parameters.commandMessaging.sendMessage({
+            type: 'siteBlocker',
+            blocked: true,
+            timeSpent: 0,
+            timeLimit: 60,
+            validTime: true
+        })
 
         const siteBlockerCommand = canvas.getByTestId('site-blocker-command-0')
         await userEvent.type(siteBlockerCommand, 'b')
-        expect(playContext.parameters.commandMessaging.lastReceivedMessages[playContext.parameters.commandMessaging.lastReceivedMessages.length - 1]).toEqual({ type: 'siteBlocker', isBlocked: true })
+        expect(
+            playContext.parameters.commandMessaging.lastReceivedMessages[playContext.parameters.commandMessaging.lastReceivedMessages.length - 1]
+        ).toEqual({ type: 'siteBlocker' })
 
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: true, timeSpent: 80, totalSeconds: 3600, validTime: true })
+        playContext.parameters.commandMessaging.sendMessage({
+            type: 'siteBlocker',
+            blocked: false,
+            timeSpent: 2,
+            timeLimit: 60,
+            validTime: true
+        })
 
         await waitFor(() => {
             expect(siteBlockerCommand.textContent).toMatch(/58 Minutes Left/)
@@ -122,20 +136,22 @@ export const StartBlock: Story = {
     },
 };
 
-export const StopBlock: Story = {
+export const StopAvailable: Story = {
     play: async (playContext) => {
         const canvas = within(playContext.canvasElement)
 
-        await StartBlock.play?.(playContext)
+        await StartAvailable.play?.(playContext)
 
         const siteBlockerCommand = canvas.getByTestId('site-blocker-command-0')
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: true, timeSpent: 60, totalSeconds: 3600, validTime: true })
+        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', blocked: false, timeSpent: 1, timeLimit: 60, validTime: true })
         await userEvent.type(siteBlockerCommand, 'b')
 
         console.log(playContext.parameters.commandMessaging.lastReceivedMessages)
-        expect(playContext.parameters.commandMessaging.lastReceivedMessages[playContext.parameters.commandMessaging.lastReceivedMessages.length - 1]).toEqual({ type: 'siteBlocker', isBlocked: false })
+        expect(
+            playContext.parameters.commandMessaging.lastReceivedMessages[playContext.parameters.commandMessaging.lastReceivedMessages.length - 1]
+        ).toEqual({ type: 'siteBlocker' })
 
-        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', isBlocked: false, timeSpent: 120, totalSeconds: 3600, validTime: true })
+        playContext.parameters.commandMessaging.sendMessage({ type: 'siteBlocker', blocked: true, timeSpent: 2, timeLimit: 60, validTime: true })
         await waitFor(() => {
             expect(siteBlockerCommand.textContent).toMatch(/58 Minutes Left/)
         })

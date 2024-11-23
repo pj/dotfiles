@@ -35,6 +35,8 @@ export type EmptyLayout = {
 
 export type Layout = ColumnsLayout | RowsLayout | StackLayout | PinnedLayout | EmptyLayout
 
+export type LayoutConstant = Layout extends any ? Layout["type"] : never;
+
 // export type Window = {
 //     id: string
 //     title: string
@@ -52,4 +54,11 @@ export type WindowManagementState = {
     currentLayout: RootLayout
     currentLayoutName: string
     currentScreens: { name: string, primary: boolean }[]
+}
+
+export type Geometry = {
+    w: number
+    h: number
+    x: number
+    y: number
 }

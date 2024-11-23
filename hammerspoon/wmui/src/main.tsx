@@ -2,9 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { Prefix, PrefixSelectCommand } from './PrefixSelectCommand.tsx'
-import { SiteBlockerCommand } from './SiteBlocker.tsx'
-// import { EditLayoutCommand } from './window_management/EditLayoutCommand.tsx'
+import { Prefix, PrefixSelectCommand } from './commands/PrefixSelectCommand.tsx'
+import { SiteBlockerCommand } from './commands/SiteBlocker.tsx'
 import { SelectLayoutCommand } from './window_management/SelectLayoutCommand.tsx'
 export function sendMessage(message: any) {
   // @ts-ignore
