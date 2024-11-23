@@ -13,19 +13,36 @@
     inputs.home-manager.follows = "home-manager";
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, ... }@inputs: {
+  inputs.xremap-flake.url = "github:xremap/nix-flake";
+
+  outputs = { self, nixpkgs, home-manager, plasma-manager, xremap-flake, ... }@inputs: {
     nixosConfigurations.nixbox = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+
       # specialArgs = { inherit inputs; };
       modules = [
+        # inputs.xremap-flake.nixosModules.default
+        # {
+        #   services.xremap.withKDE = true;
+        #   services.xremap.config.keymap = [
+        #     {
+        #       name = "Remap control paste";
+        #       remap = { "C-u" = "PAGEUP"; };
+        #     }
+        #   ];
+        # }
         ./nixbox/configuration.nix
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];
+          home-manager.sharedModules = [ 
+            xremap-flake.homeManagerModules.default 
+            plasma-manager.homeManagerModules.plasma-manager ];
 
+          home-manager.backupFileExtension = "home_manager_backup";
           home-manager.users.paul = import ./nixbox/home.nix;
-          # home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.extraSpecialArgs = { inherit inputs; };
         }
       ];
     };
