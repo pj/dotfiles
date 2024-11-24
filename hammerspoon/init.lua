@@ -5,7 +5,6 @@
 -- -- Saving/Loading Layouts
 
 package.path = package.path .. ";./?.lua"
-require("lock_screen")
 
 local site_blocker = require("site_blocker")
 
@@ -218,6 +217,14 @@ function UpdateLayouts(modalCommander)
     })
 end
 
+function UpdateVolume(modalCommander)
+    modalCommander:postMessageToWebview({
+        type = "volume",
+        volume = hs.audiodevice.defaultOutputDevice():volume(),
+        muted = hs.audiodevice.defaultOutputDevice():muted()
+    })
+end
+
 ModalCommander = modal_commander.new({
     debug = true,
     -- appAddress = "http://127.0.0.1:5173",
@@ -250,18 +257,37 @@ ModalCommander = modal_commander.new({
             WM:toggleZoomFocusedWindow()
         elseif message.type == "windowManagementFloatToggle" then
             WM:toggleFloatFocusedWindow()
+        elseif message.type == "lockScreen" then
+            hs.caffeinate.startScreensaver()
+        elseif message.type == "volumeMute" then
+            local device = hs.audiodevice.defaultOutputDevice()
+            device:setMuted(not device:muted())
+        elseif message.type == "volumeUp" then
+            local device = hs.audiodevice.defaultOutputDevice()
+            device:setVolume(device:volume() + 1)
+            hs.sound.getByName("Tink"):play()
+        elseif message.type == "volumeDown" then
+            local device = hs.audiodevice.defaultOutputDevice()
+            device:setVolume(device:volume() - 1)
+            hs.sound.getByName("Tink"):play()
+        elseif message.type == "volumeSet" then
+            local device = hs.audiodevice.defaultOutputDevice()
+            device:setVolume(message.volume)
+            hs.sound.getByName("Tink"):play()
         end
+        UpdateVolume(modalCommander)
     end,
     onShow = function(modalCommander)
         local siteBlockerState = SiteBlocker:getState()
         siteBlockerState.type = "siteBlocker"
         modalCommander:postMessageToWebview(siteBlockerState)
         UpdateLayouts(modalCommander)
+        UpdateVolume(modalCommander)
     end
 })
 
 ModalCommander:start()
 
 hs.hotkey.bind({ "cmd", "ctrl" }, "t", nil, function()
-    ModalCommander:focusBrowser()
+    ModalCommander:toggleBrowser()
 end)

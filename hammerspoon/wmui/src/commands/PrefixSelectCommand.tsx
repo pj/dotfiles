@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react"
-import { defaultCommandProps, DefaultCommandProps, useFocus } from "./CommandWrapper"
+import { defaultCommandProps, DefaultCommandProps, useFocus } from "../CommandWrapper"
 import React from "react"
-import { AppExitContext } from "./App"
-import { Key } from "./Key"
+import { AppExitContext } from "../App"
+import { Key } from "../Key"
 
 export type Prefix = {
     type: "command"

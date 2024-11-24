@@ -1,5 +1,5 @@
-import { useContext, useEffect, useReducer, useState } from "react"
-import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
+import { useContext, useEffect, useReducer } from "react"
+import { AppExitContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Geometry, LayoutConstant, Layout as LayoutType, RootLayout as RootLayoutType, WindowManagementState } from "./Types"
 import { CommandLoading } from "../CommandLoading"
@@ -277,7 +277,7 @@ export function EditLayoutCommand({ index, handleDelete }: EditLayoutCommandProp
     const { wrapperElement, setFocus } = useFocus()
     const appState = useContext(AppStateContext)
 
-    const sendMessage = useContext(AppSendMessageContext)
+    // const sendMessage = useContext(AppSendMessageContext)
     const handleExit = useContext(AppExitContext)
 
     const [rootLayout, setRootLayout] = useReducer<React.Reducer<RootLayoutType | null, LayoutChangeAction>>(handleLayoutChange, null)

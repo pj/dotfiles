@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { SiteBlockerCommand } from '../commands/SiteBlocker';
 import { expect, userEvent, waitFor, within } from '@storybook/test';
 import { CommandDecorator } from './CommandDecorator';
 import { hammerspoonReady } from './utils';
@@ -57,13 +56,13 @@ export const Loading: Story = {
 
 export const Muted: Story = {
     play: async (playContext) => {
-        const canvas = within(playContext.canvasElement)
+        // const canvas = within(playContext.canvasElement)
 
         await Loading.play?.(playContext)
 
         playContext.parameters.commandMessaging.sendMessage({ type: 'volume', muted: true, volume: 49 })
 
-        const volumeCommand = canvas.getByTestId('volume-command-0')
+        // const volumeCommand = canvas.getByTestId('volume-command-0')
 
         // await waitFor(() => {
         //     expect(volumeCommand.textContent).toMatch(/Muted/)
@@ -73,13 +72,13 @@ export const Muted: Story = {
 
 export const Unmuted: Story = {
     play: async (playContext) => {
-        const canvas = within(playContext.canvasElement)
+        // const canvas = within(playContext.canvasElement)
 
         await Loading.play?.(playContext)
 
         playContext.parameters.commandMessaging.sendMessage({ type: 'volume', muted: false, volume: 49 })
 
-        const volumeCommand = canvas.getByTestId('volume-command-0')
+        // const volumeCommand = canvas.getByTestId('volume-command-0')
 
         // await waitFor(() => {
         //     expect(volumeCommand.textContent).toMatch(/Muted/)

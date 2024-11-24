@@ -138,7 +138,7 @@ end
 
 function obj:_createModalCommanderWebview()
     local usercontent = self._hs.webview.usercontent.new("wmui")
-    usercontent:setCallback(function ( event) self:_receiveMessageFromWebview(event) end)
+    usercontent:setCallback(function(event) self:_receiveMessageFromWebview(event) end)
     local screenFrame = self._hs.screen.mainScreen():frame()
     local middleX = screenFrame.x + screenFrame.w / 2
     local x = middleX - self._appWidth / 2
@@ -169,6 +169,16 @@ function obj:hideBrowser()
     self._browser:hide()
     self:postMessageToWebview({ type = "resetState" })
     self._browserVisible = false
+end
+
+function obj:toggleBrowser()
+    if not self._browserVisible then
+        self._hs.printf("focusing browser")
+        self:focusBrowser()
+    else
+        self._hs.printf("hiding browser")
+        self:hideBrowser()
+    end
 end
 
 return obj

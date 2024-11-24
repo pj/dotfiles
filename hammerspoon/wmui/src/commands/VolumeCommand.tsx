@@ -1,4 +1,4 @@
-import { useContext, useState } from "react"
+import { useContext } from "react"
 import { AppExitContext, AppSendMessageContext, AppStateContext } from "../App"
 import { DefaultCommandProps, defaultCommandProps, useFocus } from "../CommandWrapper"
 import { Key } from "../Key"
@@ -17,12 +17,13 @@ export function VolumeCommand({ index, handleDelete }: VolumeCommandProps) {
     const sendMessage = useContext(AppSendMessageContext)
     const handleExit = useContext(AppExitContext)
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    // const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
     const volumeState = appState.volume as VolumeState | undefined;
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault()
+        console.log("key: ", event)
         if (event.key === 'Escape') {
             handleExit();
             return;
@@ -65,8 +66,8 @@ export function VolumeCommand({ index, handleDelete }: VolumeCommandProps) {
                         <>
                             <div className="form-control">
                                 <label className="label cursor-pointer flex flex-row items-center gap-2 justify-start">
-                                    <span className="label-text">Mute</span>
                                     <Key key="M" text="M" />
+                                    <span className="label-text">Mute</span>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary toggle-lg"
@@ -103,7 +104,7 @@ export function VolumeCommand({ index, handleDelete }: VolumeCommandProps) {
                                     +</button>
                                 <Key key="U" text="U" />
                             </div>
-                            {errorMessage && <div className="text-xs text-center text-red-500">{errorMessage}</div>}
+                            {/* {errorMessage && <div className="text-xs text-center text-red-500">{errorMessage}</div>} */}
                         </>
                     ) : <span data-testid="volume-loading" className="loading loading-bars loading-xl">Loading...</span>
                 }

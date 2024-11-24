@@ -1,9 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
-import './index.css'
+import { LockCommand } from './commands/LockCommand.tsx'
 import { Prefix, PrefixSelectCommand } from './commands/PrefixSelectCommand.tsx'
 import { SiteBlockerCommand } from './commands/SiteBlocker.tsx'
+import { VolumeCommand } from './commands/VolumeCommand.tsx'
+import './index.css'
 import { SelectLayoutCommand } from './window_management/SelectLayoutCommand.tsx'
 export function sendMessage(message: any) {
   // @ts-ignore
@@ -30,25 +32,33 @@ createRoot(document.getElementById('root')!).render(
                         {component: SelectLayoutCommand, props: {}, description: 'Select Layout', type: "command"}
                     ],
                     [
-                        'z', 
-                        {
-                            quickFunction: () => {
-                                sendMessage({ type: "windowManagementZoomToggle" })
-                            }, 
-                            description: 'Toggle Zoom of focused window', 
-                            type: "quickFunction"
-                        }
+                        'o', 
+                        {component: LockCommand, props: {}, description: 'Lock Screen', type: "command"}
                     ],
                     [
-                        'f', 
-                        {
-                            quickFunction: () => {
-                                sendMessage({ type: "windowManagementFloatToggle" })
-                            }, 
-                            description: 'Make focused window float', 
-                            type: "quickFunction"
-                        }
+                        'v', 
+                        {component: VolumeCommand, props: {}, description: 'Volume', type: "command"}
                     ],
+                    // [
+                    //     'z', 
+                    //     {
+                    //         quickFunction: () => {
+                    //             sendMessage({ type: "windowManagementZoomToggle" })
+                    //         }, 
+                    //         description: 'Toggle Zoom of focused window', 
+                    //         type: "quickFunction"
+                    //     }
+                    // ],
+                    // [
+                    //     'f', 
+                    //     {
+                    //         quickFunction: () => {
+                    //             sendMessage({ type: "windowManagementFloatToggle" })
+                    //         }, 
+                    //         description: 'Make focused window float', 
+                    //         type: "quickFunction"
+                    //     }
+                    // ],
                 ]),
                 index: 0,
                 handleDelete: () => {}

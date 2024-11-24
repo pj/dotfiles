@@ -1,4 +1,4 @@
-import { defaultCommandProps, DefaultCommandProps, useFocus } from "./CommandWrapper";
+import { defaultCommandProps, DefaultCommandProps, useFocus } from "../CommandWrapper";
 
 export type NullCommandProps = DefaultCommandProps & {
     text: string
