@@ -327,7 +327,11 @@ export function EditLayoutCommand({ index, handleDelete }: EditLayoutCommandProp
                                 selectedLayout={rootLayout}
                                 setLayout={setRootLayout}
                             />
-                            <RootLayout rootLayout={rootLayout} setLayout={setRootLayout} currentScreens={windowManagementState.currentScreens} />
+                            <RootLayout
+                                rootLayout={rootLayout}
+                                setLayout={setRootLayout}
+                                currentScreens={windowManagementState.currentScreens}
+                            />
                             {/* {
                                 errorMessage &&
                                 <div className="text-xs text-center text-red-500">
