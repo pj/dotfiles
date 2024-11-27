@@ -69,6 +69,11 @@
       enable = true;
       enableZshIntegration = true;
     };
+    programs.vim = {
+      enable = true;
+      defaultEditor = true;
+      extraConfig = builtins.readFile ./../vimrc;
+    };
 
     home.stateVersion = "24.05";
     # home.file.".local/share/fonts/Monaco Nerd Font Complete Mono.ttf".source = ./../../${"Monaco Nerd Font Complete Mono.ttf"};

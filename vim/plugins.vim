@@ -27,7 +27,6 @@ Plug 'Raimondi/delimitMate' " Automatically close parens etc.
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'preservim/nerdcommenter'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " Project plugins
 Plug 'mileszs/ack.vim'
@@ -39,7 +38,6 @@ Plug 'hdima/python-syntax'
 " Javascript/Node
 Plug 'jelera/vim-javascript-syntax'
 Plug 'digitaltoad/vim-jade'
-Plug 'niftylettuce/vim-jinja'
 Plug 'pangloss/vim-javascript'
 
 " Postgres
@@ -50,7 +48,4 @@ Plug 'autozimu/LanguageClient-neovim', {
     \ 'do': 'bash install.sh',
     \ }
 
-Plug 'ionide/Ionide-vim', {
-      \ 'do':  'make fsautocomplete',
-      \}
 call plug#end()            " required
