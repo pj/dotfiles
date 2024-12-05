@@ -89,6 +89,8 @@
     git
     tmux
     inetutils
+    pstree
+    btop
   ] ++ lib.optionals stdenv.isDarwin [
   ];
 }
