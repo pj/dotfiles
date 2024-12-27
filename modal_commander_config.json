@@ -1,0 +1,17 @@
+{
+  "rootCommand": {
+    "name": "PrefixSelectCommand",
+    "props": {
+      "prefixes": {
+        "l": {
+          "description": "Lock Screen",
+          "type": "command",
+          "packageName": "@modal-commander/builtins",
+          "commandName": "LockCommand",
+          "props": {}
+        }
+      }
+    },
+    "package": "@modal-commander/builtins"
+  }
+}
