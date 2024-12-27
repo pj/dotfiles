@@ -731,6 +731,8 @@ function obj:_reconcileRecursive(current_screen, new_layout, current_frame, igno
     elseif new_layout.type == obj.__ROWS then
         return self:_reconcileDirectional(current_screen, new_layout.rows, current_frame, false, ignored_windows)
     elseif new_layout.type == obj.__PINNED then
+        self._hs.inspect(new_layout.application)
+        self._hs.inspect(self._application_cache)
         local application = self._application_cache[new_layout.application]
         if application == nil then
             self._logger.e("Application not found: " .. new_layout.application)

@@ -12,3 +12,5 @@ plugged/
 direnv/
 .vscode
 .direnv
+
+.DS_Store

@@ -91,6 +91,8 @@
     inetutils
     pstree
     btop
+    python3
+    nixfmt-classic
   ] ++ lib.optionals stdenv.isDarwin [
   ];
 }
