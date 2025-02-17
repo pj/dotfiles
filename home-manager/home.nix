@@ -93,6 +93,7 @@
     btop
     python3
     nixfmt-classic
+    aerospace
   ] ++ lib.optionals stdenv.isDarwin [
   ];
 }

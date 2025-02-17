@@ -1,17 +1,274 @@
 {
-  "rootCommand": {
-    "name": "PrefixSelectCommand",
-    "props": {
-      "prefixes": {
-        "l": {
-          "description": "Lock Screen",
-          "type": "command",
-          "packageName": "@modal-commander/builtins",
-          "commandName": "LockCommand",
-          "props": {}
+  "hotkeys": [
+    {
+      "type": "command",
+      "key": "Command+Control+M",
+      "name": "PrefixSelectCommand",
+      "props": {
+        "prefixes": {
+          "l": {
+            "description": "Layout Selector",
+            "type": "command",
+            "packageName": "@modal-commander/builtins",
+            "commandName": "LayoutSelectCommand",
+            "props": {}
+          },
+          "a": {
+            "description": "Application Switcher",
+            "type": "command",
+            "packageName": "@modal-commander/builtins",
+            "commandName": "ApplicationSwitchCommand",
+            "props": {
+              "applications": [
+                {
+                  "name": "Cursor",
+                  "key": "v"
+                },
+                {
+                  "name": "iTerm",
+                  "key": "t"
+                },
+                {
+                  "name": "Chrome",
+                  "key": "c"
+                }
+              ]
+            }
+          },
+          "b": {
+            "description": "Site Blocker",
+            "type": "command",
+            "packageName": "@modal-commander/builtins",
+            "commandName": "SiteBlockerCommand",
+            "props": {}
+          },
+          "v": {
+            "description": "Volume",
+            "type": "command",
+            "packageName": "@modal-commander/builtins",
+            "commandName": "VolumeCommand",
+            "props": {}
+          },
+          "w": {
+            "description": "Window Management",
+            "type": "command",
+            "packageName": "@modal-commander/builtins",
+            "commandName": "PrefixSelectCommand",
+            "props": {
+              "prefixes": {
+                "w": {
+                  "description": "Move Current Window To",
+                  "type": "command",
+                  "packageName": "@modal-commander/builtins",
+                  "commandName": "MoveWindowFromCommand",
+                  "props": {
+                    "source": "window"
+                  }
+                },
+                "a": {
+                  "description": "Move Current App to",
+                  "type": "command",
+                  "packageName": "@modal-commander/builtins",
+                  "commandName": "MoveWindowFromCommand",
+                  "props": {
+                    "source": "app"
+                  }
+                },
+                "f": {
+                  "description": "Move App",
+                  "type": "command",
+                  "packageName": "@modal-commander/builtins",
+                  "commandName": "MoveWindowFromCommand",
+                  "props": {
+                  }
+                }
+              }
+            }
+          }
         }
+      },
+      "package": "@modal-commander/builtins"
+    }
+  ],
+  "commandConfig": [
+    {
+      "name": "SiteBlockerCommand",
+      "package": "@modal-commander/builtins",
+      "config": {
+        "timeLimit": 60,
+        "weekendTimeLimit": 120,
+        "blocklistFilename": "/Users/pauljohnson/.blocklist",
+        "permanentBlocklistFilename": "/Users/pauljohnson/.permanent_blocklist",
+        "hostsTemplate": "/Users/pauljohnson/.hosts_template",
+        "hostsFilePath": "/etc/hosts",
+        "closeTabScriptFilename": "/Users/pauljohnson/dotfiles/hammerspoon/tabCloser.scpt"
       }
     },
-    "package": "@modal-commander/builtins"
-  }
+    {
+      "name": "LayoutSelectCommand",
+      "package": "@modal-commander/builtins",
+      "config": {
+        "defaultLayout": "v",
+        "layouts": [
+          {
+            "name": "VLC",
+            "quickKey": "v",
+            "screenSets": [
+              {
+                "MSI PS341WU": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 75
+                    },
+                    {
+                      "type": "rows",
+                      "percentage": 25,
+                      "rows": [
+                        {
+                          "type": "pinned",
+                          "percentage": 50,
+                          "application": "VLC"
+                        },
+                        {
+                          "type": "pinned",
+                          "percentage": 50,
+                          "application": "Podcasts"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "CX101": {
+                  "type": "pinned",
+                  "percentage": 100,
+                  "application": "Amazon Music"
+                }
+              },
+              {
+                "MSI PS341WU": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 75
+                    },
+                    {
+                      "type": "rows",
+                      "percentage": 25,
+                      "rows": [
+                        {
+                          "type": "pinned",
+                          "percentage": 50,
+                          "application": "VLC"
+                        },
+                        {
+                          "type": "pinned",
+                          "percentage": 50,
+                          "application": "Podcasts"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "Built-in Retina Display": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 60
+                    },
+                    {
+                      "type": "pinned",
+                      "percentage": 40,
+                      "application": "VLC"
+                    }
+                  ]
+                }
+              },
+              {
+                "$PRIMARY": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 75
+                    },
+                    {
+                      "type": "pinned",
+                      "percentage": 25,
+                      "application": "VLC"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "Plex",
+            "quickKey": "p",
+            "screenSets": [
+              {
+                "$PRIMARY": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 75
+                    },
+                    {
+                      "type": "pinned",
+                      "percentage": 25,
+                      "application": "Plex"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "Split",
+            "quickKey": "s",
+            "screenSets": [
+              {
+                "$PRIMARY": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 50
+                    },
+                    {
+                      "type": "empty",
+                      "percentage": 50
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "Full Screen",
+            "quickKey": "f",
+            "screenSets": [
+              {
+                "$PRIMARY": {
+                  "type": "columns",
+                  "columns": [
+                    {
+                      "type": "stack",
+                      "percentage": 100
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
