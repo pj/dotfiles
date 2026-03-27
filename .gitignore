@@ -16,4 +16,4 @@ direnv/
 .DS_Store
 
 # Machine-specific Nix config (work packages, homebrew, etc.) — copy from nix-darwin/local.nix.example
-nix-darwin/local.nix
+nix/local.nix
