@@ -1,0 +1,39 @@
+#[custom_commands.new_then_describe]
+#  key = ["N"]
+#  lua = '''
+#  jj("new", "-A", revisions.current())
+#  revisions.refresh()
+#
+#  local new_change_id = jj("log", "-r", "@", "-T", "change_id.shortest()", "--no-graph")
+#  revisions.navigate{to=new_change_id}
+#  revisions.start_inline_describe()
+#  '''
+
+[[actions]]
+name = "new-after"
+lua = '''
+jj_async("new", "--after", context.change_id())
+revisions.refresh()
+'''
+
+[[actions]]
+name = "patch-edit"
+lua = '''
+jj_interactive("diffedit", "-r", context.change_id(), "--tool", "patch-vim")
+revisions.refresh()
+'''
+
+[[bindings]]
+action = "new-after"
+key = "N"
+scope = "revisions"
+desc = "new after"
+
+[[bindings]]
+action = "patch-edit"
+key = "P"
+scope = "revisions"
+desc = "edit diff as patch in vim"
+
+[ui]
+auto_refresh_interval = 5

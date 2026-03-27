@@ -17,8 +17,8 @@
   ...
 }:
 {
-  programs.direnv.enable = true;
-  programs.direnv.nix-direnv.enable = true;
+  #programs.direnv.enable = true;
+  #programs.direnv.nix-direnv.enable = true;
 
   programs.git = {
     enable = true;
@@ -107,6 +107,16 @@
   home.file = {
     ".tmux.conf".source = ./../tmux.conf;
     ".config/commandline_thing/config.yaml".source = ./../commandline_thing.yaml;
+    ".config/jjui/config.toml".source = ./../jjui_config.toml;
+    ".config/jj/config.toml".source = pkgs.writeText "jj-config.toml" (
+      (builtins.readFile ./../jj_config.toml)
+      + ''
+
+        [user]
+        name = "${gitUserName}"
+        email = "${gitUserEmail}"
+      ''
+    );
   }
   // builtins.listToAttrs (
     map (f: {
@@ -119,6 +129,54 @@
 
   home.packages =
     with pkgs;
+    let
+      jj-patch-vim = pkgs.writeShellScriptBin "jj-patch-vim" ''
+        set -euo pipefail
+        left="$1"
+        right="$2"
+        # Remove jj's synthetic instructions file so it doesn't appear in the diff
+        rm -f "$right/JJ-INSTRUCTIONS"
+        patch_file=$(mktemp /tmp/jj-patch-XXXXXX.patch)
+        trap 'rm -f "$patch_file"' EXIT
+        diff -u -r "$left" "$right" > "$patch_file" || true
+        vim "$patch_file"
+        # Reset right dir to match left, then apply the edited patch.
+        # Patch paths are absolute (e.g. /tmp/jj-xxx/right/foo/bar.py).
+        # With -d "$right", patch operates inside $right, so we strip all
+        # components of $right plus one more for the filename prefix.
+        # patch -p strips N leading path components (split on '/').
+        # Absolute paths start with '/' giving an empty first component,
+        # so -p(slashes_in_right + 1) strips everything up to and including
+        # the last component of $right, leaving a path relative to it.
+        strip=$(( $(echo "$right" | tr -cd '/' | wc -c | tr -d ' ') + 1 ))
+        cp -r "$left/." "$right/"
+        patch -d "$right" -p"$strip" < "$patch_file"
+      '';
+      spec-kit = pkgs.python3.pkgs.buildPythonPackage {
+        pname = "specify-cli";
+        version = "0.4.4";
+        pyproject = true;
+        src = pkgs.fetchgit {
+          url = "https://github.com/github/spec-kit";
+          rev = "725ef567b78e7a49f09d1771640743dcce4916cb";
+          sha256 = "0gdpha8mk68kcscwyp5sryxl2ffwqrrznzb0mg7v4caf2jz2bzj2";
+        };
+        build-system = [ pkgs.python3.pkgs.hatchling ];
+        dependencies = with pkgs.python3.pkgs; [
+          typer
+          click
+          rich
+          httpx
+          platformdirs
+          readchar
+          truststore
+          pyyaml
+          packaging
+          pathspec
+          json5
+        ];
+      };
+    in
     [
       curl
       wget
@@ -134,6 +192,8 @@
       fdupes
       jujutsu
       jjui
+      jj-patch-vim
+      spec-kit
     ]
     ++ customPackages
     ++ lib.optionals stdenv.isDarwin [ ];

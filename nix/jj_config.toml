@@ -1,0 +1,9 @@
+"$schema" = "https://jj-vcs.github.io/jj/latest/config-schema.json"
+
+[ui]
+editor = "vim"
+
+[merge-tools.patch-vim]
+program = "jj-patch-vim"
+edit-args = ["$left", "$right"]
+
