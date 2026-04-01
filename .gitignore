@@ -17,3 +17,6 @@ direnv/
 
 # Machine-specific Nix config (work packages, homebrew, etc.) — copy from nix-darwin/local.nix.example
 nix/local.nix
+
+# Local opencode config — contains credentials and employer-specific config
+nix/opencode.jsonc

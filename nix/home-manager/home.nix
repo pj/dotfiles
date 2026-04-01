@@ -108,6 +108,9 @@
     ".tmux.conf".source = ./../tmux.conf;
     ".config/commandline_thing/config.yaml".source = ./../commandline_thing.yaml;
     ".config/jjui/config.toml".source = ./../jjui_config.toml;
+    ".config/opencode/opencode.jsonc" = lib.mkIf (builtins.pathExists ./../opencode.jsonc) {
+      source = ./../opencode.jsonc;
+    };
     ".config/jj/config.toml".source = pkgs.writeText "jj-config.toml" (
       (builtins.readFile ./../jj_config.toml)
       + ''
