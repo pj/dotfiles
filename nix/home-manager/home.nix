@@ -17,6 +17,7 @@
   ...
 }:
 {
+  imports = [ ./macos-defaults.nix ];
   #programs.direnv.enable = true;
   #programs.direnv.nix-direnv.enable = true;
 
@@ -110,6 +111,7 @@
     ".config/jjui/config.toml".source = ./../jjui_config.toml;
     ".config/opencode/opencode.jsonc" = lib.mkIf (builtins.pathExists ./../opencode.jsonc) {
       source = ./../opencode.jsonc;
+      force = true;
     };
     ".config/jj/config.toml".source = pkgs.writeText "jj-config.toml" (
       (builtins.readFile ./../jj_config.toml)
