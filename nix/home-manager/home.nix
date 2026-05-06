@@ -107,6 +107,7 @@
   # customFiles entries: { source = <path>; target = "relative/path/in/home"; }
   home.file = {
     ".tmux.conf".source = ./../tmux.conf;
+    ".config/ghostty/config".source = ./../ghostty.conf;
     ".config/commandline_thing/config.yaml".source = ./../commandline_thing.yaml;
     ".config/jjui/config.toml".source = ./../jjui_config.toml;
     ".config/opencode/opencode.jsonc" = lib.mkIf (builtins.pathExists ./../opencode.jsonc) {
@@ -189,6 +190,7 @@
       commandline_thing.packages.${pkgs.stdenv.hostPlatform.system}.default
       git
       tmux
+      ghostty-bin
       inetutils
       pstree
       btop
