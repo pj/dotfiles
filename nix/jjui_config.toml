@@ -35,5 +35,54 @@ key = "P"
 scope = "revisions"
 desc = "edit diff as patch in vim"
 
+# Vim-style navigation bindings
+[[bindings]]
+action = "page_down"
+key = "ctrl+f"
+scope = "revisions"
+desc = "page down"
+
+[[bindings]]
+action = "page_up"
+key = "ctrl+b"
+scope = "revisions"
+desc = "page up"
+
+[[bindings]]
+action = "page_down"
+key = "ctrl+f"
+scope = "diff"
+desc = "page down"
+
+[[bindings]]
+action = "page_up"
+key = "ctrl+b"
+scope = "diff"
+desc = "page up"
+
+[[bindings]]
+action = "half_page_down"
+key = "ctrl+d"
+scope = "diff"
+desc = "half page down"
+
+[[bindings]]
+action = "half_page_up"
+key = "ctrl+u"
+scope = "diff"
+desc = "half page up"
+
+[[bindings]]
+action = "move_top"
+key = "g"
+scope = "diff"
+desc = "go to top"
+
+[[bindings]]
+action = "move_bottom"
+key = "G"
+scope = "diff"
+desc = "go to bottom"
+
 [ui]
 auto_refresh_interval = 5
