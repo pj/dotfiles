@@ -35,51 +35,126 @@ key = "P"
 scope = "revisions"
 desc = "edit diff as patch in vim"
 
+[[actions]]
+name = "push-new-bookmark"
+lua = '''
+local rev = context.change_id()
+local output = jj("bookmark", "list", "-r", rev, "--template", "name ++ \"\\n\"")
+local bookmarks = split_lines(output)
+if #bookmarks == 0 then
+  flash({text = "No bookmarks on this revision", error = true})
+elseif #bookmarks == 1 then
+  jj_async("git", "push", "--bookmark", bookmarks[1], "--remote", "origin", "--allow-new")
+  flash("Pushed bookmark: " .. bookmarks[1])
+else
+  local selected = choose({options = bookmarks, title = "Push bookmark to origin (--allow-new)", filter = true})
+  if selected then
+    jj_async("git", "push", "--bookmark", selected, "--remote", "origin", "--allow-new")
+    flash("Pushed bookmark: " .. selected)
+  end
+end
+'''
+
+[[bindings]]
+action = "push-new-bookmark"
+key = "ctrl+p"
+scope = "revisions"
+desc = "push bookmark to origin (allow new)"
+
+# Vim-style navigation actions
+[[actions]]
+name = "revisions-page-down"
+lua = '''
+revisions.navigate({by = 1, page = true})
+'''
+
+[[actions]]
+name = "revisions-page-up"
+lua = '''
+revisions.navigate({by = -1, page = true})
+'''
+
+[[actions]]
+name = "diff-page-down"
+lua = '''
+diff.page_down()
+'''
+
+[[actions]]
+name = "diff-page-up"
+lua = '''
+diff.page_up()
+'''
+
+[[actions]]
+name = "diff-half-page-down"
+lua = '''
+diff.half_page_down()
+'''
+
+[[actions]]
+name = "diff-half-page-up"
+lua = '''
+diff.half_page_up()
+'''
+
+[[actions]]
+name = "diff-move-top"
+lua = '''
+diff.move_top()
+'''
+
+[[actions]]
+name = "diff-move-bottom"
+lua = '''
+diff.move_bottom()
+'''
+
 # Vim-style navigation bindings
 [[bindings]]
-action = "page_down"
+action = "revisions-page-down"
 key = "ctrl+f"
 scope = "revisions"
 desc = "page down"
 
 [[bindings]]
-action = "page_up"
+action = "revisions-page-up"
 key = "ctrl+b"
 scope = "revisions"
 desc = "page up"
 
 [[bindings]]
-action = "page_down"
+action = "diff-page-down"
 key = "ctrl+f"
 scope = "diff"
 desc = "page down"
 
 [[bindings]]
-action = "page_up"
+action = "diff-page-up"
 key = "ctrl+b"
 scope = "diff"
 desc = "page up"
 
 [[bindings]]
-action = "half_page_down"
+action = "diff-half-page-down"
 key = "ctrl+d"
 scope = "diff"
 desc = "half page down"
 
 [[bindings]]
-action = "half_page_up"
+action = "diff-half-page-up"
 key = "ctrl+u"
 scope = "diff"
 desc = "half page up"
 
 [[bindings]]
-action = "move_top"
+action = "diff-move-top"
 key = "g"
 scope = "diff"
 desc = "go to top"
 
 [[bindings]]
-action = "move_bottom"
+action = "diff-move-bottom"
 key = "G"
 scope = "diff"
 desc = "go to bottom"
