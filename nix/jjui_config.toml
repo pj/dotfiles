@@ -61,6 +61,52 @@ key = "ctrl+p"
 scope = "revisions"
 desc = "push bookmark to origin (allow new)"
 
+# Hide bookmarks on the currently selected commit (and the chain back to trunk) from the revset
+[[actions]]
+name = "hide-bookmarks-here"
+lua = '''
+local rev = context.change_id()
+if not rev then
+  flash({text = "No revision selected", error = true})
+  return
+end
+local output = jj("bookmark", "list", "-r", rev, "-T", "name ++ \"\\n\"")
+local bookmarks = {}
+for _, b in ipairs(split_lines(output)) do
+  if b ~= "" then table.insert(bookmarks, b) end
+end
+if #bookmarks == 0 then
+  flash({text = "No bookmarks on this commit", error = true})
+  return
+end
+local current = revset.current()
+local exclusions = {}
+for _, b in ipairs(bookmarks) do
+  table.insert(exclusions, "(trunk()..(" .. b .. "))")
+end
+revset.set("(" .. current .. ") ~ (" .. table.concat(exclusions, " | ") .. ")")
+flash("Hidden branch(es): " .. table.concat(bookmarks, ", "))
+'''
+
+[[actions]]
+name = "reset-revset"
+lua = '''
+revset.reset()
+flash("Revset reset to default")
+'''
+
+[[bindings]]
+action = "hide-bookmarks-here"
+key = "H"
+scope = "revisions"
+desc = "hide bookmarks on selected commit"
+
+[[bindings]]
+action = "reset-revset"
+key = "ctrl+shift+r"
+scope = "revisions"
+desc = "reset revset to default"
+
 # Vim-style navigation actions
 [[actions]]
 name = "revisions-page-down"
