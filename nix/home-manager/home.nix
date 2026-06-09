@@ -9,6 +9,15 @@
   # Git identity. Defaults keep the repo functional without local.nix overrides.
   gitUserName ? "Unknown",
   gitUserEmail ? "unknown@example.com",
+  # Arbitrary shell environment variables. Passed straight to
+  # home.sessionVariables. Empty {} = none.
+  environmentVariables ? { },
+  # Nix HTTP fetcher access tokens (host -> token). When non-empty, lands in
+  # ~/.config/nix/nix.conf as a single access-tokens line.
+  nixAccessTokens ? { },
+  # Per-scope npm registry config: { <scope> = { url; authToken; }; }.
+  # When non-empty, lands in ~/.npmrc.
+  npmScopedRegistries ? { },
 }:
 {
   config,
@@ -16,6 +25,39 @@
   lib,
   ...
 }:
+let
+  hasNixAccessTokens = nixAccessTokens != { };
+  hasNpmConfig = npmScopedRegistries != { };
+
+  # "https://npm.pkg.github.com" -> "//npm.pkg.github.com/"
+  # (npm's .npmrc keys auth lines by URL minus scheme, with trailing slash.)
+  npmAuthKey =
+    registry:
+    let
+      noScheme = builtins.replaceStrings [ "https://" "http://" ] [ "" "" ] registry;
+      withSlash = if lib.hasSuffix "/" noScheme then noScheme else noScheme + "/";
+    in
+    "//" + withSlash;
+
+  # "<scope>:registry=<url>" line per entry.
+  npmScopeLines = lib.mapAttrsToList (scope: r: "${scope}:registry=${r.url}") npmScopedRegistries;
+
+  # Group entries by url so we emit one auth line per unique registry.
+  # If two scopes point to the same url with different authTokens, the first
+  # one wins (user is responsible for keeping them consistent).
+  npmEntriesByUrl = lib.groupBy (r: r.url) (lib.attrValues npmScopedRegistries);
+
+  npmAuthLines = lib.mapAttrsToList (
+    url: entries: "${npmAuthKey url}:_authToken=${(builtins.head entries).authToken}"
+  ) npmEntriesByUrl;
+
+  npmrcText = lib.concatStringsSep "\n" (npmScopeLines ++ npmAuthLines) + "\n";
+
+  # access-tokens = host1=tok1 host2=tok2 ...
+  accessTokensValue = lib.concatStringsSep " " (
+    lib.mapAttrsToList (host: token: "${host}=${token}") nixAccessTokens
+  );
+in
 {
   imports = [ ./macos-defaults.nix ];
   #programs.direnv.enable = true;
@@ -103,6 +145,9 @@
   # Add custom paths to PATH per system
   home.sessionPath = customPathAdditions;
 
+  # Arbitrary shell env vars passed in from local.nix. Empty {} = no-op.
+  home.sessionVariables = environmentVariables;
+
   # Static dotfile links, plus any customFiles from local.nix.
   # customFiles entries: { source = <path>; target = "relative/path/in/home"; }
   home.file = {
@@ -131,7 +176,20 @@
         source = f.source;
       };
     }) customFiles
-  );
+  )
+  // lib.optionalAttrs hasNixAccessTokens {
+    # Per-user Nix config. Merged on top of /etc/nix/nix.conf (Determinate Nix).
+    # Provides access-tokens so Nix's HTTP fetcher can pull from private hosts
+    # via fetchFromGitHub / flake inputs.
+    ".config/nix/nix.conf".text = ''
+      access-tokens = ${accessTokensValue}
+    '';
+  }
+  // lib.optionalAttrs hasNpmConfig {
+    # Per-user npm config. One <scope>:registry=<url> line per entry plus
+    # //<host>/:_authToken=<token> per unique registry url.
+    ".npmrc".text = npmrcText;
+  };
 
   home.packages =
     with pkgs;
