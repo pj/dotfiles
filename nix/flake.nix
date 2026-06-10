@@ -39,6 +39,7 @@
           environmentVariables ? { },
           nixAccessTokens ? { },
           npmScopedRegistries ? { },
+          globalNpmPackages ? [ ],
         }:
         nix-darwin.lib.darwinSystem {
           specialArgs = { };
@@ -100,6 +101,7 @@
                   environmentVariables
                   nixAccessTokens
                   npmScopedRegistries
+                  globalNpmPackages
                   ;
               };
             }

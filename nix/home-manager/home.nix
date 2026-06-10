@@ -18,6 +18,12 @@
   # Per-scope npm registry config: { <scope> = { url; authToken; }; }.
   # When non-empty, lands in ~/.npmrc.
   npmScopedRegistries ? { },
+  # Global npm packages to install via `npm install -g --prefix=$HOME/.local`
+  # on every home-manager activation. Pin versions with `pkg@x.y.z`.
+  # Auth flows through ~/.npmrc (set via npmScopedRegistries above).
+  # Note: removing a package here does NOT auto-uninstall it - use
+  # `npm uninstall -g --prefix=$HOME/.local <pkg>` manually.
+  globalNpmPackages ? [ ],
 }:
 {
   config,
@@ -28,6 +34,7 @@
 let
   hasNixAccessTokens = nixAccessTokens != { };
   hasNpmConfig = npmScopedRegistries != { };
+  hasGlobalNpmPackages = globalNpmPackages != [ ];
 
   # "https://npm.pkg.github.com" -> "//npm.pkg.github.com/"
   # (npm's .npmrc keys auth lines by URL minus scheme, with trailing slash.)
@@ -189,6 +196,24 @@ in
     # Per-user npm config. One <scope>:registry=<url> line per entry plus
     # //<host>/:_authToken=<token> per unique registry url.
     ".npmrc".text = npmrcText;
+  };
+
+  # Imperative `npm install -g` per entry in globalNpmPackages, into
+  # $HOME/.local (user-writable - nix-store npm prefix is read-only).
+  # Auth flows through ~/.npmrc generated above. Runs after writeBoundary
+  # so .npmrc symlink is in place. `customPathAdditions` should include
+  # "$HOME/.local/bin" for the binaries to be discoverable.
+  home.activation = lib.optionalAttrs hasGlobalNpmPackages {
+    installGlobalNpmPackages = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      # Postinstall scripts (e.g. unrs-resolver) need `node` on PATH;
+      # $HOME/.local/bin lets later packages see binaries from earlier ones.
+      export PATH="$HOME/.local/bin:${pkgs.nodejs_24}/bin:$PATH"
+      $DRY_RUN_CMD mkdir -p "$HOME/.local"
+      ${lib.concatMapStringsSep "\n" (
+        pkg:
+        ''$DRY_RUN_CMD ${pkgs.nodejs_24}/bin/npm install --no-fund --no-audit -g --prefix="$HOME/.local" ${lib.escapeShellArg pkg}''
+      ) globalNpmPackages}
+    '';
   };
 
   home.packages =
