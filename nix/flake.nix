@@ -8,6 +8,8 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     commandline_thing.url = "github:pj/commandline_thing?ref=1.0.3";
+    emojifont.url = "github:pj/emojifont";
+    memeterminal.url = "github:pj/iTerm2?ref=memeterminal";
   };
 
   outputs =
@@ -17,6 +19,7 @@
       nixpkgs,
       home-manager,
       commandline_thing,
+      memeterminal,
       ...
     }@inputs:
     let
@@ -54,11 +57,14 @@
 
                 # List packages installed in system profile. To search by name, run:
                 # $ nix-env -qaP | grep wget
-                environment.systemPackages = [ ];
+                environment.systemPackages = [
+                  inputs.memeterminal.packages.${platform}.default
+                ];
 
                 # Necessary for using flakes on this system.
                 nix.settings.experimental-features = "nix-command flakes";
 
+                nix.settings.trusted-users = [ "root" username ];
                 nix.enable = false;
                 # Enable alternative shell support in nix-darwin.
                 # programs.zsh.enable = true;
@@ -82,7 +88,34 @@
                 # Set primary user (required for launchd.user.agents)
                 system.primaryUser = username;
 
-                fonts.packages = [ (./. + "/Monaco Nerd Font Complete Mono.ttf") ];
+                # xcodebuild/SPM use NSHomeDirectory() which returns /var/empty
+                # for nixbld users. Create writable dirs so nix builds of
+                # Xcode projects (e.g. MemeTerminal) work.
+                system.activationScripts.postActivation.text = ''
+                  mkdir -p /var/empty/Library/Developer/Xcode/DerivedData
+                  mkdir -p /var/empty/Library/Developer/CoreSimulator/Devices
+                  mkdir -p /var/empty/Library/Caches/org.swift.swiftpm
+                  chgrp -R nixbld /var/empty/Library 2>/dev/null || true
+                  chmod -R g+rwx /var/empty/Library 2>/dev/null || true
+                '';
+
+                fonts.packages = [
+                  ./MonacoNerdFontCompleteMono.ttf
+                  # MemeFont: Monaco Nerd Font with meme images injected as SBIX
+                  # color emoji at U+F900+ (see github:pj/emojifont)
+                  (pkgs.runCommand "memefont"
+                    {
+                      nativeBuildInputs = [ inputs.emojifont.packages.${platform}.default ];
+                    }
+                    ''
+                      mkdir -p $out/share/fonts/truetype
+                      emojifont "${./MonacoNerdFontCompleteMono.ttf}" \
+                        $out/share/fonts/truetype/MemeFont.ttf \
+                        --mappings "U+F900:${./memes/pepe.jpg},U+F901:${./memes/mofusand_shark.jpg}" \
+                        --font-name "MemeFont"
+                    ''
+                  )
+                ];
               }
             )
             home-manager.darwinModules.home-manager
