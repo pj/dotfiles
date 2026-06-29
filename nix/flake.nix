@@ -88,16 +88,6 @@
                 # Set primary user (required for launchd.user.agents)
                 system.primaryUser = username;
 
-                # xcodebuild/SPM use NSHomeDirectory() which returns /var/empty
-                # for nixbld users. Create writable dirs so nix builds of
-                # Xcode projects (e.g. MemeTerminal) work.
-                system.activationScripts.postActivation.text = ''
-                  mkdir -p /var/empty/Library/Developer/Xcode/DerivedData
-                  mkdir -p /var/empty/Library/Developer/CoreSimulator/Devices
-                  mkdir -p /var/empty/Library/Caches/org.swift.swiftpm
-                  chgrp -R nixbld /var/empty/Library 2>/dev/null || true
-                  chmod -R g+rwx /var/empty/Library 2>/dev/null || true
-                '';
 
                 fonts.packages = [
                   ./MonacoNerdFontCompleteMono.ttf
