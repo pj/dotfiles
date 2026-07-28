@@ -286,5 +286,8 @@ in
       spec-kit
     ]
     ++ customPackages
+    # globalNpmPackages install CLIs with `#!/usr/bin/env node` shebangs, so
+    # they need node on PATH at runtime (the installer only has it internally).
+    ++ lib.optional hasGlobalNpmPackages nodejs_24
     ++ lib.optionals stdenv.isDarwin [ ];
 }
