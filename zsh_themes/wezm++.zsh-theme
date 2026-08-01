@@ -31,6 +31,17 @@ zle -N zle-line-finish
 
 function update-tmux-variables  {
     local Z_LAST_RETVAL=$?
+
+    # Advances any stateful operations (e.g. cycle, for the nyan cat
+    # animation) for the prompt location. Uses the same instance-key
+    # resolution PROMPT= does below, so it matches whichever instance
+    # `generate prompt` will read from next.
+    if [[ -n $TMUX ]]; then
+        (commandline_thing update prompt "$(tmux display -p "#{=-1:session_id}:#{=-1:window_id}.#{=-1:pane_id}")" "$(pwd)" > /dev/null 2>&1 &)
+    else
+        (commandline_thing update prompt "$$" "$(pwd)" > /dev/null 2>&1 &)
+    fi;
+
     if [[ -n $TMUX ]]; then
         IDS="$(tmux display -p "#{=-1:session_id}:#{=-1:window_id}.#{=-1:pane_id}")"
         (commandline_thing set-state pane "$IDS" exit_code "$Z_LAST_RETVAL" > /dev/null 2>&1 &)

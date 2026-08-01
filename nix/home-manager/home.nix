@@ -60,6 +60,108 @@ let
 
   npmrcText = lib.concatStringsSep "\n" (npmScopeLines ++ npmAuthLines) + "\n";
 
+  # macOS notifier for the Claude Code hook below. Prebuilt arm64 binary from
+  # the alerter release; terminal-notifier is unreliable on macOS Tahoe, and
+  # alerter is not packaged in nixpkgs/homebrew.
+  alerter = pkgs.stdenvNoCC.mkDerivation {
+    pname = "alerter";
+    version = "26.5";
+    src = pkgs.fetchurl {
+      url = "https://github.com/vjeantet/alerter/releases/download/v26.5/alerter-26.5.zip";
+      hash = "sha256-EfY83cm7P4VU7Zt2JjKhIM+nvuBePAnWVzSCPgnSTxA=";
+    };
+    nativeBuildInputs = [ pkgs.unzip ];
+    # The zip holds a single `alerter` file (no dir), so the default unpack
+    # phase errors; unzip it ourselves in installPhase instead.
+    dontUnpack = true;
+    dontStrip = true; # stripping breaks the Mach-O signature; macOS won't run it
+    installPhase = ''
+      runHook preInstall
+      unzip $src
+      install -Dm755 alerter $out/bin/alerter
+      runHook postInstall
+    '';
+  };
+
+  # Claude Code Notification-hook handler: when Claude needs input it fires a
+  # clickable macOS notification. Clicking it brings the terminal to the front
+  # first, then switches tmux to Claude's pane (pulls attached clients to that
+  # session); nothing switches until you click. Reads the hook JSON on stdin.
+  # Override the terminal focused on click with $CLAUDE_NOTIFY_BUNDLE (defaults
+  # to iTerm2). tmux context comes from the $TMUX_PANE Claude Code inherits
+  # when launched inside tmux.
+  claudeNotifyHook = pkgs.writeShellScriptBin "claude-notify-hook" ''
+    set -euo pipefail
+
+    tmux=${pkgs.tmux}/bin/tmux
+    jq=${pkgs.jq}/bin/jq
+    alerter=${alerter}/bin/alerter
+
+    # Logging for debugging. Tail it with:
+    #   tail -f ~/.claude/claude-notify-hook.log
+    # Disable by pointing CLAUDE_NOTIFY_LOG at /dev/null.
+    LOG=''${CLAUDE_NOTIFY_LOG:-$HOME/.claude/claude-notify-hook.log}
+    mkdir -p "$(dirname "$LOG")" 2>/dev/null || true
+    log() { printf '%s [%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$$" "$*" >> "$LOG" 2>/dev/null || true; }
+
+    log "=== invoked ==="
+    log "PATH=$PATH"
+    log "TMUX=''${TMUX:-<unset>} TMUX_PANE=''${TMUX_PANE:-<unset>} TERM_PROGRAM=''${TERM_PROGRAM:-<unset>}"
+    log "alerter=$alerter (exists: $([ -x "$alerter" ] && echo yes || echo no))"
+
+    input=$(cat)
+    log "stdin: $input"
+    message=$(printf '%s' "$input" | "$jq" -r '.message // "Claude needs your input"' 2>/dev/null || printf 'Claude needs your input')
+    bundle=''${CLAUDE_NOTIFY_BUNDLE:-com.googlecode.iterm2}
+    log "message=$message bundle=$bundle"
+
+    pane=""
+    session=""
+    subtitle=""
+    if [ -n "''${TMUX:-}" ] && [ -n "''${TMUX_PANE:-}" ]; then
+      pane=$TMUX_PANE
+      session=$("$tmux" display-message -p -t "$pane" '#{session_name}' 2>/dev/null || true)
+      winidx=$("$tmux" display-message -p -t "$pane" '#{window_index}' 2>/dev/null || true)
+      winname=$("$tmux" display-message -p -t "$pane" '#{window_name}' 2>/dev/null || true)
+      subtitle="$session:$winidx $winname"
+      log "tmux context: pane=$pane session=$session subtitle=$subtitle"
+    else
+      log "not inside tmux (or TMUX_PANE unset) - notification only, no teleport target"
+    fi
+
+    # Clickable notification, backgrounded so the hook returns immediately.
+    # Only ON CLICK (activationType=contentClicked) do we switch: activate
+    # Claude's window+pane, pull every attached client to that session, and
+    # bring the terminal to the front. No switching happens otherwise.
+    (
+      log "firing alerter (timeout 120s, blocks until click/timeout)"
+      result=$("$alerter" --title "Claude Code" --subtitle "$subtitle" \
+        --message "$message" --sound default --timeout 120 --json 2>>"$LOG" || true)
+      log "alerter result: $result"
+      activation=$(printf '%s' "$result" | "$jq" -r '.activationType // ""' 2>/dev/null || true)
+      log "activationType=$activation"
+      # alerter v26.5 reports a body click as "contentsClicked"; older/other
+      # builds use "contentClicked". Accept both.
+      if [ "$activation" = "contentsClicked" ] || [ "$activation" = "contentClicked" ]; then
+        log "clicked - focusing $bundle first, then switching tmux"
+        /usr/bin/open -b "$bundle" 2>>"$LOG" || true
+        if [ -n "$pane" ]; then
+          "$tmux" select-window -t "$pane" 2>>"$LOG" || true
+          "$tmux" select-pane -t "$pane" 2>>"$LOG" || true
+          if [ -n "$session" ]; then
+            "$tmux" list-clients -F '#{client_name}' 2>/dev/null | while IFS= read -r c; do
+              "$tmux" switch-client -c "$c" -t "$session" 2>>"$LOG" || true
+            done
+          fi
+        fi
+      fi
+      log "background handler done"
+    ) >/dev/null 2>&1 &
+
+    log "returning (alerter running in background, pid $!)"
+    exit 0
+  '';
+
   # access-tokens = host1=tok1 host2=tok2 ...
   accessTokensValue = lib.concatStringsSep " " (
     lib.mapAttrsToList (host: token: "${host}=${token}") nixAccessTokens
@@ -67,8 +169,8 @@ let
 in
 {
   imports = [ ./macos-defaults.nix ];
-  #programs.direnv.enable = true;
-  #programs.direnv.nix-direnv.enable = true;
+  programs.direnv.enable = true;
+  programs.direnv.nix-direnv.enable = true;
 
   programs.git = {
     enable = true;
@@ -101,6 +203,7 @@ in
         # Load local zshrc if it exists
         [ -f ~/.zshrc.local ] && source ~/.zshrc.local
       ''
+      (builtins.readFile ./../meme.sh)
     ];
     dotDir = "${config.xdg.configHome}/zsh";
     oh-my-zsh = {
@@ -175,6 +278,32 @@ in
         email = "${gitUserEmail}"
       ''
     );
+    # Claude Code settings, managed declaratively (force-overwrites any existing
+    # file). Edit these values here rather than via /config - this is a
+    # read-only link into the nix store. The Notification hook fires
+    # claude-notify-hook when Claude needs input (tmux auto-switch + macOS
+    # notification); see the claudeNotifyHook definition above.
+    ".claude/settings.json" = {
+      force = true;
+      text = builtins.toJSON {
+        model = "opus";
+        enabledPlugins = {
+          "swift-lsp@claude-plugins-official" = true;
+        };
+        tui = "fullscreen";
+        hooks.Notification = [
+          {
+            matcher = "";
+            hooks = [
+              {
+                type = "command";
+                command = "${claudeNotifyHook}/bin/claude-notify-hook";
+              }
+            ];
+          }
+        ];
+      };
+    };
   }
   // builtins.listToAttrs (
     map (f: {
@@ -284,6 +413,8 @@ in
       jjui
       jj-patch-vim
       spec-kit
+      alerter
+      claudeNotifyHook
     ]
     ++ customPackages
     # globalNpmPackages install CLIs with `#!/usr/bin/env node` shebangs, so

@@ -9,6 +9,7 @@ configs:
       - type: tmux_active_pane
       - type: tmux_current_pane
       - type: host_details
+      - type: meme
     template: >
       {{- define "color" -}}#[fg={{ . }},bg=black]{{- end -}}
       {{- $sep := "#[fg=color238,bg=black]" }}
@@ -33,15 +34,19 @@ configs:
       - type: vim
       - type: venv
       - type: exit_code
+      - type: meme
+      - type: cycle
+        name: partyblob
+        names: [partyblob1, partyblob2, partyblob3, partyblob4, partyblob5, partyblob6, partyblob7, partyblob8, partyblob9, partyblob10, partyblob11, partyblob12, partyblob13, partyblob14, partyblob15, partyblob16, partyblob17, partyblob18, partyblob19, partyblob20, partyblob21, partyblob22, partyblob23, partyblob24, partyblob25, partyblob26, partyblob27, partyblob28, partyblob29, partyblob30, partyblob31, partyblob32, partyblob33, partyblob34, partyblob35, partyblob36, partyblob37]
     template: >
       {{- $sep := "%F{238}" }}
       {{- if not .in_tmux }}
       {{- if eq .vim "0" }}%F{112}  {{ else }}%F{red}  {{ end }}
       {{- if ne .exit_code "0" }}{{ $sep }}%F{160}  {{ else }}{{ $sep }}%F{112}  {{ end }}
       {{- if and .git .git.Branch }}{{ $sep }}{{ if .git.Status }}%F{160}{{ else }}%F{12}{{ end }} {{ .git.Branch }} {{ end }}
-      {{- $sep }}
+      {{- (index .meme .partyblob) }}{{- "  "}}
       {{- else}}
-      {{- " "}}{{- $sep }}
+      {{- " "}}{{- (index .meme .partyblob) }}{{- " "}}
       {{- end }}
       %F{250}
   rprompt:
@@ -53,12 +58,14 @@ configs:
       - type: vim
       - type: venv
       - type: exit_code
+      - type: meme
     template: >
       {{- $rsep := "%F{238}" }}
       {{- if not .in_tmux }}
-      {{ $rsep }}%F{green} {{ .working_directory }}
+      {{- " "}}{{- .meme.POGGERS }}{{- "  "}}
       {{- end }}
 
+    # {{ $rsep }}%F{green} {{ .working_directory }}
 postCommands:
  #  tmux refresh-client is kind of sensitive to when it's run, so delay a little so tmux can catch up.
   - "sleep 0.1; tmux refresh-client -S"
