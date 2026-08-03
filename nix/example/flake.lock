@@ -21,6 +21,25 @@
         "type": "github"
       }
     },
+    "dotfiles": {
+      "inputs": {
+        "commandline_thing": "commandline_thing",
+        "emojifont": "emojifont",
+        "home-manager": "home-manager",
+        "memeterminal": "memeterminal",
+        "nix-darwin": "nix-darwin",
+        "nixpkgs": "nixpkgs_4"
+      },
+      "locked": {
+        "path": "../",
+        "type": "path"
+      },
+      "original": {
+        "path": "../",
+        "type": "path"
+      },
+      "parent": []
+    },
     "emojifont": {
       "inputs": {
         "flake-utils": "flake-utils_3",
@@ -98,6 +117,7 @@
       "inputs": {
         "flake-utils": "flake-utils_2",
         "nixpkgs": [
+          "dotfiles",
           "commandline_thing",
           "nixpkgs"
         ]
@@ -119,6 +139,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "dotfiles",
           "nixpkgs"
         ]
       },
@@ -158,6 +179,7 @@
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
+          "dotfiles",
           "nixpkgs"
         ]
       },
@@ -240,12 +262,11 @@
     },
     "root": {
       "inputs": {
-        "commandline_thing": "commandline_thing",
-        "emojifont": "emojifont",
-        "home-manager": "home-manager",
-        "memeterminal": "memeterminal",
-        "nix-darwin": "nix-darwin",
-        "nixpkgs": "nixpkgs_4"
+        "dotfiles": "dotfiles",
+        "nixpkgs": [
+          "dotfiles",
+          "nixpkgs"
+        ]
       }
     },
     "systems": {
