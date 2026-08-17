@@ -44,12 +44,12 @@ local bookmarks = split_lines(output)
 if #bookmarks == 0 then
   flash({text = "No bookmarks on this revision", error = true})
 elseif #bookmarks == 1 then
-  jj_async("git", "push", "--bookmark", bookmarks[1], "--remote", "origin", "--all")
+  jj_async("git", "push", "--bookmark", bookmarks[1], "--remote", "origin")
   flash("Pushed bookmark: " .. bookmarks[1])
 else
-  local selected = choose({options = bookmarks, title = "Push bookmark to origin (--all)", filter = true})
+  local selected = choose({options = bookmarks, title = "Push bookmark to origin", filter = true})
   if selected then
-    jj_async("git", "push", "--bookmark", selected, "--remote", "origin", "--all")
+    jj_async("git", "push", "--bookmark", selected, "--remote", "origin")
     flash("Pushed bookmark: " .. selected)
   end
 end
@@ -57,7 +57,7 @@ end
 
 [[bindings]]
 action = "push-new-bookmark"
-key = "ctrl+p"
+key = "alt+p"
 scope = "revisions"
 desc = "push bookmark to origin (allow new)"
 
