@@ -7,7 +7,7 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    commandline_thing.url = "github:pj/commandline_thing?ref=1.0.3";
+    commandline_thing.url = "github:pj/commandline_thing?ref=1.0.9";
     emojifont.url = "github:pj/emojifont";
     memeterminal.url = "github:pj/iTerm2?ref=memeterminal";
   };
