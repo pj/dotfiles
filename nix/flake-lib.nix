@@ -92,22 +92,43 @@ let
 
             fonts.packages = [
               (flakeRoot + "/MonacoNerdFontCompleteMono.ttf")
-              # MemeFont: Monaco Nerd Font with meme images injected as SBIX
-              # color emoji at U+F900+ (see github:pj/emojifont)
-              (pkgs.runCommand "memefont"
-                {
-                  nativeBuildInputs = [ inputs.emojifont.packages.${platform}.default ];
-                }
-                ''
-                  mkdir -p $out/share/fonts/truetype
-                  emojifont "${flakeRoot + "/MonacoNerdFontCompleteMono.ttf"}" \
-                    $out/share/fonts/truetype/MemeFont.ttf \
-                    --mappings "U+F900:${flakeRoot + "/memes/pepe.jpg"},U+F901:${
-                      flakeRoot + "/memes/mofusand_shark.jpg"
-                    }" \
-                    --font-name "MemeFont"
-                ''
-              )
+              (pkgs.stdenv.mkDerivation {
+                pname = "MemeFont";
+                version = "0.0.0";
+                dontUnpack = true;
+                nativeBuildInputs = [ inputs.emojifont.packages.${platform}.default ];
+                # Bakes in dotfiles/nix/memes/ and MonacoNerdFontCompleteMono.ttf as
+                # build inputs — MemeFont.ttf is rebuilt from source on every nix
+                # build rather than living as a committed binary. Code-point
+                # assignment (sorted stem -> U+100000 + index) is emojifont's, see
+                # build_meme_mappings_from_dir in inject.py — commandline_thing's
+                # MemeCodepoint replicates the same rule over the same directory.
+                buildPhase = ''
+                  runHook preBuild
+                  emojifont-build-meme-font ${./MonacoNerdFontCompleteMono.ttf} ${./memes} MemeFont.ttf --font-name MemeFont
+                  runHook postBuild
+                '';
+                installPhase = ''
+                  runHook preInstall
+                    mkdir -p $out/share/fonts/truetype
+                  cp MemeFont.ttf $out/share/fonts/truetype/MemeFont.ttf
+                  runHook postInstall
+                '';
+              })
+            #   (pkgs.runCommand "memefont"
+            #     {
+            #       nativeBuildInputs = [ inputs.emojifont.packages.${platform}.default ];
+            #     }
+            #     ''
+            #       mkdir -p $out/share/fonts/truetype
+            #       emojifont "${flakeRoot + "/MonacoNerdFontCompleteMono.ttf"}" \
+            #         $out/share/fonts/truetype/MemeFont.ttf \
+            #         --mappings "U+F900:${flakeRoot + "/memes/pepe.jpg"},U+F901:${
+            #           flakeRoot + "/memes/mofusand_shark.jpg"
+            #         }" \
+            #         --font-name "MemeFont"
+            #     ''
+            #   )
             ];
           }
         )
