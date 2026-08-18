@@ -200,8 +200,6 @@ in
         export EDITOR=vim
         # Add custom paths per system
         ${lib.concatMapStringsSep "\n" (path: ''export PATH="${path}:$PATH"'') customPathAdditions}
-        # Load local zshrc if it exists
-        [ -f ~/.zshrc.local ] && source ~/.zshrc.local
       ''
       (builtins.readFile ./../meme.sh)
     ];
