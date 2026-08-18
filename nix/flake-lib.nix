@@ -28,7 +28,14 @@
 }:
 { systems }:
 let
-  inherit (inputs) nix-darwin nixpkgs home-manager commandline_thing memeterminal;
+  inherit (inputs)
+    nix-darwin
+    nixpkgs
+    home-manager
+    commandline_thing
+    memeterminal
+    window_thing
+    ;
 
   mkDarwinSystem =
     hostname:
@@ -140,6 +147,7 @@ let
           home-manager.users.${username} = import (flakeRoot + "/home-manager/home.nix") {
             inherit
               commandline_thing
+              window_thing
               customPackages
               customPathAdditions
               customFiles
