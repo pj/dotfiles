@@ -1,6 +1,5 @@
 {
   commandline_thing,
-  window_thing,
   customPackages ? [ ],
   customPathAdditions ? [ ],
   # List of { source = path; target = "relative/path/in/home"; } entries.
@@ -33,12 +32,6 @@
   ...
 }:
 let
-  # The prebuilt, Developer ID signed release — not a source build. macOS keys
-  # the Accessibility grant to the code signature, so an unsigned build would
-  # lose its permission on every upgrade.
-  windowThing = window_thing.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  windowThingApp = "${windowThing}/Applications/WindowThing.app";
-
   hasNixAccessTokens = nixAccessTokens != { };
   hasNpmConfig = npmScopedRegistries != { };
   hasGlobalNpmPackages = globalNpmPackages != [ ];
@@ -350,22 +343,6 @@ in
     '';
   };
 
-  # WindowThing is a menubar agent, so it wants to be running at login. Pointing
-  # launchd at the binary inside the bundle (rather than at the bare executable)
-  # is what gives the process its bundle identity: Info.plist, LSUIElement, and
-  # the code signature macOS matches the Accessibility grant against.
-  #
-  # KeepAlive is off on purpose — quitting from the menubar should quit it, not
-  # have launchd immediately bring it back.
-  launchd.agents.window-thing = {
-    enable = true;
-    config = {
-      ProgramArguments = [ "${windowThingApp}/Contents/MacOS/WindowThing" ];
-      RunAtLoad = true;
-      KeepAlive = false;
-      ProcessType = "Interactive";
-    };
-  };
 
   home.packages =
     with pkgs;
@@ -422,7 +399,6 @@ in
       wget
       jq
       commandline_thing.packages.${pkgs.stdenv.hostPlatform.system}.default
-      windowThing
       git
       tmux
       ghostty-bin

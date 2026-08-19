@@ -34,7 +34,6 @@ let
     home-manager
     commandline_thing
     memeterminal
-    window_thing
     ;
 
   mkDarwinSystem =
@@ -147,7 +146,6 @@ let
           home-manager.users.${username} = import (flakeRoot + "/home-manager/home.nix") {
             inherit
               commandline_thing
-              window_thing
               customPackages
               customPathAdditions
               customFiles

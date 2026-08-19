@@ -8,10 +8,6 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     commandline_thing.url = "github:pj/commandline_thing?ref=1.0.9";
-    # Pinned to a tag rather than a branch: that tag's flake.nix carries the
-    # hash of its own signed release asset, which is what actually gets
-    # installed. See window-thing's RELEASE.md.
-    window_thing.url = "github:pj/window-thing?ref=v0.2.0";
     emojifont.url = "github:pj/emojifont";
     memeterminal.url = "github:pj/iTerm2?ref=memeterminal";
   };
