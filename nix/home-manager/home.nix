@@ -289,6 +289,12 @@ in
           "swift-lsp@claude-plugins-official" = true;
         };
         tui = "fullscreen";
+        # Auto-mode classifier rules. /auto-mode-setup would normally write this
+        # section itself, but cannot: this file is a read-only store symlink, so
+        # the wizard fails with "Could not write .../.claude/settings.json".
+        # The answers live in claude-auto-mode.nix instead. Inspect the result
+        # with `claude auto-mode config`.
+        autoMode = import ./claude-auto-mode.nix { inherit lib; };
         hooks.Notification = [
           {
             matcher = "";
