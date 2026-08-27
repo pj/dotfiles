@@ -7,3 +7,8 @@ editor = "vim"
 program = "jj-patch-vim"
 edit-args = ["$left", "$right"]
 
+[merge-tools.vimdiff]
+program = "vimdiff"
+merge-args = ["$base", "$left", "$right", "$output"]
+merge-tool-edits-conflict-markers = true
+

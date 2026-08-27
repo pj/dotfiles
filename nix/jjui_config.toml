@@ -36,6 +36,19 @@ scope = "revisions"
 desc = "edit diff as patch in vim"
 
 [[actions]]
+name = "resolve-vimdiff"
+lua = '''
+jj_interactive("resolve", "-r", context.change_id(), "--tool", "vimdiff")
+revisions.refresh()
+'''
+
+[[bindings]]
+action = "resolve-vimdiff"
+key = "alt+r"
+scope = "revisions"
+desc = "resolve conflicts with vimdiff"
+
+[[actions]]
 name = "push-new-bookmark"
 lua = '''
 local rev = context.change_id()
