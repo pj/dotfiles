@@ -6,7 +6,7 @@
   };
 
   # Reference an external flake
-  inputs.commandline_thing.url = github:pj/commandline_thing?ref=1.0.3;
+  inputs.commandline_thing.url = github:pj/commandline_thing?ref=1.0.11;
   inputs.plasma-manager = {
     url = "github:nix-community/plasma-manager";
     inputs.nixpkgs.follows = "nixpkgs";
