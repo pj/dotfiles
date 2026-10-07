@@ -267,6 +267,14 @@ in
       source = ./../opencode.jsonc;
       force = true;
     };
+    # Kilo Code TUI config: attention notifications (desktop notification + sound
+    # when a session completes, errors, or needs input). Managed like the
+    # opencode.jsonc link above - edit kilo-tui.json here rather than in place.
+    # force = true because kilo writes this file itself on plugin install.
+    ".config/kilo/tui.json" = lib.mkIf (builtins.pathExists ./../kilo-tui.json) {
+      source = ./../kilo-tui.json;
+      force = true;
+    };
     ".config/jj/config.toml".source = pkgs.writeText "jj-config.toml" (
       (builtins.readFile ./../jj_config.toml)
       + ''
