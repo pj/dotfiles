@@ -44,16 +44,16 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1791394120,
-        "narHash": "sha256-sZCs58LQrX/oSvFfUVK3jt0lPgEWBOvl4qxAuEMm9oA=",
+        "lastModified": 1791400605,
+        "narHash": "sha256-0ZoS/2MJsKk98N1PuQaCDHXnyWnsT13cnXVcW4jkkK8=",
         "owner": "pj",
         "repo": "commandline_thing",
-        "rev": "5e41e84e2083530d00c492b98c255965699e5cb7",
+        "rev": "95b44e6ef0fc90f401c886f7c310a252e112a85c",
         "type": "github"
       },
       "original": {
         "owner": "pj",
-        "ref": "1.0.12",
+        "ref": "1.0.13",
         "repo": "commandline_thing",
         "type": "github"
       }
