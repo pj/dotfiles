@@ -83,14 +83,15 @@ let
     '';
   };
 
-  # Claude Code Notification-hook handler: when Claude needs input it fires a
+  # Shared notification-hook handler for Claude Code and Kilo Code: fires a
   # clickable macOS notification. Clicking it brings the terminal to the front
-  # first, then switches tmux to Claude's pane (pulls attached clients to that
+  # first, then switches tmux to the agent's pane (pulls attached clients to that
   # session); nothing switches until you click. Reads the hook JSON on stdin.
-  # Override the terminal focused on click with $CLAUDE_NOTIFY_BUNDLE (defaults
-  # to MemeTerminal). tmux context comes from the $TMUX_PANE Claude Code inherits
-  # when launched inside tmux.
-  claudeNotifyHook = pkgs.writeShellScriptBin "claude-notify-hook" ''
+  # Tune via env vars: NOTIFY_TITLE (default "Claude Code"), NOTIFY_BUNDLE
+  # (terminal focused on click, default MemeTerminal), NOTIFY_LOG, NOTIFY_SOUND
+  # (default "default"; empty = silent). tmux context comes from the $TMUX_PANE
+  # the agent inherits when launched inside tmux.
+  notifyHook = pkgs.writeShellScriptBin "agent-notify-hook" ''
     set -euo pipefail
 
     tmux=${pkgs.tmux}/bin/tmux
@@ -98,9 +99,9 @@ let
     alerter=${alerter}/bin/alerter
 
     # Logging for debugging. Tail it with:
-    #   tail -f ~/.claude/claude-notify-hook.log
-    # Disable by pointing CLAUDE_NOTIFY_LOG at /dev/null.
-    LOG=''${CLAUDE_NOTIFY_LOG:-$HOME/.claude/claude-notify-hook.log}
+    #   tail -f ~/.agent-notify-hook.log
+    # Disable by pointing NOTIFY_LOG at /dev/null.
+    LOG=''${NOTIFY_LOG:-$HOME/.agent-notify-hook.log}
     mkdir -p "$(dirname "$LOG")" 2>/dev/null || true
     log() { printf '%s [%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$$" "$*" >> "$LOG" 2>/dev/null || true; }
 
@@ -112,8 +113,14 @@ let
     input=$(cat)
     log "stdin: $input"
     message=$(printf '%s' "$input" | "$jq" -r '.message // "Claude needs your input"' 2>/dev/null || printf 'Claude needs your input')
-    bundle=''${CLAUDE_NOTIFY_BUNDLE:-com.googlecode.iterm2.meme}
-    log "message=$message bundle=$bundle"
+    title=''${NOTIFY_TITLE:-Claude Code}
+    bundle=''${NOTIFY_BUNDLE:-com.googlecode.iterm2.meme}
+    # NOTIFY_SOUND defaults to "default"; set it empty for a silent (but still
+    # clickable) notification.
+    sound=''${NOTIFY_SOUND-default}
+    soundArgs=()
+    [ -n "$sound" ] && soundArgs=(--sound "$sound")
+    log "message=$message title=$title bundle=$bundle sound=$sound"
 
     pane=""
     session=""
@@ -131,12 +138,12 @@ let
 
     # Clickable notification, backgrounded so the hook returns immediately.
     # Only ON CLICK (activationType=contentClicked) do we switch: activate
-    # Claude's window+pane, pull every attached client to that session, and
+    # the terminal window+pane, pull every attached client to that session, and
     # bring the terminal to the front. No switching happens otherwise.
     (
       log "firing alerter (timeout 120s, blocks until click/timeout)"
-      result=$("$alerter" --title "Claude Code" --subtitle "$subtitle" \
-        --message "$message" --sound default --timeout 120 --json 2>>"$LOG" || true)
+      result=$("$alerter" --title "$title" --subtitle "$subtitle" \
+        --message "$message" "''${soundArgs[@]}" --timeout 120 --json 2>>"$LOG" || true)
       log "alerter result: $result"
       activation=$(printf '%s' "$result" | "$jq" -r '.activationType // ""' 2>/dev/null || true)
       log "activationType=$activation"
@@ -161,6 +168,16 @@ let
     log "returning (alerter running in background, pid $!)"
     exit 0
   '';
+
+  # Kilo Code plugin: on session completion / error / permission prompt, fire the
+  # same clickable agent-notify-hook so a click teleports tmux to the Kilo pane.
+  # The built-in `attention` notifications in tui.json are not clickable to a
+  # specific pane, so this plugin supplies that. Loaded from ~/.config/kilo/plugin/
+  # (auto-registered). The source lives at ../kilo-notify.ts; replaceVars fills
+  # @agentNotifyHook@ with the built hook path.
+  kiloNotifyPlugin = pkgs.replaceVars ./../kilo-notify.ts {
+    agentNotifyHook = "${notifyHook}/bin/agent-notify-hook";
+  };
 
   # access-tokens = host1=tok1 host2=tok2 ...
   accessTokensValue = lib.concatStringsSep " " (
@@ -267,14 +284,18 @@ in
       source = ./../opencode.jsonc;
       force = true;
     };
-    # Kilo Code TUI config: attention notifications (desktop notification + sound
-    # when a session completes, errors, or needs input). Managed like the
-    # opencode.jsonc link above - edit kilo-tui.json here rather than in place.
-    # force = true because kilo writes this file itself on plugin install.
+    # Kilo Code TUI config: attention sound (desktop banner comes from the
+    # clickable kilo-notify plugin below, so `notifications` is off to avoid a
+    # duplicate). Managed like the opencode.jsonc link above - edit
+    # kilo-tui.json here rather than in place. force = true because kilo writes
+    # this file itself on plugin install.
     ".config/kilo/tui.json" = lib.mkIf (builtins.pathExists ./../kilo-tui.json) {
       source = ./../kilo-tui.json;
       force = true;
     };
+    # Kilo Code plugin (auto-registered from the plugin/ dir) that fires the
+    # clickable agent-notify-hook on completion/error/permission.
+    ".config/kilo/plugin/kilo-notify.ts".source = kiloNotifyPlugin;
     ".config/jj/config.toml".source = pkgs.writeText "jj-config.toml" (
       (builtins.readFile ./../jj_config.toml)
       + ''
@@ -287,8 +308,8 @@ in
     # Claude Code settings, managed declaratively (force-overwrites any existing
     # file). Edit these values here rather than via /config - this is a
     # read-only link into the nix store. The Notification hook fires
-    # claude-notify-hook when Claude needs input (tmux auto-switch + macOS
-    # notification); see the claudeNotifyHook definition above.
+    # agent-notify-hook when Claude needs input (tmux auto-switch + macOS
+    # notification); see the notifyHook definition above.
     ".claude/settings.json" = {
       force = true;
       text = builtins.toJSON {
@@ -309,7 +330,7 @@ in
             hooks = [
               {
                 type = "command";
-                command = "${claudeNotifyHook}/bin/claude-notify-hook";
+                command = "${notifyHook}/bin/agent-notify-hook";
               }
             ];
           }
@@ -427,7 +448,7 @@ in
       jj-patch-vim
       spec-kit
       alerter
-      claudeNotifyHook
+      notifyHook
     ]
     ++ customPackages
     # globalNpmPackages install CLIs with `#!/usr/bin/env node` shebangs, so
