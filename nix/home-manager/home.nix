@@ -262,6 +262,9 @@ in
   programs.vim = {
     enable = true;
     defaultEditor = true;
+    # vim-full's Darwin default enables the GTK2 GUI, but vim 9.2's image.c
+    # uses gui.scale, which only exists in GTK3+ builds. Build without GUI.
+    packageConfigurable = pkgs.vim-full.override { guiSupport = "none"; };
     extraConfig = builtins.readFile ./../vimrc;
   };
 
