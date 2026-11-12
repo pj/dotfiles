@@ -3,6 +3,9 @@
 [ui]
 editor = "vim"
 
+[snapshot]
+max-new-file-size = 0
+
 [merge-tools.patch-vim]
 program = "jj-patch-vim"
 edit-args = ["$left", "$right"]
